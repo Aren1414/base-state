@@ -1,18 +1,53 @@
-"use client";
-import Image from "next/image";
-import { Wallet } from "@coinbase/onchainkit/wallet";
-// import { useQuickAuth } from "@coinbase/onchainkit/minikit";
-import styles from "./page.module.css";
+'use client'
+import { useState } from 'react'
+import { Wallet, useWallet } from '@coinbase/onchainkit/wallet'
+import { sendContractTransaction } from '@coinbase/onchainkit/transaction'
+import WalletStatus from '@/components/WalletStatus'
+import { fetchWalletStats } from '@/lib/fetchWalletStats'
+import styles from './page.module.css'
+
+const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
+
+const CONTRACT_ABI = [
+  {
+    inputs: [],
+    name: 'ping',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+]
 
 export default function Home() {
-  // If you need to verify the user's identity, you can use the useQuickAuth hook.
-  // This hook will verify the user's signature and return the user's FID. You can update
-  // this to meet your needs. See the /app/api/auth/route.ts file for more details.
-  // Note: If you don't need to verify the user's identity, you can get their FID and other user data
-  // via `useMiniKit().context?.user`.
-  // const { data, isLoading, error } = useQuickAuth<{
-  //   userFid: string;
-  // }>("/api/auth");
+  const { address } = useWallet()
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [txConfirmed, setTxConfirmed] = useState(false)
+
+  const handlePingAndFetch = async () => {
+    if (!address) return
+    setLoading(true)
+
+    try {
+      const tx = await sendContractTransaction({
+        contractAddress: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'ping',
+        chainId: 8453,
+      })
+
+      if (tx?.receipt?.status === 1) {
+        setTxConfirmed(true)
+        const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
+        const result = await fetchWalletStats(address, apiKey)
+        setStats(result)
+      }
+    } catch (err) {
+      console.error('Contract call failed:', err)
+    }
+
+    setLoading(false)
+  }
 
   return (
     <div className={styles.container}>
@@ -21,52 +56,16 @@ export default function Home() {
       </header>
 
       <div className={styles.content}>
-        <Image
-          priority
-          src="/sphere.svg"
-          alt="Sphere"
-          width={200}
-          height={200}
-        />
-        <h1 className={styles.title}>MiniKit</h1>
+        <h1 className={styles.title}>BaseState</h1>
 
-        <p>
-          Get started by editing <code>app/page.tsx</code>
-        </p>
-
-        <h2 className={styles.componentsTitle}>Explore Components</h2>
-
-        <ul className={styles.components}>
-          {[
-            {
-              name: "Transaction",
-              url: "https://docs.base.org/onchainkit/transaction/transaction",
-            },
-            {
-              name: "Swap",
-              url: "https://docs.base.org/onchainkit/swap/swap",
-            },
-            {
-              name: "Checkout",
-              url: "https://docs.base.org/onchainkit/checkout/checkout",
-            },
-            {
-              name: "Wallet",
-              url: "https://docs.base.org/onchainkit/wallet/wallet",
-            },
-            {
-              name: "Identity",
-              url: "https://docs.base.org/onchainkit/identity/identity",
-            },
-          ].map((component) => (
-            <li key={component.name}>
-              <a target="_blank" rel="noreferrer" href={component.url}>
-                {component.name}
-              </a>
-            </li>
-          ))}
-        </ul>
+        {!txConfirmed ? (
+          <button className={styles.button} onClick={handlePingAndFetch} disabled={loading}>
+            {loading ? 'Submitting transaction...' : 'Log activity and show wallet stats'}
+          </button>
+        ) : stats ? (
+          <WalletStatus stats={stats} />
+        ) : null}
       </div>
     </div>
-  );
+  )
 }
