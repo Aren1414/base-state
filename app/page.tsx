@@ -1,6 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { Wallet, useWallet, sendContractTransaction } from '@coinbase/onchainkit'
+import { useAuthenticate } from '@coinbase/onchainkit/minikit'
+import { useMiniKit } from '@coinbase/minikit'
+import { useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
@@ -18,47 +20,59 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address } = useWallet()
+  const { context } = useMiniKit()
+  const { user } = useAuthenticate()
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const handlePingAndFetch = async () => {
-    if (!address) return
-    setLoading(true)
-
-    try {
-      const tx = await sendContractTransaction({
-        contractAddress: CONTRACT_ADDRESS,
-        abi: CONTRACT_ABI,
-        functionName: 'ping',
-        chainId: 8453,
-      })
-
-      if (tx?.receipt?.status === 1) {
-        setTxConfirmed(true)
+  const { writeContract } = useWriteContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'ping',
+    chainId: 8453,
+    onSuccess: async (data) => {
+      setTxConfirmed(true)
+      if (user?.address) {
         const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
-        const result = await fetchWalletStats(address, apiKey)
+        const result = await fetchWalletStats(user.address, apiKey)
         setStats(result)
       }
-    } catch (err) {
-      console.error('Contract call failed:', err)
-    }
+      setLoading(false)
+    },
+    onError: (error) => {
+      console.error('Contract call failed:', error)
+      setLoading(false)
+    },
+  })
 
-    setLoading(false)
+  const handlePing = async () => {
+    if (!user?.address) return
+    setLoading(true)
+    writeContract()
+  }
+
+  if (!user) {
+    return (
+      <div className={styles.container}>
+        <header className={styles.headerWrapper}>
+          <button onClick={context?.authenticate}>Sign in</button>
+        </header>
+      </div>
+    )
   }
 
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <Wallet />
+        <div>Welcome, {context?.user?.displayName ?? user.address}</div>
       </header>
 
       <div className={styles.content}>
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handlePingAndFetch} disabled={loading}>
+          <button className={styles.button} onClick={handlePing} disabled={loading}>
             {loading ? 'Submitting transaction...' : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
