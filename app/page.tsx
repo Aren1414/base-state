@@ -8,6 +8,7 @@ import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
 
+
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d' as `0x${string}`
 
 const CONTRACT_ABI = [
@@ -41,6 +42,7 @@ export default function Home() {
     )
   }
 
+  
   const calls = [
     {
       to: CONTRACT_ADDRESS,
@@ -73,9 +75,11 @@ export default function Home() {
 
         {!txConfirmed ? (
           <Transaction calls={calls} isSponsored onSuccess={handleSuccess}>
-            <TransactionButton as="button" className={styles.button}>
-              Log activity and show wallet stats
-            </TransactionButton>
+            
+            <TransactionButton
+              className={styles.button}
+              label="Log activity and show wallet stats"
+            />
           </Transaction>
         ) : stats ? (
           <WalletStatus stats={stats} />
