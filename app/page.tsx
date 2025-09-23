@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useAuthenticate } from '@coinbase/onchainkit/minikit'
-import { useMiniKit } from '@coinbase/minikit'
+import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
 import { useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -20,8 +19,11 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
+  
+  const { user, authenticate } = useAuthenticate()
+
   const { context } = useMiniKit()
-  const { user } = useAuthenticate()
+
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
@@ -31,7 +33,7 @@ export default function Home() {
     abi: CONTRACT_ABI,
     functionName: 'ping',
     chainId: 8453,
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       setTxConfirmed(true)
       if (user?.address) {
         const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
@@ -56,7 +58,9 @@ export default function Home() {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
-          <button onClick={context?.authenticate}>Sign in</button>
+          <button className={styles.button} onClick={authenticate}>
+            Sign in
+          </button>
         </header>
       </div>
     )
@@ -65,15 +69,23 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, {context?.user?.displayName ?? user.address}</div>
+        <div>
+          Welcome, {context?.user?.displayName ?? user.address}
+        </div>
       </header>
 
       <div className={styles.content}>
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handlePing} disabled={loading}>
-            {loading ? 'Submitting transaction...' : 'Log activity and show wallet stats'}
+          <button
+            className={styles.button}
+            onClick={handlePing}
+            disabled={loading}
+          >
+            {loading
+              ? 'Submitting transaction...'
+              : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
