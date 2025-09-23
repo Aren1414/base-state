@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
 import { Transaction, TransactionButton } from '@coinbase/onchainkit/transaction'
+import { useAccount } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
@@ -23,11 +24,12 @@ export default function Home() {
   const { signIn } = useAuthenticate()
   const { context } = useMiniKit()
   const user = context?.user
+  const { address } = useAccount()
 
-  const [stats, setStats] = useState<ReturnType<typeof fetchWalletStats> | null>(null)
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  if (!user) {
+  if (!user && !address) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -50,9 +52,9 @@ export default function Home() {
 
   const handleSuccess = async () => {
     setTxConfirmed(true)
-    if (user?.address) {
+    if (address) {
       const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
-      const result = await fetchWalletStats(user.address, apiKey)
+      const result = await fetchWalletStats(address, apiKey)
       setStats(result)
     }
   }
@@ -60,7 +62,10 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, {user.displayName ?? user.address}</div>
+        <div>
+          Welcome,&nbsp;
+          {user?.displayName || user?.fid || address || 'Guest'}
+        </div>
       </header>
 
       <div className={styles.content}>
