@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
-import { useContractWrite } from 'wagmi'
+import { useAuthenticate, useMiniKit, useWriteContract } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
@@ -28,9 +27,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { write } = useContractWrite({
-    addressOrName: CONTRACT_ADDRESS,
-    contractInterface: CONTRACT_ABI,
+  const { writeContract } = useWriteContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
     functionName: 'ping',
     chainId: 8453,
     onSuccess: async () => {
@@ -51,7 +50,7 @@ export default function Home() {
   const handlePing = async () => {
     if (!user?.address) return
     setLoading(true)
-    write?.()
+    writeContract?.()
   }
 
   if (!user) {
