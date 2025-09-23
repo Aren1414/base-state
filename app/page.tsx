@@ -1,13 +1,11 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useAuthenticate } from '@coinbase/onchainkit/minikit'
-import { useMiniKit } from '@coinbase/minikit'
-import { Transaction, TransactionButton, TransactionSponsor, TransactionStatus, TransactionStatusLabel, TransactionStatusAction } from '@coinbase/onchainkit/transaction'
+import { useAccount, useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
-import type { LifecycleStatus } from '@coinbase/onchainkit/transaction'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 
@@ -23,29 +21,39 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { signIn } = useAuthenticate()
-  const { context } = useMiniKit()
-  const user = context?.user
+  const { address } = useAccount()
 
   const [stats, setStats] = useState<ReturnType<typeof fetchWalletStats> | null>(null)
+  const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const handleOnStatus = useCallback(
-    async (status: LifecycleStatus) => {
-      console.log('Transaction status:', status)
-
-      if (status.statusName === 'success') {
-        setTxConfirmed(true)
-        if (user?.address) {
-          const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
-          const result = await fetchWalletStats(user.address, apiKey)
-          setStats(result)
-        }
+  const { writeContract } = useWriteContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'ping',
+    chainId: 8453,
+    onSuccess: async () => {
+      setTxConfirmed(true)
+      if (address) {
+        const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
+        const result = await fetchWalletStats(address, apiKey)
+        setStats(result)
       }
+      setLoading(false)
     },
-    [user]
-  )
+    onError: (error) => {
+      console.error('Contract call failed:', error)
+      setLoading(false)
+    },
+  })
 
-  if (!user) {
+  const handlePing = async () => {
+    if (!address) return
+    setLoading(true)
+    writeContract()
+  }
+
+  if (!address) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -57,39 +65,23 @@ export default function Home() {
     )
   }
 
-  // Async call for Transaction component
-  const callsCallback = async () => [
-    {
-      address: CONTRACT_ADDRESS,
-      abi: CONTRACT_ABI,
-      functionName: 'ping',
-      args: [],
-    },
-  ]
-
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, {user.displayName ?? user.address}</div>
+        <div>Welcome, {address}</div>
       </header>
 
       <div className={styles.content}>
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <Transaction
-            chainId={8453}
-            calls={callsCallback}
-            onStatus={handleOnStatus}
-            isSponsored={true} // Requires Paymaster setup in OnchainKitProvider
+          <button
+            className={styles.button}
+            onClick={handlePing}
+            disabled={loading}
           >
-            <TransactionButton label="Log activity and show wallet stats" />
-            <TransactionSponsor />
-            <TransactionStatus>
-              <TransactionStatusLabel />
-              <TransactionStatusAction />
-            </TransactionStatus>
-          </Transaction>
+            {loading ? 'Submitting transaction...' : 'Log activity and show wallet stats'}
+          </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
         ) : null}
