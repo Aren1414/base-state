@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
+import { useAuthenticate } from '@coinbase/onchainkit/minikit'
+import { useMiniKit } from '@coinbase/minikit'
 import { useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -20,11 +21,13 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   
-  const { user, authenticate } = useAuthenticate()
+  const { signIn } = useAuthenticate()
 
+  
   const { context } = useMiniKit()
+  const user = context?.user
 
-  const [stats, setStats] = useState(null)
+  const [stats, setStats] = useState<ReturnType<typeof fetchWalletStats> | null>(null)
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
@@ -54,11 +57,12 @@ export default function Home() {
     writeContract()
   }
 
+  
   if (!user) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
-          <button className={styles.button} onClick={authenticate}>
+          <button className={styles.button} onClick={() => signIn()}>
             Sign in
           </button>
         </header>
@@ -66,11 +70,12 @@ export default function Home() {
     )
   }
 
+  
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
         <div>
-          Welcome, {context?.user?.displayName ?? user.address}
+          Welcome, {user.displayName ?? user.address}
         </div>
       </header>
 
