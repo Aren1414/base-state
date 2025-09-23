@@ -28,7 +28,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { write } = useContractWrite({
+  const { writeAsync } = useContractWrite({
     addressOrName: CONTRACT_ADDRESS,
     contractInterface: CONTRACT_ABI,
     functionName: 'ping',
@@ -42,13 +42,16 @@ export default function Home() {
       }
       setLoading(false)
     },
-    onError: () => setLoading(false),
+    onError: (error) => {
+      console.error('Contract call failed:', error)
+      setLoading(false)
+    },
   })
 
   const handlePing = async () => {
     if (!user?.address) return
     setLoading(true)
-    await write?.()
+    await writeAsync?.()
   }
 
   if (!user) {
@@ -66,7 +69,9 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, {user.displayName ?? user.address}</div>
+        <div>
+          Welcome, {user.displayName ?? user.address}
+        </div>
       </header>
 
       <div className={styles.content}>
@@ -78,7 +83,9 @@ export default function Home() {
             onClick={handlePing}
             disabled={loading}
           >
-            {loading ? 'Submitting transaction...' : 'Log activity and show wallet stats'}
+            {loading
+              ? 'Submitting transaction...'
+              : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
