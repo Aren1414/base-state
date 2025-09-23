@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
-import { useWriteContract } from 'wagmi'
+import { usePrepareContractWrite, useContractWrite } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
@@ -20,10 +20,7 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  
   const { signIn } = useAuthenticate()
-
-  
   const { context } = useMiniKit()
   const user = context?.user
 
@@ -31,12 +28,15 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  
-  const { writeContract } = useWriteContract({
-    address: CONTRACT_ADDRESS,
+  const { config } = usePrepareContractWrite({
+    address: CONTRACT_ADDRESS as `0x${string}`,
     abi: CONTRACT_ABI,
     functionName: 'ping',
     chainId: 8453,
+  })
+
+  const { writeAsync } = useContractWrite({
+    ...config,
     onSuccess: async () => {
       setTxConfirmed(true)
       if (user?.address) {
@@ -46,19 +46,15 @@ export default function Home() {
       }
       setLoading(false)
     },
-    onError: (error) => {
-      console.error('Contract call failed:', error)
-      setLoading(false)
-    },
+    onError: () => setLoading(false),
   })
 
   const handlePing = async () => {
     if (!user?.address) return
     setLoading(true)
-    writeContract()
+    await writeAsync()
   }
 
-  
   if (!user) {
     return (
       <div className={styles.container}>
@@ -71,13 +67,10 @@ export default function Home() {
     )
   }
 
-  
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>
-          Welcome, {user.displayName ?? user.address}
-        </div>
+        <div>Welcome, {user.displayName ?? user.address}</div>
       </header>
 
       <div className={styles.content}>
@@ -89,9 +82,7 @@ export default function Home() {
             onClick={handlePing}
             disabled={loading}
           >
-            {loading
-              ? 'Submitting transaction...'
-              : 'Log activity and show wallet stats'}
+            {loading ? 'Submitting transaction...' : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
