@@ -1,7 +1,7 @@
 'use client'
+
 import { useState } from 'react'
-import { useAuthenticate } from '@coinbase/onchainkit/minikit'
-import { useMiniKit } from '@coinbase/minikit'
+import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
 import { useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -31,6 +31,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
+  
   const { writeContract } = useWriteContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
