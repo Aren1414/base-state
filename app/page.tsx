@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { useAuthenticate } from '@coinbase/onchainkit/minikit'
-import { useAccount, useWriteContract } from 'wagmi'
+import { useState, useCallback } from 'react'
+import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
+import { useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
@@ -21,17 +21,22 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { signIn } = useAuthenticate()
-  const { address } = useAccount()
+  const { context } = useMiniKit()
+  const user = context?.user
+  const address = user?.address
 
   const [stats, setStats] = useState<ReturnType<typeof fetchWalletStats> | null>(null)
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { writeContract } = useWriteContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'ping',
+  const { write } = useWriteContract({
     chainId: 8453,
+    request: {
+      address: CONTRACT_ADDRESS,
+      abi: CONTRACT_ABI,
+      functionName: 'ping',
+      args: [],
+    },
     onSuccess: async () => {
       setTxConfirmed(true)
       if (address) {
@@ -47,13 +52,13 @@ export default function Home() {
     },
   })
 
-  const handlePing = async () => {
+  const handlePing = useCallback(async () => {
     if (!address) return
     setLoading(true)
-    writeContract()
-  }
+    write()
+  }, [address, write])
 
-  if (!address) {
+  if (!user) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -68,7 +73,9 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, {address}</div>
+        <div>
+          Welcome, {user.displayName ?? user.address}
+        </div>
       </header>
 
       <div className={styles.content}>
@@ -80,7 +87,9 @@ export default function Home() {
             onClick={handlePing}
             disabled={loading}
           >
-            {loading ? 'Submitting transaction...' : 'Log activity and show wallet stats'}
+            {loading
+              ? 'Submitting transaction...'
+              : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
@@ -88,4 +97,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+    }
