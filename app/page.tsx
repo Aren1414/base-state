@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuthenticate, useMiniKit, useWriteContract } from '@coinbase/onchainkit/minikit'
+import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
+import { Transaction, TransactionButton } from '@coinbase/onchainkit/transaction'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
@@ -24,34 +25,7 @@ export default function Home() {
   const user = context?.user
 
   const [stats, setStats] = useState<ReturnType<typeof fetchWalletStats> | null>(null)
-  const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
-
-  const { writeContract } = useWriteContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'ping',
-    chainId: 8453,
-    onSuccess: async () => {
-      setTxConfirmed(true)
-      if (user?.address) {
-        const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
-        const result = await fetchWalletStats(user.address, apiKey)
-        setStats(result)
-      }
-      setLoading(false)
-    },
-    onError: (error) => {
-      console.error('Contract call failed:', error)
-      setLoading(false)
-    },
-  })
-
-  const handlePing = async () => {
-    if (!user?.address) return
-    setLoading(true)
-    writeContract?.()
-  }
 
   if (!user) {
     return (
@@ -65,27 +39,39 @@ export default function Home() {
     )
   }
 
+  const calls = [
+    {
+      address: CONTRACT_ADDRESS,
+      abi: CONTRACT_ABI,
+      functionName: 'ping',
+      args: [],
+    },
+  ]
+
+  const handleSuccess = async () => {
+    setTxConfirmed(true)
+    if (user?.address) {
+      const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
+      const result = await fetchWalletStats(user.address, apiKey)
+      setStats(result)
+    }
+  }
+
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>
-          Welcome, {user.displayName ?? user.address}
-        </div>
+        <div>Welcome, {user.displayName ?? user.address}</div>
       </header>
 
       <div className={styles.content}>
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button
-            className={styles.button}
-            onClick={handlePing}
-            disabled={loading}
-          >
-            {loading
-              ? 'Submitting transaction...'
-              : 'Log activity and show wallet stats'}
-          </button>
+          <Transaction calls={calls} isSponsored={true} onSuccess={handleSuccess}>
+            <TransactionButton className={styles.button}>
+              Log activity and show wallet stats
+            </TransactionButton>
+          </Transaction>
         ) : stats ? (
           <WalletStatus stats={stats} />
         ) : null}
