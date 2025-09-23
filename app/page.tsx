@@ -41,9 +41,9 @@ export default function Home() {
     )
   }
 
-  const contracts = [
+  const calls = [
     {
-      address: CONTRACT_ADDRESS,
+      to: CONTRACT_ADDRESS, 
       abi: CONTRACT_ABI,
       functionName: 'ping',
       args: [] as const,
@@ -72,7 +72,7 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <Transaction contracts={contracts} isSponsored={true} onSuccess={handleSuccess}>
+          <Transaction calls={calls} isSponsored={true} onSuccess={handleSuccess}>
             <TransactionButton className={styles.button}>
               Log activity and show wallet stats
             </TransactionButton>
