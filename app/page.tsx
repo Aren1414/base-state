@@ -73,9 +73,10 @@ export default function Home() {
 
         {!txConfirmed ? (
           <Transaction calls={calls} isSponsored={true} onSuccess={handleSuccess}>
-            <TransactionButton className={styles.button}>
-              Log activity and show wallet stats
-            </TransactionButton>
+            <TransactionButton
+              className={styles.button}
+              label="Log activity and show wallet stats"
+            />
           </Transaction>
         ) : stats ? (
           <WalletStatus stats={stats} />
