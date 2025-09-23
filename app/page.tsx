@@ -8,7 +8,7 @@ import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
 
-const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
+const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d' as `0x${string}`
 
 const CONTRACT_ABI = [
   {
@@ -43,7 +43,7 @@ export default function Home() {
 
   const calls = [
     {
-      to: CONTRACT_ADDRESS, 
+      to: CONTRACT_ADDRESS,
       abi: CONTRACT_ABI,
       functionName: 'ping',
       args: [] as const,
