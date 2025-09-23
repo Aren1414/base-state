@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Wallet, useWallet } from '@coinbase/onchainkit/wallet'
-import { sendContractTransaction } from '@coinbase/onchainkit/transaction'
+import { Wallet, useWallet, sendContractTransaction } from '@coinbase/onchainkit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
