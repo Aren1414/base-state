@@ -28,7 +28,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { writeAsync } = useContractWrite({
+  const { write } = useContractWrite({
     addressOrName: CONTRACT_ADDRESS,
     contractInterface: CONTRACT_ABI,
     functionName: 'ping',
@@ -51,7 +51,7 @@ export default function Home() {
   const handlePing = async () => {
     if (!user?.address) return
     setLoading(true)
-    await writeAsync?.()
+    write?.()
   }
 
   if (!user) {
