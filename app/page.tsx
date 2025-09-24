@@ -78,7 +78,7 @@ export default function Home() {
             <Transaction calls={calls} isSponsored onSuccess={handleSuccess}>
               <TransactionButton
                 className={styles.button}
-                label="Log activity and show wallet stats"
+                text="Log activity and show wallet stats"
               />
             </Transaction>
           ) : stats ? (
