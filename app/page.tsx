@@ -5,7 +5,6 @@ import { useAccount, useContractWrite } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
-import { Contract } from 'ethers'
 import styles from './page.module.css'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
@@ -25,13 +24,13 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address, connector } = useAccount()
+  const { address } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const contractWrite = useContractWrite({
-    mode: 'recklesslyUnprepared', 
+    mode: 'recklesslyUnprepared',
     args: [],
     chainId: base.id,
     addressOrName: CONTRACT_ADDRESS,
