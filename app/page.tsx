@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAccount, useSendTransaction } from 'wagmi'
 import { encodeFunctionData } from 'viem'
-import { useMiniKit } from '@coinbase/onchainkit/minikit'
+import { useAuthenticate } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -26,17 +26,16 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address: smartWalletAddress } = useAccount()
-  const { context } = useMiniKit()
-  const realAddress = context?.user?.address
-
+  const { user, authenticate } = useAuthenticate()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [authenticating, setAuthenticating] = useState(false)
 
   const { sendTransactionAsync } = useSendTransaction()
 
   const handleClick = async () => {
-    if (!realAddress) return
+    if (!user) return
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -55,7 +54,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(realAddress, apiKey)
+      const result = await fetchWalletStats(user.fid, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -65,11 +64,25 @@ export default function Home() {
     }
   }
 
-  if (!realAddress) {
+  const handleAuth = async () => {
+    setAuthenticating(true)
+    try {
+      await authenticate()
+    } catch (err) {
+      console.error('Authentication failed:', err)
+    } finally {
+      setAuthenticating(false)
+    }
+  }
+
+  if (!user) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
-          <p>Please connect your wallet to continue.</p>
+          <p>Please sign in to continue.</p>
+          <button onClick={handleAuth} disabled={authenticating}>
+            {authenticating ? 'Authenticating...' : 'Sign In with Farcaster'}
+          </button>
         </header>
       </div>
     )
@@ -78,7 +91,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome,&nbsp;{realAddress}</div>
+        <div>Welcome, FID&nbsp;{user.fid}</div>
       </header>
 
       <div className={styles.content}>
