@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useWriteContract, useWaitForTransaction } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -33,9 +33,16 @@ export default function Home() {
 
   const writeContract = useWriteContract()
 
-  const { isLoading: waiting } = useWaitForTransactionReceipt({
-    hash: txHash ?? undefined, 
-    onSuccess: () => setTxConfirmed(true),
+  
+  const { isLoading: waiting } = useWaitForTransaction({
+    hash: txHash ?? undefined,
+    chainId: base.id,
+    watch: true, 
+    onSettled(data, error) {
+      if (data && !error) {
+        setTxConfirmed(true)
+      }
+    },
   })
 
   const handleClick = async () => {
@@ -50,7 +57,6 @@ export default function Home() {
         args: [],
       })
 
-      
       setTxHash(hash as `0x${string}`)
 
       const apiKey = process.env.BASE_API_KEY || ''
