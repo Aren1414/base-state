@@ -24,25 +24,28 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  
   const contractWrite = useContractWrite({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
+    mode: 'recklesslyUnprepared', 
+    addressOrName: CONTRACT_ADDRESS,
+    contractInterface: CONTRACT_ABI,
     functionName: 'ping',
     chainId: base.id,
+    onSettled(data, error) {
+      if (error) console.error('Transaction failed:', error)
+      else console.log('Transaction success:', data)
+    },
   })
 
   const handleClick = async () => {
-    if (!contractWrite.write) return
+    if (!isConnected) return
     setLoading(true)
     try {
-      const tx = await contractWrite.write()
-      
+      await contractWrite.write?.()
       setTxConfirmed(true)
 
       if (address) {
@@ -57,7 +60,7 @@ export default function Home() {
     }
   }
 
-  if (!address) {
+  if (!isConnected) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
