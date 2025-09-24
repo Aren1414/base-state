@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  env: {
+    BASE_API_KEY: process.env.BASE_API_KEY,
+  },
   webpack: (config, { isServer }) => {
-    
     config.externals = config.externals || [];
     config.externals.push("pino-pretty", "lokijs", "encoding");
 
@@ -17,7 +19,6 @@ const nextConfig: NextConfig = {
     return config;
   },
   eslint: {
-    
     ignoreDuringBuilds: true,
   },
 };
