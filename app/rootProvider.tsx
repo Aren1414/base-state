@@ -18,10 +18,10 @@ export function RootProvider({ children }: { children: ReactNode }) {
           preference: "all",
         },
       }}
-      
       miniKit={{
-        enabled: false,
-        autoConnect: false,
+        enabled: true,          
+        autoConnect: true,      
+        notificationProxyUrl: undefined,
       }}
     >
       {children}
