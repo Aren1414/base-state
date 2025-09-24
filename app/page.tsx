@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuthenticate, AutoConnect } from '@coinbase/onchainkit/minikit'
+import { useAuthenticate } from '@coinbase/onchainkit/minikit'
 import { Transaction, TransactionButton } from '@coinbase/onchainkit/transaction'
 import { useAccount } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
+import { OnchainKitProvider } from '@coinbase/onchainkit'
 import styles from './page.module.css'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d' as `0x${string}`
@@ -58,7 +59,7 @@ export default function Home() {
   }
 
   return (
-    <AutoConnect>
+    <OnchainKitProvider apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY} chain={{ id: 8453 }}>
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
           <div>
@@ -82,6 +83,6 @@ export default function Home() {
           ) : null}
         </div>
       </div>
-    </AutoConnect>
+    </OnchainKitProvider>
   )
 }
