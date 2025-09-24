@@ -26,9 +26,8 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address: smartWalletAddress } = useAccount()
-  const { signIn } = useAuthenticate()
+  const { user, authenticate } = useAuthenticate()
 
-  const [fid, setFid] = useState<string | null>(null)
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -39,11 +38,7 @@ export default function Home() {
   const handleAuth = async () => {
     setAuthenticating(true)
     try {
-      const result = await signIn()
-      if (result) {
-        setFid(result.fid)
-        console.log('Authenticated FID:', result.fid)
-      }
+      await authenticate()
     } catch (err) {
       console.error('Authentication failed:', err)
     } finally {
@@ -52,7 +47,7 @@ export default function Home() {
   }
 
   const handleClick = async () => {
-    if (!fid) return
+    if (!user?.fid) return
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -71,7 +66,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(fid, apiKey)
+      const result = await fetchWalletStats(user.fid, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -81,7 +76,7 @@ export default function Home() {
     }
   }
 
-  if (!fid) {
+  if (!user) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -97,7 +92,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, FID&nbsp;{fid}</div>
+        <div>Welcome, FID&nbsp;{user.fid}</div>
       </header>
 
       <div className={styles.content}>
