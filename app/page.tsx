@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useContractWrite } from 'wagmi'
+import { useAccount, useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -29,26 +29,25 @@ export default function Home() {
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const { writeAsync } = useContractWrite({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'ping',
-    chainId: base.id,
-  })
+  const { writeContractAsync } = useWriteContract()
 
   const handleClick = async () => {
-    if (!writeAsync) return
+    if (!address) return
     setLoading(true)
     try {
-      const tx = await writeAsync()
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'ping',
+        chainId: base.id,
+        args: [],
+      })
       console.log('Transaction sent:', tx)
       setTxConfirmed(true)
 
-      if (address) {
-        const apiKey = process.env.BASE_API_KEY || ''
-        const result = await fetchWalletStats(address, apiKey)
-        setStats(result)
-      }
+      const apiKey = process.env.BASE_API_KEY || ''
+      const result = await fetchWalletStats(address, apiKey)
+      setStats(result)
     } catch (err) {
       console.error('Transaction failed:', err)
     } finally {
