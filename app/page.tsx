@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAccount } from 'wagmi'
-import { useWriteContract } from 'wagmi'
+import { writeContract } from '@wagmi/core'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -29,27 +29,29 @@ export default function Home() {
   const { address } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
-
-  const writeContract = useWriteContract({
-    abi: CONTRACT_ABI,
-    address: CONTRACT_ADDRESS,
-    functionName: 'ping',
-    chainId: base.id,
-    onSuccess: async () => {
-      setTxConfirmed(true)
-      if (address) {
-        const apiKey = process.env.BASE_API_KEY || ''
-        const result = await fetchWalletStats(address, apiKey)
-        setStats(result)
-      }
-    },
-    onError: (err) => {
-      console.error('Transaction failed:', err)
-    },
-  })
+  const [loading, setLoading] = useState(false)
 
   const handleClick = async () => {
-    writeContract() 
+    if (!address) return
+    setLoading(true)
+    try {
+      const tx = await writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'ping',
+        chainId: base.id,
+      })
+      await tx.wait()
+      setTxConfirmed(true)
+
+      const apiKey = process.env.BASE_API_KEY || ''
+      const result = await fetchWalletStats(address, apiKey)
+      setStats(result)
+    } catch (err) {
+      console.error('Transaction failed:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (!address) {
@@ -72,8 +74,8 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handleClick}>
-            Log activity and show wallet stats
+          <button className={styles.button} onClick={handleClick} disabled={loading}>
+            {loading ? 'Processing...' : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
