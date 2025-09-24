@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAccount, useSendTransaction } from 'wagmi'
 import { encodeFunctionData } from 'viem'
+import { useSession } from '@coinbase/onchainkit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -24,7 +25,10 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address } = useAccount()
+  const { address: smartWalletAddress } = useAccount()
+  const { session } = useSession()
+  const realAddress = session?.ownerAddress
+
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -32,7 +36,7 @@ export default function Home() {
   const { sendTransactionAsync } = useSendTransaction()
 
   const handleClick = async () => {
-    if (!address) return
+    if (!realAddress) return
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -51,7 +55,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(address, apiKey)
+      const result = await fetchWalletStats(realAddress, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -61,7 +65,7 @@ export default function Home() {
     }
   }
 
-  if (!address) {
+  if (!realAddress) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -74,7 +78,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome,&nbsp;{address}</div>
+        <div>Welcome,&nbsp;{realAddress}</div>
       </header>
 
       <div className={styles.content}>
