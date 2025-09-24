@@ -27,24 +27,29 @@ const CONTRACT_ABI = [
 export default function Home() {
   const { address } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const writeContract = useWriteContract()
 
+  const { isLoading: waiting } = useWaitForTransactionReceipt({
+    hash: txHash || undefined,
+    onSuccess: () => setTxConfirmed(true),
+  })
+
   const handleClick = async () => {
     if (!address) return
     setLoading(true)
     try {
-      const tx = await writeContract.writeContractAsync({
+      const hash = await writeContract.writeContractAsync({
         address: CONTRACT_ADDRESS,
         functionName: 'ping',
         abi: CONTRACT_ABI,
         chainId: base.id,
         args: [],
       })
-      await tx.wait()
-      setTxConfirmed(true)
+      setTxHash(hash)
 
       const apiKey = process.env.BASE_API_KEY || ''
       const result = await fetchWalletStats(address, apiKey)
@@ -76,8 +81,8 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handleClick} disabled={loading}>
-            {loading ? 'Processing...' : 'Log activity and show wallet stats'}
+          <button className={styles.button} onClick={handleClick} disabled={loading || waiting}>
+            {loading || waiting ? 'Processing...' : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
