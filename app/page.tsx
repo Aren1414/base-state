@@ -27,14 +27,14 @@ const CONTRACT_ABI = [
 export default function Home() {
   const { address } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
-  const [txHash, setTxHash] = useState<string | null>(null)
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const writeContract = useWriteContract()
 
   const { isLoading: waiting } = useWaitForTransactionReceipt({
-    hash: txHash || undefined,
+    hash: txHash ?? undefined, 
     onSuccess: () => setTxConfirmed(true),
   })
 
@@ -49,7 +49,9 @@ export default function Home() {
         chainId: base.id,
         args: [],
       })
-      setTxHash(hash)
+
+      
+      setTxHash(hash as `0x${string}`)
 
       const apiKey = process.env.BASE_API_KEY || ''
       const result = await fetchWalletStats(address, apiKey)
