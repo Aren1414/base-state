@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useWriteContract } from 'wagmi'
+import { useAccount, useSendTransaction } from 'wagmi'
+import { encodeFunctionData } from 'viem'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -29,19 +30,24 @@ export default function Home() {
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const { writeContractAsync } = useWriteContract()
+  const { sendTransactionAsync } = useSendTransaction()
 
   const handleClick = async () => {
     if (!address) return
     setLoading(true)
     try {
-      const tx = await writeContractAsync({
-        address: CONTRACT_ADDRESS,
+      const data = encodeFunctionData({
         abi: CONTRACT_ABI,
         functionName: 'ping',
-        chainId: base.id,
         args: [],
       })
+
+      const tx = await sendTransactionAsync({
+        to: CONTRACT_ADDRESS,
+        data,
+        chainId: base.id,
+      })
+
       console.log('Transaction sent:', tx)
       setTxConfirmed(true)
 
