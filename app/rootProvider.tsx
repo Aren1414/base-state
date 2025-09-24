@@ -18,10 +18,10 @@ export function RootProvider({ children }: { children: ReactNode }) {
           preference: "all",
         },
       }}
+      
       miniKit={{
-        enabled: true,
-        autoConnect: true,
-        sponsorship: { enabled: false }, 
+        enabled: false,
+        autoConnect: false,
       }}
     >
       {children}
