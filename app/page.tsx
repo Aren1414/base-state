@@ -75,7 +75,7 @@ export default function Home() {
           <h1 className={styles.title}>BaseState</h1>
 
           {!txConfirmed ? (
-            <Transaction calls={calls} isSponsored onSuccess={handleSuccess}>
+            <Transaction calls={calls} onSuccess={handleSuccess}>
               <TransactionButton
                 className={styles.button}
                 text="Log activity and show wallet stats"
