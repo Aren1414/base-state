@@ -5,10 +5,10 @@ import { useAccount, useContractWrite } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
+import { Contract } from 'ethers'
 import styles from './page.module.css'
 
-const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d' as `0x${string}`
-
+const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const CONTRACT_ABI = [
   { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
   { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
@@ -25,25 +25,26 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address } = useAccount()
+  const { address, connector } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  
   const contractWrite = useContractWrite({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'ping',
+    mode: 'recklesslyUnprepared', 
+    args: [],
     chainId: base.id,
+    addressOrName: CONTRACT_ADDRESS,
+    contractInterface: CONTRACT_ABI,
+    functionName: 'ping',
   })
 
   const handleClick = async () => {
     if (!contractWrite.write) return
     setLoading(true)
     try {
-      const tx = await contractWrite.write() 
-      await tx.wait() 
+      const tx = await contractWrite.write()
+      await tx.wait()
       setTxConfirmed(true)
 
       if (address) {
