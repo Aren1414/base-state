@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Transaction, TransactionButton } from '@coinbase/onchainkit/transaction'
-import { useAccount } from 'wagmi'
+import { useAccount, usePrepareContractWrite, useContractWrite } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -27,9 +26,27 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address } = useAccount()
-
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
+
+  
+  const { config } = usePrepareContractWrite({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'ping',
+    chainId: base.id,
+  })
+
+  const { write } = useContractWrite(config)
+
+  const handleSuccess = async () => {
+    setTxConfirmed(true)
+    if (address) {
+      const apiKey = process.env.BASE_API_KEY || ''
+      const result = await fetchWalletStats(address, apiKey)
+      setStats(result)
+    }
+  }
 
   if (!address) {
     return (
@@ -41,25 +58,11 @@ export default function Home() {
     )
   }
 
-  const calls = [
-    { to: CONTRACT_ADDRESS, abi: CONTRACT_ABI, functionName: 'ping', args: [] as const },
-  ]
-
-  const handleSuccess = async () => {
-    setTxConfirmed(true)
-    if (address) {
-      const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(address, apiKey)
-      setStats(result)
-    }
-  }
-
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
         <div>
-          Welcome,&nbsp;
-          {address}
+          Welcome,&nbsp;{address}
         </div>
       </header>
 
@@ -67,12 +70,12 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <Transaction calls={calls} onSuccess={handleSuccess}>
-            <TransactionButton
-              className={styles.button}
-              text="Log activity and show wallet stats"
-            />
-          </Transaction>
+          <button
+            className={styles.button}
+            onClick={() => write?.().then(handleSuccess)}
+          >
+            Log activity and show wallet stats
+          </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
         ) : null}
