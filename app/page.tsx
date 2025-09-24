@@ -30,19 +30,19 @@ export default function Home() {
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const { writeAsync } = useContractWrite({
+  const writeContract = useContractWrite({
     address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
     functionName: 'ping',
+    abi: CONTRACT_ABI,
     chainId: base.id,
   })
 
   const handleClick = async () => {
-    if (!writeAsync || !address) return
+    if (!writeContract.write || !address) return
     setLoading(true)
     try {
-      const tx = await writeAsync()
-      await tx.wait()
+      const tx = await writeContract.write()
+      await tx.wait() 
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
