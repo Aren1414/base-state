@@ -30,29 +30,26 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { writeContract } = useWriteContract()
-
-  const handleClick = async () => {
-    if (!writeContract) return
-    try {
-      const tx = await writeContract({
-        abi: CONTRACT_ABI,
-        address: CONTRACT_ADDRESS,
-        functionName: 'ping',
-        args: [],
-        chainId: base.id,
-      })
-      await tx.wait()
+  const writeContract = useWriteContract({
+    abi: CONTRACT_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: 'ping',
+    chainId: base.id,
+    onSuccess: async () => {
       setTxConfirmed(true)
-
       if (address) {
         const apiKey = process.env.BASE_API_KEY || ''
         const result = await fetchWalletStats(address, apiKey)
         setStats(result)
       }
-    } catch (err) {
+    },
+    onError: (err) => {
       console.error('Transaction failed:', err)
-    }
+    },
+  })
+
+  const handleClick = async () => {
+    writeContract() 
   }
 
   if (!address) {
