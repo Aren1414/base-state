@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
-import { useWriteContract } from 'wagmi'
+import { useState } from 'react'
+import { useAuthenticate, AutoConnect } from '@coinbase/onchainkit/minikit'
+import { Transaction, TransactionButton } from '@coinbase/onchainkit/transaction'
+import { useAccount } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import styles from './page.module.css'
 
-const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
+const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d' as `0x${string}`
 
 const CONTRACT_ABI = [
   {
@@ -21,46 +22,12 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { signIn } = useAuthenticate()
-  const { context } = useMiniKit()
-  const user = context?.user
+  const { address } = useAccount()
 
-  
-  const address = user?.wallet?.address || user?.accounts?.[0]?.address
-
-  const [stats, setStats] = useState<ReturnType<typeof fetchWalletStats> | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { write } = useWriteContract({
-    chainId: 8453,
-    request: {
-      address: CONTRACT_ADDRESS,
-      abi: CONTRACT_ABI,
-      functionName: 'ping',
-      args: [],
-    },
-    onSuccess: async () => {
-      setTxConfirmed(true)
-      if (address) {
-        const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
-        const result = await fetchWalletStats(address, apiKey)
-        setStats(result)
-      }
-      setLoading(false)
-    },
-    onError: (error) => {
-      console.error('Contract call failed:', error)
-      setLoading(false)
-    },
-  })
-
-  const handlePing = useCallback(async () => {
-    if (!address) return
-    setLoading(true)
-    write()
-  }, [address, write])
-
-  if (!user) {
+  if (!address) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -72,31 +39,49 @@ export default function Home() {
     )
   }
 
+  const calls = [
+    {
+      to: CONTRACT_ADDRESS,
+      abi: CONTRACT_ABI,
+      functionName: 'ping',
+      args: [] as const,
+    },
+  ]
+
+  const handleSuccess = async () => {
+    setTxConfirmed(true)
+    if (address) {
+      const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
+      const result = await fetchWalletStats(address, apiKey)
+      setStats(result)
+    }
+  }
+
   return (
-    <div className={styles.container}>
-      <header className={styles.headerWrapper}>
-        <div>
-          Welcome, {user.displayName ?? address}
+    <AutoConnect>
+      <div className={styles.container}>
+        <header className={styles.headerWrapper}>
+          <div>
+            Welcome,&nbsp;
+            {address || 'Guest'}
+          </div>
+        </header>
+
+        <div className={styles.content}>
+          <h1 className={styles.title}>BaseState</h1>
+
+          {!txConfirmed ? (
+            <Transaction calls={calls} isSponsored onSuccess={handleSuccess}>
+              <TransactionButton
+                className={styles.button}
+                label="Log activity and show wallet stats"
+              />
+            </Transaction>
+          ) : stats ? (
+            <WalletStatus stats={stats} />
+          ) : null}
         </div>
-      </header>
-
-      <div className={styles.content}>
-        <h1 className={styles.title}>BaseState</h1>
-
-        {!txConfirmed ? (
-          <button
-            className={styles.button}
-            onClick={handlePing}
-            disabled={loading}
-          >
-            {loading
-              ? 'Submitting transaction...'
-              : 'Log activity and show wallet stats'}
-          </button>
-        ) : stats ? (
-          <WalletStatus stats={stats} />
-        ) : null}
       </div>
-    </div>
+    </AutoConnect>
   )
 }
