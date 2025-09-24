@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, usePrepareContractWrite, useContractWrite } from 'wagmi'
+import { useAccount, useContractWrite } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -29,22 +29,27 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  
-  const { config } = usePrepareContractWrite({
+  const { writeAsync } = useContractWrite({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: 'ping',
     chainId: base.id,
   })
 
-  const { write } = useContractWrite(config)
+  const handleClick = async () => {
+    if (!writeAsync) return
+    try {
+      const tx = await writeAsync()
+      await tx.wait() 
+      setTxConfirmed(true)
 
-  const handleSuccess = async () => {
-    setTxConfirmed(true)
-    if (address) {
-      const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(address, apiKey)
-      setStats(result)
+      if (address) {
+        const apiKey = process.env.BASE_API_KEY || ''
+        const result = await fetchWalletStats(address, apiKey)
+        setStats(result)
+      }
+    } catch (err) {
+      console.error('Transaction failed:', err)
     }
   }
 
@@ -61,19 +66,14 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>
-          Welcome,&nbsp;{address}
-        </div>
+        <div>Welcome,&nbsp;{address}</div>
       </header>
 
       <div className={styles.content}>
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button
-            className={styles.button}
-            onClick={() => write?.().then(handleSuccess)}
-          >
+          <button className={styles.button} onClick={handleClick}>
             Log activity and show wallet stats
           </button>
         ) : stats ? (
