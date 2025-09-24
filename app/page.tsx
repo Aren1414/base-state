@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useContractWrite } from 'wagmi'
+import { useAccount } from 'wagmi'
+import { useWriteContract } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -29,18 +30,19 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { write } = useContractWrite({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'ping',
-    chainId: base.id,
-  })
+  const { writeContract } = useWriteContract()
 
   const handleClick = async () => {
-    if (!write) return
+    if (!writeContract) return
     try {
-      const tx = await write()
-      await tx.wait() 
+      const tx = await writeContract({
+        abi: CONTRACT_ABI,
+        address: CONTRACT_ADDRESS,
+        functionName: 'ping',
+        args: [],
+        chainId: base.id,
+      })
+      await tx.wait()
       setTxConfirmed(true)
 
       if (address) {
