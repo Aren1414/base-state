@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useContractWrite } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -27,35 +27,23 @@ const CONTRACT_ABI = [
 export default function Home() {
   const { address } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
-  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const writeContract = useWriteContract()
-
-  const { isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
+  const { writeAsync } = useContractWrite({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'ping',
     chainId: base.id,
-    watch: true,
   })
 
-  if (isSuccess) {
-    setTxConfirmed(true)
-  }
-
   const handleClick = async () => {
-    if (!address) return
+    if (!writeAsync || !address) return
     setLoading(true)
     try {
-      const hash = await writeContract.writeContractAsync({
-        address: CONTRACT_ADDRESS,
-        functionName: 'ping',
-        abi: CONTRACT_ABI,
-        chainId: base.id,
-        args: [],
-      })
-
-      setTxHash(hash as `0x${string}`)
+      const tx = await writeAsync()
+      await tx.wait()
+      setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
       const result = await fetchWalletStats(address, apiKey)
