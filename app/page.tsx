@@ -30,12 +30,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
 
   const contractWrite = useContractWrite({
-    mode: 'recklesslyUnprepared',
-    args: [],
-    chainId: base.id,
     addressOrName: CONTRACT_ADDRESS,
     contractInterface: CONTRACT_ABI,
     functionName: 'ping',
+    chainId: base.id,
+    args: [],
   })
 
   const handleClick = async () => {
