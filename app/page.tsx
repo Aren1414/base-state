@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useWriteContract, useWaitForTransaction } from 'wagmi'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -27,23 +27,21 @@ const CONTRACT_ABI = [
 export default function Home() {
   const { address } = useAccount()
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
-  const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const writeContract = useWriteContract()
 
-  
-  const { isLoading: waiting } = useWaitForTransaction({
-    hash: txHash ?? undefined,
+  const { isSuccess } = useWaitForTransactionReceipt({
+    hash: txHash,
     chainId: base.id,
-    watch: true, 
-    onSettled(data, error) {
-      if (data && !error) {
-        setTxConfirmed(true)
-      }
-    },
+    watch: true,
   })
+
+  if (isSuccess) {
+    setTxConfirmed(true)
+  }
 
   const handleClick = async () => {
     if (!address) return
@@ -89,8 +87,8 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handleClick} disabled={loading || waiting}>
-            {loading || waiting ? 'Processing...' : 'Log activity and show wallet stats'}
+          <button className={styles.button} onClick={handleClick} disabled={loading}>
+            {loading ? 'Processing...' : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
