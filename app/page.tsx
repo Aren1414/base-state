@@ -11,7 +11,6 @@ import styles from './page.module.css'
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const CONTRACT_ABI = [
   { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
   {
     anonymous: false,
     inputs: [
