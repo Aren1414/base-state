@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuthenticate, useMiniKit } from '@coinbase/onchainkit/minikit'
 import { Transaction, TransactionButton } from '@coinbase/onchainkit/transaction'
 import { useAccount } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
@@ -27,21 +26,16 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { signIn } = useAuthenticate()
-  const { context } = useMiniKit()
-  const user = context?.user
   const { address } = useAccount()
 
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  if (!user && !address) {
+  if (!address) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
-          <button className={styles.button} onClick={() => signIn()}>
-            Sign in
-          </button>
+          <p>Please connect your wallet to continue.</p>
         </header>
       </div>
     )
@@ -65,7 +59,7 @@ export default function Home() {
       <header className={styles.headerWrapper}>
         <div>
           Welcome,&nbsp;
-          {user?.displayName || user?.fid || address || 'Guest'}
+          {address}
         </div>
       </header>
 
