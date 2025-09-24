@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAccount, useSendTransaction } from 'wagmi'
 import { encodeFunctionData } from 'viem'
-import { useOnchainKitContext } from '@coinbase/onchainkit'
+import { useMiniKit } from '@coinbase/onchainkit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -26,8 +26,8 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address: smartWalletAddress } = useAccount()
-  const { session } = useOnchainKitContext()
-  const realAddress = session?.ownerAddress
+  const { context } = useMiniKit()
+  const realAddress = context?.session?.ownerAddress
 
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
