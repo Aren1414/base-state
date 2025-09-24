@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAccount, useSendTransaction } from 'wagmi'
 import { encodeFunctionData } from 'viem'
-import { useMiniKit } from '@coinbase/onchainkit'
+import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
