@@ -55,7 +55,7 @@ export default function Home() {
   const handleSuccess = async () => {
     setTxConfirmed(true)
     if (address) {
-      const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_KEY || ''
+      const apiKey = process.env.BASE_API_KEY || ''
       const result = await fetchWalletStats(address, apiKey)
       setStats(result)
     }
