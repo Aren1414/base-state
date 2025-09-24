@@ -17,6 +17,7 @@ interface EtherscanTx {
   gasUsed: string;
   gasPrice: string;
   value: string;
+  contractAddress?: string;
 }
 
 interface EtherscanResponse<T> {
@@ -29,7 +30,6 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
   const baseUrl = 'https://api.etherscan.io/v2/api';
   const chainId = 8453;
 
-  
   const txRes = await fetch(
     `${baseUrl}?chainid=${chainId}&module=account&action=txlist&address=${address}&sort=asc&apikey=${apiKey}`
   );
@@ -41,11 +41,12 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
   const today = Math.floor(Date.now() / 1000);
   const walletAge = Math.floor((today - firstTxTs) / 86400);
 
-  
-  const activeDates = [...new Set(txList.map(tx => new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10)))];
+  const activeDates = [...new Set(
+    txList.map(tx => new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10))
+  )].sort();
+
   const activeDays = activeDates.length;
 
-  
   let streak = 0, best = 0, prev = '';
   for (const date of activeDates) {
     if (!prev) {
@@ -70,19 +71,17 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
   const volume = txList.reduce((sum, tx) => sum + BigInt(tx.value), 0n);
   const volumeEth = (Number(volume) / 1e18).toFixed(6);
 
-  
   const balRes = await fetch(
     `${baseUrl}?chainid=${chainId}&module=account&action=balance&address=${address}&apikey=${apiKey}`
   );
   const balanceJson: EtherscanResponse<string> = await balRes.json();
   const balanceEth = (Number(balanceJson.result) / 1e18).toFixed(6);
 
-  
   const tokenRes = await fetch(
     `${baseUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
   );
   const tokensJson: EtherscanResponse<EtherscanTx[]> = await tokenRes.json();
-  const tokenCount = [...new Set(tokensJson.result.map(t => t.to))].length;
+  const tokenCount = [...new Set(tokensJson.result.map(t => t.contractAddress))].length;
 
   return {
     walletAge,
