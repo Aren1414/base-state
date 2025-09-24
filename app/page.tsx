@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAccount, useSendTransaction } from 'wagmi'
 import { encodeFunctionData } from 'viem'
-import { useAuthenticate } from '@coinbase/onchainkit/minikit'
+import { useAuthenticate } from '@coinbase/onchainkit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -26,7 +26,11 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address: smartWalletAddress } = useAccount()
-  const { user, authenticate } = useAuthenticate()
+  const { signIn } = useAuthenticate()
+
+  const [fid, setFid] = useState<string | null>(null)
+  const [signature, setSignature] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
@@ -38,7 +42,13 @@ export default function Home() {
   const handleAuth = async () => {
     setAuthenticating(true)
     try {
-      await authenticate()
+      const result = await signIn()
+      if (result) {
+        setFid(result.fid)
+        setSignature(result.signature)
+        setMessage(result.message)
+        console.log('Authenticated:', result)
+      }
     } catch (err) {
       console.error('Authentication failed:', err)
     } finally {
@@ -47,7 +57,7 @@ export default function Home() {
   }
 
   const handleClick = async () => {
-    if (!user?.fid) return
+    if (!fid) return
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -66,7 +76,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(user.fid, apiKey)
+      const result = await fetchWalletStats(fid, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -76,7 +86,7 @@ export default function Home() {
     }
   }
 
-  if (!user) {
+  if (!fid) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -92,7 +102,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, FID&nbsp;{user.fid}</div>
+        <div>Welcome, FID&nbsp;{fid}</div>
       </header>
 
       <div className={styles.content}>
