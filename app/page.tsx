@@ -1,3 +1,5 @@
+'use client' 
+
 import { useState } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
@@ -27,13 +29,13 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [txHash, setTxHash] = useState<string | null>(null)
 
   const { writeContract } = useWriteContract({
     address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
     functionName: 'ping',
-    args: [],
     chainId: base.id,
+    args: [],
   })
 
   const handleClick = async () => {
@@ -41,22 +43,27 @@ export default function Home() {
     setLoading(true)
     try {
       const tx = await writeContract()
-      const txHash = tx.hash
-      const { isSuccess } = await useWaitForTransactionReceipt({ hash: txHash, chainId: base.id })
-      if (isSuccess) {
-        setTxConfirmed(true)
-        if (address) {
-          const apiKey = process.env.BASE_API_KEY || ''
-          const result = await fetchWalletStats(address, apiKey)
-          setStats(result)
-        }
-      }
+      setTxHash(tx.hash)
     } catch (err) {
       console.error('Transaction failed:', err)
     } finally {
       setLoading(false)
     }
   }
+
+  
+  useWaitForTransactionReceipt({
+    hash: txHash || undefined,
+    chainId: base.id,
+    onSuccess: async () => {
+      setTxConfirmed(true)
+      if (address) {
+        const apiKey = process.env.BASE_API_KEY || ''
+        const result = await fetchWalletStats(address, apiKey)
+        setStats(result)
+      }
+    },
+  })
 
   if (!address) {
     return (
