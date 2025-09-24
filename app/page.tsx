@@ -27,7 +27,7 @@ const CONTRACT_ABI = [
 export default function Home() {
   const { address: smartWalletAddress } = useAccount()
   const { context } = useMiniKit()
-  const realAddress = context?.session?.ownerAddress
+  const realAddress = context?.user?.wallet?.address
 
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
