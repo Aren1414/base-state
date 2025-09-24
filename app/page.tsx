@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useContractWrite, prepareWriteContract } from 'wagmi'
+import { useAccount, useContractWrite } from 'wagmi'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -31,29 +31,26 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
 
   
+  const contractWrite = useContractWrite({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'ping',
+    chainId: base.id,
+  })
+
   const handleClick = async () => {
-    if (!address) return
+    if (!contractWrite.write) return
     setLoading(true)
     try {
-      
-      const config = await prepareWriteContract({
-        address: CONTRACT_ADDRESS,
-        abi: CONTRACT_ABI,
-        functionName: 'ping',
-        chainId: base.id,
-      })
-
-      
-      const { write } = useContractWrite(config)
-      if (!write) throw new Error('Write function not ready')
-
-      const tx = await write()
+      const tx = await contractWrite.write() 
       await tx.wait() 
       setTxConfirmed(true)
 
-      const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(address, apiKey)
-      setStats(result)
+      if (address) {
+        const apiKey = process.env.BASE_API_KEY || ''
+        const result = await fetchWalletStats(address, apiKey)
+        setStats(result)
+      }
     } catch (err) {
       console.error('Transaction failed:', err)
     } finally {
