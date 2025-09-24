@@ -52,6 +52,7 @@ export default function Home() {
 
       const apiKey = process.env.BASE_API_KEY || ''
       const result = await fetchWalletStats(address, apiKey)
+      console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
       console.error('Transaction failed:', err)
@@ -85,7 +86,11 @@ export default function Home() {
           </button>
         ) : stats ? (
           <WalletStatus stats={stats} />
-        ) : null}
+        ) : (
+          <p style={{ opacity: 0.6, fontFamily: 'monospace' }}>
+            No wallet stats available. Try again or check API response.
+          </p>
+        )}
       </div>
     </div>
   )
