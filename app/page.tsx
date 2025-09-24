@@ -23,7 +23,9 @@ export default function Home() {
   const { signIn } = useAuthenticate()
   const { context } = useMiniKit()
   const user = context?.user
-  const address = user?.address
+
+  
+  const address = user?.wallet?.address || user?.accounts?.[0]?.address
 
   const [stats, setStats] = useState<ReturnType<typeof fetchWalletStats> | null>(null)
   const [loading, setLoading] = useState(false)
@@ -74,7 +76,7 @@ export default function Home() {
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
         <div>
-          Welcome, {user.displayName ?? user.address}
+          Welcome, {user.displayName ?? address}
         </div>
       </header>
 
@@ -97,4 +99,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+}
