@@ -29,7 +29,7 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
 
-  const { writeAsync } = useContractWrite({
+  const { write } = useContractWrite({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: 'ping',
@@ -37,9 +37,9 @@ export default function Home() {
   })
 
   const handleClick = async () => {
-    if (!writeAsync) return
+    if (!write) return
     try {
-      const tx = await writeAsync()
+      const tx = await write()
       await tx.wait() 
       setTxConfirmed(true)
 
