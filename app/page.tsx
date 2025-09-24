@@ -83,7 +83,10 @@ export default function Home() {
   }
 
   return (
-    <OnchainKitProvider apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY} chain={base}>
+    <OnchainKitProvider
+      apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+      chain={base}
+    >
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
           <div>
@@ -96,7 +99,7 @@ export default function Home() {
           <h1 className={styles.title}>BaseState</h1>
 
           {!txConfirmed ? (
-            <Transaction calls={calls} onSuccess={handleSuccess} paymaster={null}>
+            <Transaction calls={calls} onSuccess={handleSuccess}>
               <TransactionButton
                 className={styles.button}
                 text="Log activity and show wallet stats"
