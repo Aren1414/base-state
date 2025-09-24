@@ -26,7 +26,9 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address: smartWalletAddress } = useAccount()
-  const { user, authenticate } = useAuthenticate()
+  const { signIn } = useAuthenticate()
+
+  const [fid, setFid] = useState<string | null>(null)
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -34,8 +36,23 @@ export default function Home() {
 
   const { sendTransactionAsync } = useSendTransaction()
 
+  const handleAuth = async () => {
+    setAuthenticating(true)
+    try {
+      const result = await signIn()
+      if (result) {
+        setFid(result.fid)
+        console.log('Authenticated FID:', result.fid)
+      }
+    } catch (err) {
+      console.error('Authentication failed:', err)
+    } finally {
+      setAuthenticating(false)
+    }
+  }
+
   const handleClick = async () => {
-    if (!user) return
+    if (!fid) return
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -54,7 +71,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(user.fid, apiKey)
+      const result = await fetchWalletStats(fid, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -64,18 +81,7 @@ export default function Home() {
     }
   }
 
-  const handleAuth = async () => {
-    setAuthenticating(true)
-    try {
-      await authenticate()
-    } catch (err) {
-      console.error('Authentication failed:', err)
-    } finally {
-      setAuthenticating(false)
-    }
-  }
-
-  if (!user) {
+  if (!fid) {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
@@ -91,7 +97,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, FID&nbsp;{user.fid}</div>
+        <div>Welcome, FID&nbsp;{fid}</div>
       </header>
 
       <div className={styles.content}>
