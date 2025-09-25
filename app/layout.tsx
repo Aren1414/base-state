@@ -9,7 +9,15 @@ export async function generateMetadata(): Promise<Metadata> {
     title: minikitConfig.frame.name,
     description: minikitConfig.frame.description,
     other: {
-      "fc:frame": JSON.stringify({
+      
+      "fc:frame": "vNext",
+      "fc:frame:image": minikitConfig.frame.heroImageUrl,
+      "fc:frame:post_url": minikitConfig.frame.homeUrl,
+      "fc:frame:button:1": minikitConfig.frame.buttons?.[0] || "Mint",
+      "fc:frame:button:2": minikitConfig.frame.buttons?.[1] || "View Stats",
+
+      
+      "fc:frame:raw": JSON.stringify({
         version: minikitConfig.frame.version,
         imageUrl: minikitConfig.frame.heroImageUrl,
         button: {
@@ -43,7 +51,6 @@ export default function RootLayout({
     <RootProvider>
       <html lang="en">
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
-          
           {children}
         </body>
       </html>
