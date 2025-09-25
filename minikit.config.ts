@@ -1,7 +1,10 @@
-const ROOT_URL =
-  process.env.NEXTPUBLICURL ||
-  (process.env.VERCELURL?.startsWith("http") ? process.env.VERCELURL : `https://${process.env.VERCEL_URL}`);
+const ROOT_URL = process.env.NEXT_PUBLIC_URL || process.env.VERCEL_URL;
 
+/**
+ * MiniApp configuration object. Must follow the Farcaster MiniApp specification.
+ *
+ * @see {@link https://miniapps.farcaster.xyz/docs/guides/publishing}
+ */
 export const minikitConfig = {
   accountAssociation: {
     header: "",
@@ -17,7 +20,7 @@ export const minikitConfig = {
     iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#000000",
-    homeUrl: `${ROOT_URL}`,
+    homeUrl: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: [],
