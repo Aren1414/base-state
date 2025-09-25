@@ -27,7 +27,9 @@ export interface ContractStats {
   postTokens: number;
 }
 
-export type AddressStats = { type: 'wallet'; data: WalletStats } | { type: 'contract'; data: ContractStats };
+export type AddressStats =
+  | { type: 'wallet'; data: WalletStats }
+  | { type: 'contract'; data: ContractStats };
 
 interface EtherscanTx {
   timeStamp: string;
@@ -45,7 +47,7 @@ interface EtherscanResponse<T> {
   result: T;
 }
 
-export async function fetchAddressStats(address: string, apiKey: string): Promise<AddressStats> {
+export async function fetchWalletStats(address: string, apiKey: string): Promise<AddressStats> {
   const baseUrl = 'https://api.etherscan.io/v2/api';
   const chainId = 8453;
 
@@ -206,4 +208,4 @@ export async function fetchAddressStats(address: string, apiKey: string): Promis
       postTokens,
     },
   };
-      }
+}
