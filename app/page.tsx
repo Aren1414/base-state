@@ -39,7 +39,8 @@ export default function Home() {
     }
   }, [isFrameReady, setFrameReady])
 
-  const fid = context?.user?.fid
+  const user = context?.user
+  const fid = user?.fid
 
   const handleClick = async () => {
     if (!fid || !smartWalletAddress) return
@@ -84,12 +85,10 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
-        <div>Welcome, FID&nbsp;{fid}</div>
-        {smartWalletAddress && (
-          <div style={{ fontSize: '0.9em', opacity: 0.7 }}>
-            Wallet: {smartWalletAddress}
-          </div>
-        )}
+        <div>
+          Welcome,&nbsp;
+          {user?.displayName || fid || smartWalletAddress || 'Guest'}
+        </div>
       </header>
 
       <div className={styles.content}>
@@ -109,4 +108,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+  }
