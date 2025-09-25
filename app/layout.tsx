@@ -14,7 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
       "fc:frame:image": minikitConfig.frame.heroImageUrl,
       "fc:frame:post_url": minikitConfig.frame.webhookUrl,
       "fc:frame:button:1": minikitConfig.frame.buttons[0],
-      "fc:frame:button:2": minikitConfig.frame.buttons[1],
 
       
       "fc:frame:raw": JSON.stringify({
