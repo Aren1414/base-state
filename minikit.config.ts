@@ -1,4 +1,6 @@
-const ROOT_URL = "https://base-state.vercel.app";
+const ROOT_URL =
+  process.env.NEXTPUBLICURL ||
+  (process.env.VERCELURL?.startsWith("http") ? process.env.VERCELURL : `https://${process.env.VERCEL_URL}`);
 
 export const minikitConfig = {
   accountAssociation: {
@@ -15,8 +17,8 @@ export const minikitConfig = {
     iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#000000",
-    homeUrl: ROOT_URL,
-    webhookUrl: `${ROOT_URL}/api/frame`, 
+    homeUrl: `${ROOT_URL}`, 
+    webhookUrl: `${ROOT_URL}/api/webhook`, 
     primaryCategory: "utility",
     tags: [],
     heroImageUrl: `${ROOT_URL}/hero.png`,
@@ -24,26 +26,6 @@ export const minikitConfig = {
     ogTitle: "",
     ogDescription: "",
     ogImageUrl: `${ROOT_URL}/hero.png`,
-    buttons: ["Log activity and show wallet stats"], 
-  },
-  miniapp: {
-    version: "1",
-    name: "base-state",
-    subtitle: "",
-    description: "",
-    screenshotUrls: [],
-    iconUrl: `${ROOT_URL}/icon.png`,
-    splashImageUrl: `${ROOT_URL}/splash.png`,
-    splashBackgroundColor: "#000000",
-    homeUrl: ROOT_URL,
-    webhookUrl: `${ROOT_URL}/api/webhook`,
-    primaryCategory: "utility",
-    tags: [],
-    heroImageUrl: `${ROOT_URL}/hero.png`,
-    tagline: "",
-    ogTitle: "",
-    ogDescription: "",
-    ogImageUrl: `${ROOT_URL}/hero.png`,
-    buttons: ["Log activity and show wallet stats"],
+    buttons: ["View Stats"], 
   },
 } as const;
