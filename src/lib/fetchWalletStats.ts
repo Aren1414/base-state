@@ -58,7 +58,6 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
   const isContract = codeJson.result?.[0]?.ABI !== 'Contract source code not verified';
 
   if (!isContract) {
-    // Wallet logic
     const txRes = await fetch(
       `${baseUrl}?chainid=${chainId}&module=account&action=txlist&address=${address}&sort=asc&apikey=${apiKey}`
     );
@@ -110,7 +109,7 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
       `${baseUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
     );
     const tokensJson: EtherscanResponse<EtherscanTx[]> = await tokenRes.json();
-    const tokenCount = [...new Set(tokensJson.result.map(t => t.contractAddress))].length;
+    const tokenCount = [...new Set(tokensJson.result.map(t => t.contractAddress).filter(Boolean))].length;
 
     return {
       type: 'wallet',
@@ -129,7 +128,6 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
     };
   }
 
-  // Contract logic
   const intRes = await fetch(
     `${baseUrl}?chainid=${chainId}&module=account&action=txlistinternal&address=${address}&sort=asc&apikey=${apiKey}`
   );
@@ -181,11 +179,15 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
   );
   const tokensJson: EtherscanResponse<EtherscanTx[]> = await tokenRes.json();
   const tokenList = tokensJson.result || [];
-  const tokensReceived = [...new Set(tokenList.map(t => t.contractAddress))].length;
-  const rareTokens = Object.values(tokenList.reduce((acc, t) => {
-    acc[t.contractAddress] = (acc[t.contractAddress] || 0) + 1;
+  const tokensReceived = [...new Set(tokenList.map(t => t.contractAddress).filter(Boolean))].length;
+
+  const rareTokens = Object.values(tokenList.reduce((acc: Record<string, number>, t) => {
+    if (t.contractAddress) {
+      acc[t.contractAddress] = (acc[t.contractAddress] || 0) + 1;
+    }
     return acc;
   }, {})).filter(c => c === 1).length;
+
   const postTokens = tokenList.filter(t =>
     /http|base\.dev|mini-app|frame/i.test(t.tokenName || '')
   ).length;
@@ -208,4 +210,4 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
       postTokens,
     },
   };
-}
+      }
