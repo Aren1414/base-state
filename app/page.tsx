@@ -25,7 +25,7 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address: smartWalletAddress } = useAccount()
+  const { address: walletAddress } = useAccount()
   const { sendTransactionAsync } = useSendTransaction()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
 
@@ -43,7 +43,11 @@ export default function Home() {
   const fid = user?.fid
 
   const handleClick = async () => {
-    if (!fid || !smartWalletAddress) return
+    if (!fid || !walletAddress) {
+      console.warn("Missing Farcaster FID or wallet address")
+      return
+    }
+
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -62,7 +66,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(smartWalletAddress, apiKey)
+      const result = await fetchWalletStats(walletAddress, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -87,7 +91,7 @@ export default function Home() {
       <header className={styles.headerWrapper}>
         <div>
           Welcome,&nbsp;
-          {user?.displayName || fid || smartWalletAddress || 'Guest'}
+          {user?.displayName || fid || walletAddress || 'Guest'}
         </div>
       </header>
 
@@ -95,7 +99,7 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handleClick} disabled={loading}>
+          <button className={styles.button} onClick={handleClick} disabled={loading || !walletAddress}>
             {loading ? 'Processing...' : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
@@ -108,4 +112,4 @@ export default function Home() {
       </div>
     </div>
   )
-  }
+}
