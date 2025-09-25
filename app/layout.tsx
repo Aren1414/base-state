@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, SourceCodePro } from "next/font/google";
+import { Inter, Source_Code_Pro } from "next/font/google";
 import { minikitConfig } from "@/minikit.config";
 import { RootProvider } from "./rootProvider";
 import "./globals.css";
@@ -9,13 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
     title: minikitConfig.frame.name,
     description: minikitConfig.frame.description,
     other: {
-      
       "fc:frame": "vNext",
       "fc:frame:image": minikitConfig.frame.heroImageUrl,
       "fc:frame:post_url": minikitConfig.frame.homeUrl,
       "fc:frame:button:1": minikitConfig.frame.buttons?.[0] || "View Stats",
-
-      
       "fc:frame:raw": JSON.stringify({
         version: minikitConfig.frame.version,
         imageUrl: minikitConfig.frame.heroImageUrl,
@@ -36,7 +33,7 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const sourceCodePro = SourceCodePro({
+const sourceCodePro = Source_Code_Pro({
   variable: "--font-source-code-pro",
   subsets: ["latin"],
 });
