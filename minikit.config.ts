@@ -26,6 +26,6 @@ export const minikitConfig = {
     ogTitle: "",
     ogDescription: "",
     ogImageUrl: `${ROOT_URL}/hero.png`,
-    buttons: ["Mint", "View Stats"], 
+    buttons: ["View Stats"], 
   },
 } as const;
