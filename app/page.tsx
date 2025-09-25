@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount, useSendTransaction } from 'wagmi'
 import { encodeFunctionData } from 'viem'
-import { useAuthenticate } from '@coinbase/onchainkit'
+import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -26,35 +26,20 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address: smartWalletAddress } = useAccount()
-  const { signIn } = useAuthenticate()
-
-  const [fid, setFid] = useState<string | null>(null)
-  const [signature, setSignature] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
+  const { sendTransactionAsync } = useSendTransaction()
+  const { context, isFrameReady, setFrameReady } = useMiniKit()
 
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [authenticating, setAuthenticating] = useState(false)
 
-  const { sendTransactionAsync } = useSendTransaction()
-
-  const handleAuth = async () => {
-    setAuthenticating(true)
-    try {
-      const result = await signIn()
-      if (result) {
-        setFid(result.fid)
-        setSignature(result.signature)
-        setMessage(result.message)
-        console.log('Authenticated:', result)
-      }
-    } catch (err) {
-      console.error('Authentication failed:', err)
-    } finally {
-      setAuthenticating(false)
+  useEffect(() => {
+    if (!isFrameReady) {
+      setFrameReady()
     }
-  }
+  }, [isFrameReady, setFrameReady])
+
+  const fid = context?.user?.fid
 
   const handleClick = async () => {
     if (!fid) return
@@ -90,10 +75,7 @@ export default function Home() {
     return (
       <div className={styles.container}>
         <header className={styles.headerWrapper}>
-          <p>Please sign in to continue.</p>
-          <button onClick={handleAuth} disabled={authenticating}>
-            {authenticating ? 'Authenticating...' : 'Sign In with Farcaster'}
-          </button>
+          <p>Waiting for Farcaster context...</p>
         </header>
       </div>
     )
