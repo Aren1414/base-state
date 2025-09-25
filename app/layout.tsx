@@ -9,13 +9,11 @@ export async function generateMetadata(): Promise<Metadata> {
     title: minikitConfig.frame.name,
     description: minikitConfig.frame.description,
     other: {
-      
       "fc:frame": "vNext",
       "fc:frame:image": minikitConfig.frame.heroImageUrl,
-      "fc:frame:post_url": `${minikitConfig.frame.homeUrl}/page`, 
-      "fc:frame:button:1": minikitConfig.frame.buttons?.[0] || "View Stats",
+      "fc:frame:post_url": `${minikitConfig.frame.homeUrl}/api/frame`,
+      "fc:frame:button:1": minikitConfig.frame.buttons?.[0] || "Log activity and show wallet stats",
 
-      
       "fc:frame:raw": JSON.stringify({
         version: minikitConfig.frame.version,
         imageUrl: minikitConfig.frame.heroImageUrl,
