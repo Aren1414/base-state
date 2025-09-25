@@ -15,8 +15,11 @@ export async function generateMetadata(): Promise<Metadata> {
         button: {
           title: "Launch Mini App",
           action: {
-            name: "Launch Mini App",
             type: "launch_frame",
+            name: minikitConfig.frame.name,
+            url: minikitConfig.frame.homeUrl,
+            splashImageUrl: minikitConfig.frame.splashImageUrl,
+            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
           },
         },
       }),
