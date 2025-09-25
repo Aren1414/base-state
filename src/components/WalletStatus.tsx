@@ -28,6 +28,8 @@ type ContractStats = {
   tokensReceived: number
   rareTokens: number
   postTokens: number
+  allAaTransactions: number
+  aaPaymasterSuccess: number
 }
 
 type AddressStats =
@@ -93,6 +95,11 @@ const AddressStatus = ({ stats }: { stats: AddressStats }) => {
           <div><strong>Tokens Received:</strong> <span style={{ opacity: 0.7 }}>{s.tokensReceived}</span></div>
           <div><strong>Rare Tokens:</strong> <span style={{ opacity: 0.7 }}>{s.rareTokens}</span></div>
           <div><strong>Post Tokens (MiniApps/Frames):</strong> <span style={{ opacity: 0.7 }}>{s.postTokens}</span></div>
+        </>)}
+
+        {section('🧠 AA Metrics', <>
+          <div><strong>All AA Transactions:</strong> <span style={{ opacity: 0.7 }}>{s.allAaTransactions}</span></div>
+          <div><strong>AA Paymaster Success:</strong> <span style={{ opacity: 0.7 }}>{s.aaPaymasterSuccess}</span></div>
         </>)}
       </div>
     )
