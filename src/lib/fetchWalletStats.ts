@@ -25,6 +25,8 @@ export interface ContractStats {
   tokensReceived: number;
   rareTokens: number;
   postTokens: number;
+  allAaTransactions: number;
+  aaPaymasterSuccess: number;
 }
 
 export type AddressStats =
@@ -192,6 +194,22 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
     /http|base\.dev|mini-app|frame/i.test(t.tokenName || '')
   ).length;
 
+  const padded = `0x${address.toLowerCase().replace(/^0x/, '').padStart(64, '0')}`;
+  const topic0 = '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f';
+  const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
+
+  const aaRes = await fetch(
+    `${baseUrl}?chainid=${chainId}&module=logs&action=getLogs&fromBlock=0&toBlock=latest&address=${entryPoint}&topic0=${topic0}&topic2=${padded}&apikey=${apiKey}`
+  );
+  const aaJson: EtherscanResponse<any[]> = await aaRes.json();
+  const aaList = aaJson.result || [];
+
+  const allAaTransactions = aaList.length;
+  const aaPaymasterSuccess = aaList.filter(log =>
+    log.data?.slice(66, 130) === '0000000000000000000000000000000000000000000000000000000000000001' &&
+    log.topics?.[3] !== '0x0000000000000000000000000000000000000000000000000000000000000000'
+  ).length;
+
   return {
     type: 'contract',
     data: {
@@ -208,6 +226,8 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
       tokensReceived,
       rareTokens,
       postTokens,
+      allAaTransactions,
+      aaPaymasterSuccess,
     },
   };
-      }
+}
