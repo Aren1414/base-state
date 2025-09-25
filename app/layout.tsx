@@ -6,14 +6,19 @@ import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: minikitConfig.frame.name,
-    description: minikitConfig.frame.description,
+    title: minikitConfig.miniapp.name,
+    description: minikitConfig.miniapp.description,
     other: {
-      "fc:frame": JSON.stringify({
-        version: minikitConfig.frame.version,
-        image: minikitConfig.frame.heroImageUrl,
-        post_url: minikitConfig.frame.webhookUrl,
-        buttons: minikitConfig.frame.buttons,
+      "fc:frame:raw": JSON.stringify({
+        version: minikitConfig.miniapp.version,
+        imageUrl: minikitConfig.miniapp.heroImageUrl,
+        button: {
+          title: minikitConfig.miniapp.buttons[0],
+          action: {
+            name: minikitConfig.miniapp.buttons[0],
+            type: "launch_frame",
+          },
+        },
       }),
     },
   };
