@@ -1,19 +1,12 @@
-const ROOT_URL =
-  process.env.NEXT_PUBLIC_URL ||
-  (process.env.VERCEL_URL?.startsWith("http") ? process.env.VERCEL_URL : `https://${process.env.VERCEL_URL}`);
+const ROOT_URL = "https://base-state.vercel.app";
 
-/**
- * MiniApp configuration object. Must follow the Farcaster MiniApp specification.
- *
- * @see {@link https://miniapps.farcaster.xyz/docs/guides/publishing}
- */
 export const minikitConfig = {
   accountAssociation: {
-    header: "",
+    header: "", 
     payload: "",
     signature: "",
   },
-  frame: {
+  miniapp: {
     version: "1",
     name: "base-state",
     subtitle: "Track wallet activity",
@@ -31,6 +24,6 @@ export const minikitConfig = {
     ogTitle: "BaseState Mini App",
     ogDescription: "Track your wallet activity and ping history",
     ogImageUrl: `${ROOT_URL}/hero.png`,
-    buttons: ["Log activity and show wallet stats"], 
+    buttons: ["Log activity and show wallet stats"],
   },
 } as const;
