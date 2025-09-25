@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
       
       "fc:frame": "vNext",
       "fc:frame:image": minikitConfig.frame.heroImageUrl,
-      "fc:frame:post_url": minikitConfig.frame.homeUrl,
+      "fc:frame:post_url": `${minikitConfig.frame.homeUrl}/page`, 
       "fc:frame:button:1": minikitConfig.frame.buttons?.[0] || "Mint",
       "fc:frame:button:2": minikitConfig.frame.buttons?.[1] || "View Stats",
 
