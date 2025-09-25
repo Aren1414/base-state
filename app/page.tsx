@@ -61,7 +61,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(fid, apiKey)
+      const result = await fetchWalletStats(String(fid), apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
