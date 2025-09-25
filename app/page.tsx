@@ -42,7 +42,7 @@ export default function Home() {
   const fid = context?.user?.fid
 
   const handleClick = async () => {
-    if (!fid) return
+    if (!fid || !smartWalletAddress) return
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -61,7 +61,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(String(fid), apiKey)
+      const result = await fetchWalletStats(smartWalletAddress, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -85,6 +85,11 @@ export default function Home() {
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
         <div>Welcome, FID&nbsp;{fid}</div>
+        {smartWalletAddress && (
+          <div style={{ fontSize: '0.9em', opacity: 0.7 }}>
+            Wallet: {smartWalletAddress}
+          </div>
+        )}
       </header>
 
       <div className={styles.content}>
@@ -104,4 +109,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+    }
