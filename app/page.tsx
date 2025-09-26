@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAccount, useSendTransaction } from 'wagmi'
+import { useAccount, useSendTransaction, useChainId, useSwitchChain } from 'wagmi'
 import { encodeFunctionData } from 'viem'
 import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
@@ -28,10 +28,20 @@ export default function Home() {
   const { address: walletAddress } = useAccount()
   const { sendTransactionAsync } = useSendTransaction()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
+  const chainId = useChainId()
+  const { switchChain } = useSwitchChain()
 
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  
+  useEffect(() => {
+    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+    if (!isBaseApp && chainId !== base.id && switchChain) {
+      switchChain({ chainId: base.id })
+    }
+  }, [chainId, switchChain])
 
   useEffect(() => {
     if (!isFrameReady) {
