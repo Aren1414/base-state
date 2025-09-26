@@ -8,7 +8,11 @@ import {
   useWalletClient,
 } from 'wagmi'
 import { encodeFunctionData, createWalletClient, custom } from 'viem'
-import { useMiniKit, useAuthenticate, useQuickAuth } from '@coinbase/onchainkit/minikit'
+import {
+  useMiniKit,
+  useAuthenticate,
+  useQuickAuth,
+} from '@coinbase/onchainkit/minikit'
 import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -36,7 +40,7 @@ export default function Home() {
   const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const { signIn } = useAuthenticate()
-  const { data: verifiedUser, isLoading } = useQuickAuth('/api/me')
+  const { data: verifiedUser, isLoading } = useQuickAuth<{ fid: string }>('/api/me')
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
