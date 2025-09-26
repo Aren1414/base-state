@@ -6,9 +6,8 @@ import {
   useChainId,
   useSwitchChain,
   useWalletClient,
-  usePublicClient,
 } from 'wagmi'
-import { encodeFunctionData, createWalletClient, custom, parseUnits } from 'viem'
+import { encodeFunctionData, createWalletClient, custom } from 'viem'
 import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -31,9 +30,8 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address: walletAddress, isConnected } = useAccount()
+  const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
-  const publicClient = usePublicClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
@@ -59,7 +57,7 @@ export default function Home() {
   const fid = user?.fid
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
 
-  const ready = fid && isConnected && walletAddress && chainId === base.id
+  const ready = fid && walletAddress && chainId === base.id
 
   const handleClick = async () => {
     setLoading(true)
@@ -73,18 +71,9 @@ export default function Home() {
       let tx
 
       if (walletClient) {
-        const gasEstimate = await publicClient.estimateGas({
-          account: walletClient.account!,
-          to: CONTRACT_ADDRESS,
-          data,
-        })
-
         tx = await walletClient.sendTransaction({
           to: CONTRACT_ADDRESS,
           data,
-          gas: gasEstimate,
-          maxFeePerGas: parseUnits('5', 'gwei'),
-          maxPriorityFeePerGas: parseUnits('1', 'gwei'),
         })
       } else if (typeof window !== 'undefined' && window.ethereum) {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' })
@@ -95,19 +84,10 @@ export default function Home() {
           transport: custom(window.ethereum),
         })
 
-        const gasEstimate = await publicClient.estimateGas({
-          account: accounts[0],
-          to: CONTRACT_ADDRESS,
-          data,
-        })
-
         tx = await fallbackSigner.sendTransaction({
           account: accounts[0],
           to: CONTRACT_ADDRESS,
           data,
-          gas: gasEstimate,
-          maxFeePerGas: parseUnits('5', 'gwei'),
-          maxPriorityFeePerGas: parseUnits('1', 'gwei'),
         })
       } else {
         throw new Error('No signer available')
@@ -131,7 +111,7 @@ export default function Home() {
   if (!fid) {
     return (
       <div className={styles.container}>
-        <header className={styles.headerWrapper}>
+        <header className={styles.headerCentered}>
           <p>Waiting for Farcaster context...</p>
         </header>
       </div>
@@ -140,7 +120,7 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.headerWrapperCentered}>
+      <header className={styles.headerCentered}>
         <h2 className={styles.userName}>{displayName}</h2>
       </header>
 
