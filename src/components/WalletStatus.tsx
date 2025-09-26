@@ -2,37 +2,6 @@
 import React from 'react'
 import type { WalletStats, ContractStats } from '../types'
 
-type WalletStats = {
-  walletAge: number
-  activeDays: number
-  txCount: number
-  currentStreak: number
-  bestStreak: number
-  contracts: number
-  tokens: number
-  feesEth: string
-  volumeEth: string
-  balanceEth: string
-}
-
-type ContractStats = {
-  age: number
-  firstSeen: string
-  balanceEth: string
-  internalTxCount: number
-  activeDays: number
-  currentStreak: number
-  bestStreak: number
-  uniqueSenders: number
-  zeroEthTx: number
-  volumeEth: string
-  tokensReceived: number
-  rareTokens: number
-  postTokens: number
-  allAaTransactions: number
-  aaPaymasterSuccess: number
-}
-
 type AddressStats =
   | { type: 'wallet'; data: WalletStats }
   | { type: 'contract'; data: ContractStats }
