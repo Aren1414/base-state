@@ -35,10 +35,11 @@ export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
-  const { user: verifiedUser } = useAuthenticate()
+  const auth = useAuthenticate()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
+  const [verifiedUser, setVerifiedUser] = useState<any>(null)
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -61,10 +62,15 @@ export default function Home() {
           setFrameReady()
         }
       }
+
+      const result = await auth.signIn()
+      if (result && result.user) {
+        setVerifiedUser(result.user)
+      }
     }
 
     initEnvironment()
-  }, [chainId, switchChain, isFrameReady, setFrameReady])
+  }, [chainId, switchChain, isFrameReady, setFrameReady, auth])
 
   const fid = verifiedUser?.fid
   const displayName = verifiedUser?.displayName || fid || walletAddress || 'Guest'
@@ -195,4 +201,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+      }
