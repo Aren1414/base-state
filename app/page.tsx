@@ -5,10 +5,10 @@ import {
   useAccount,
   useChainId,
   useSwitchChain,
+  useWalletClient,
 } from 'wagmi'
 import { encodeFunctionData } from 'viem'
 import { useMiniKit } from '@coinbase/onchainkit/minikit'
-import { sdk } from '@coinbase/onchainkit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -31,6 +31,7 @@ const CONTRACT_ABI = [
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
+  const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
@@ -38,7 +39,6 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [walletReady, setWalletReady] = useState(false)
 
   useEffect(() => {
     const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
@@ -53,23 +53,10 @@ export default function Home() {
     }
   }, [isFrameReady, setFrameReady])
 
-  useEffect(() => {
-    const syncWallet = async () => {
-      await sdk.actions.ready()
-      setWalletReady(!!sdk.walletClient)
-    }
-    syncWallet()
-  }, [])
-
-  useEffect(() => {
-    console.log('sdk.walletClient:', sdk.walletClient)
-    console.log('walletAddress:', walletAddress)
-  }, [walletReady, walletAddress])
-
   const user = context?.user
   const fid = user?.fid
 
-  const ready = fid && walletAddress && walletReady && chainId === base.id
+  const ready = fid && walletAddress && walletClient && chainId === base.id
 
   const handleClick = async () => {
     setLoading(true)
@@ -80,7 +67,7 @@ export default function Home() {
         args: [],
       })
 
-      const tx = await sdk.walletClient?.sendTransaction({
+      const tx = await walletClient?.sendTransaction({
         to: CONTRACT_ADDRESS,
         data,
         chain: base,
@@ -143,4 +130,4 @@ export default function Home() {
       </div>
     </div>
   )
-          }
+}
