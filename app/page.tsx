@@ -13,7 +13,6 @@ import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
 import styles from './page.module.css'
-import { addMiniApp, postCast } from '@coinbase/onchainkit'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const CONTRACT_ABI = [
@@ -112,32 +111,30 @@ export default function Home() {
     }
   }
 
-  const handleShare = async () => {
-    if (!stats || !fid) return
+  const handleShare = () => {
+    if (!stats) return
 
     const s = stats.data
     const type = stats.type
 
-    let intro = `🔵 Powered by BaseState Mini App\nExplore your wallet or contract stats and share them with the community.`
     let body = ''
 
     if (type === 'wallet') {
-      body = `📊 Wallet Snapshot\nWallet Age: ${s.walletAge}d | Active: ${s.activeDays}d\n\n📈 Activity\nTxs: ${s.txCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nContracts: ${s.contracts}\n\n🎯 Tokens & Fees\nReceived: ${s.tokens} | Gas: ${s.feesEth} ETH\nBalance: ${s.balanceEth} ETH`
+      body = `📊 Wallet Snapshot\nWallet Age: ${s.walletAge}d | Active: ${s.activeDays}d\nTxs: ${s.txCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nContracts: ${s.contracts}\nTokens: ${s.tokens} | Gas: ${s.feesEth} ETH\nBalance: ${s.balanceEth} ETH`
     } else if (type === 'contract') {
-      body = `📊 Contract Snapshot\nAge: ${s.age}d | First Seen: ${s.firstSeen}\nBalance: ${s.balanceEth} ETH\n\n📈 Activity\nInternal Txs: ${s.internalTxCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nSenders: ${s.uniqueSenders} | Zero ETH Txs: ${s.zeroEthTx}\n\n🎯 Tokens\nReceived: ${s.tokensReceived} | Rare: ${s.rareTokens} | Post: ${s.postTokens}\n\n🧠 AA Metrics\nAA Txs: ${s.allAaTransactions} | Paymaster Success: ${s.aaPaymasterSuccess}`
+      body = `📊 Contract Snapshot\nAge: ${s.age}d | First Seen: ${s.firstSeen}\nBalance: ${s.balanceEth} ETH\nInternal Txs: ${s.internalTxCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nSenders: ${s.uniqueSenders} | Zero ETH Txs: ${s.zeroEthTx}\nTokens: ${s.tokensReceived} | Rare: ${s.rareTokens} | Post: ${s.postTokens}\nAA Txs: ${s.allAaTransactions} | Paymaster Success: ${s.aaPaymasterSuccess}`
     }
 
-    const castText = `${intro}\n\n${body}`
+    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'contract'} stats using the BaseState Mini App 👇\n\n${body}\n\n🔗 https://base-state.vercel.app`
 
-    await postCast({
-      text: castText,
-      embeds: [{ url: window.location.href }],
-      fid,
-    })
+    const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}`
+    window.open(shareUrl, '_blank')
   }
 
   const handleAddMiniApp = () => {
-    addMiniApp()
+    if (typeof window !== 'undefined' && window.farcaster?.addMiniApp) {
+      window.farcaster.addMiniApp()
+    }
   }
 
   if (!fid) {
@@ -190,4 +187,4 @@ export default function Home() {
       </div>
     </div>
   )
-      }
+}
