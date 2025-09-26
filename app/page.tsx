@@ -8,7 +8,7 @@ import {
   useWalletClient,
 } from 'wagmi'
 import { encodeFunctionData, createWalletClient, custom } from 'viem'
-import { useMiniKit } from '@coinbase/onchainkit/minikit'
+import { useMiniKit, useAuthenticate } from '@coinbase/onchainkit/minikit'
 import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -35,6 +35,7 @@ export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
+  const { user: verifiedUser } = useAuthenticate()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
@@ -44,26 +45,29 @@ export default function Home() {
   const [txFailed, setTxFailed] = useState(false)
 
   useEffect(() => {
-    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
-    if (!isBaseApp && chainId !== base.id && switchChain) {
-      switchChain({ chainId: base.id })
-    }
-  }, [chainId, switchChain])
-
-  useEffect(() => {
-    const detectMiniApp = async () => {
+    const initEnvironment = async () => {
+      const isBrowser = typeof window !== 'undefined'
+      const isBaseApp = isBrowser && window.location.href.includes('cbbaseapp://')
       const isMiniApp = await sdk.isInMiniApp()
-      if (isMiniApp && !isFrameReady) {
-        setFrameReady()
+
+      if (isBaseApp && chainId !== base.id && switchChain) {
+        switchChain({ chainId: base.id })
+      }
+
+      if (isMiniApp) {
+        await sdk.actions.ready()
+        await sdk.actions.addMiniApp()
+        if (!isFrameReady) {
+          setFrameReady()
+        }
       }
     }
-    detectMiniApp()
-  }, [isFrameReady, setFrameReady])
 
-  const user = context?.user
-  const fid = user?.fid
-  const displayName = user?.displayName || fid || walletAddress || 'Guest'
+    initEnvironment()
+  }, [chainId, switchChain, isFrameReady, setFrameReady])
 
+  const fid = verifiedUser?.fid
+  const displayName = verifiedUser?.displayName || fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
   const handleClick = async () => {
@@ -191,4 +195,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+}
