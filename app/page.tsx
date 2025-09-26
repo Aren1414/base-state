@@ -5,10 +5,9 @@ import {
   useAccount,
   useChainId,
   useSwitchChain,
-  useWalletClient,
 } from 'wagmi'
 import { encodeFunctionData } from 'viem'
-import { useMiniKit } from '@coinbase/onchainkit/minikit'
+import { useMiniKit, sdk } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -30,8 +29,7 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address: walletAddress, isConnected } = useAccount()
-  const { data: walletClient } = useWalletClient()
+  const { address: walletAddress } = useAccount()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
@@ -39,6 +37,7 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [walletReady, setWalletReady] = useState(false)
 
   useEffect(() => {
     const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
@@ -53,10 +52,23 @@ export default function Home() {
     }
   }, [isFrameReady, setFrameReady])
 
+  useEffect(() => {
+    const syncWallet = async () => {
+      await sdk.actions.ready()
+      setWalletReady(!!sdk.walletClient)
+    }
+    syncWallet()
+  }, [])
+
+  useEffect(() => {
+    console.log('sdk.walletClient:', sdk.walletClient)
+    console.log('walletAddress:', walletAddress)
+  }, [walletReady, walletAddress])
+
   const user = context?.user
   const fid = user?.fid
 
-  const ready = fid && walletAddress && walletClient && chainId === base.id
+  const ready = fid && walletAddress && walletReady && chainId === base.id
 
   const handleClick = async () => {
     setLoading(true)
@@ -67,7 +79,7 @@ export default function Home() {
         args: [],
       })
 
-      const tx = await walletClient?.sendTransaction({
+      const tx = await sdk.walletClient?.sendTransaction({
         to: CONTRACT_ADDRESS,
         data,
         chain: base,
@@ -77,7 +89,6 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      if (!walletAddress) throw new Error("Wallet address is missing")
       const result = await fetchWalletStats(walletAddress, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
@@ -111,9 +122,16 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handleClick} disabled={!ready || loading}>
-            {loading ? 'Processing...' : 'Log activity and show wallet stats'}
-          </button>
+          <>
+            <button className={styles.button} onClick={handleClick} disabled={!ready || loading}>
+              {loading ? 'Processing...' : 'Log activity and show wallet stats'}
+            </button>
+            {!ready && (
+              <p style={{ opacity: 0.6, fontFamily: 'monospace', marginTop: 12 }}>
+                Wallet not ready. Try reconnecting or reload inside Farcaster/Base App.
+              </p>
+            )}
+          </>
         ) : stats ? (
           <WalletStatus stats={stats} />
         ) : (
