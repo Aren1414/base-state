@@ -75,11 +75,16 @@ export default function Home() {
           data,
         })
       } else if (typeof window !== 'undefined' && window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+        if (!accounts || accounts.length === 0) throw new Error('No accounts found in fallback signer')
+
         const fallbackSigner = createWalletClient({
           chain: base,
           transport: custom(window.ethereum),
         })
+
         tx = await fallbackSigner.sendTransaction({
+          account: accounts[0],
           to: CONTRACT_ADDRESS,
           data,
         })
@@ -145,4 +150,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+        }
