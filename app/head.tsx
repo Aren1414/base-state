@@ -6,10 +6,10 @@ export default function Head() {
         "version": "next",
         "imageUrl": "https://base-state.vercel.app/embed.png",
         "button": {
-          "title": "Check Contract Stats",
+          "title": "Check Wallet Stats",
           "action": {
             "type": "launch_frame",
-            "name": "BaseState",
+            "name": "base-state",
             "url": "https://base-state.vercel.app"
           }
         }
