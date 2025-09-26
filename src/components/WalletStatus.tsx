@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import type { WalletStats, ContractStats } from '../types'
 
 type WalletStats = {
   walletAge: number
