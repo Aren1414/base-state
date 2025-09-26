@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAccount, useSendTransaction, useChainId, useSwitchChain } from 'wagmi'
+import {
+  useAccount,
+  useChainId,
+  useSwitchChain,
+  useWalletClient,
+} from 'wagmi'
 import { encodeFunctionData } from 'viem'
 import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
@@ -25,8 +30,8 @@ const CONTRACT_ABI = [
 ]
 
 export default function Home() {
-  const { address: walletAddress } = useAccount()
-  const { sendTransactionAsync } = useSendTransaction()
+  const { address: walletAddress, isConnected } = useAccount()
+  const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
@@ -35,7 +40,6 @@ export default function Home() {
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  
   useEffect(() => {
     const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
     if (!isBaseApp && chainId !== base.id && switchChain) {
@@ -43,7 +47,6 @@ export default function Home() {
     }
   }, [chainId, switchChain])
 
-  
   useEffect(() => {
     if (!isFrameReady) {
       setFrameReady()
@@ -53,8 +56,7 @@ export default function Home() {
   const user = context?.user
   const fid = user?.fid
 
-  
-  const ready = fid && walletAddress && chainId === base.id
+  const ready = fid && walletAddress && walletClient && chainId === base.id
 
   const handleClick = async () => {
     setLoading(true)
@@ -65,10 +67,10 @@ export default function Home() {
         args: [],
       })
 
-      const tx = await sendTransactionAsync({
+      const tx = await walletClient?.sendTransaction({
         to: CONTRACT_ADDRESS,
         data,
-        chainId: base.id,
+        chain: base,
       })
 
       console.log('Transaction sent:', tx)
