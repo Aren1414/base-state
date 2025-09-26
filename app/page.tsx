@@ -114,27 +114,20 @@ export default function Home() {
   const handleShare = () => {
     if (!stats) return
 
-    const s = stats.data
     const type = stats.type
-
     let body = ''
 
     if (type === 'wallet') {
+      const s = stats.data as WalletStats
       body = `📊 Wallet Snapshot\nWallet Age: ${s.walletAge}d | Active: ${s.activeDays}d\nTxs: ${s.txCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nContracts: ${s.contracts}\nTokens: ${s.tokens} | Gas: ${s.feesEth} ETH\nBalance: ${s.balanceEth} ETH`
-    } else if (type === 'contract') {
+    } else {
+      const s = stats.data as ContractStats
       body = `📊 Contract Snapshot\nAge: ${s.age}d | First Seen: ${s.firstSeen}\nBalance: ${s.balanceEth} ETH\nInternal Txs: ${s.internalTxCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nSenders: ${s.uniqueSenders} | Zero ETH Txs: ${s.zeroEthTx}\nTokens: ${s.tokensReceived} | Rare: ${s.rareTokens} | Post: ${s.postTokens}\nAA Txs: ${s.allAaTransactions} | Paymaster Success: ${s.aaPaymasterSuccess}`
     }
 
     const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'contract'} stats using the BaseState Mini App 👇\n\n${body}\n\n🔗 https://base-state.vercel.app`
-
     const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}`
     window.open(shareUrl, '_blank')
-  }
-
-  const handleAddMiniApp = () => {
-    if (typeof window !== 'undefined' && window.farcaster?.addMiniApp) {
-      window.farcaster.addMiniApp()
-    }
   }
 
   if (!fid) {
@@ -179,7 +172,6 @@ export default function Home() {
           <>
             <WalletStatus stats={stats} />
             <button className={styles.actionButton} onClick={handleShare}>Share as Cast</button>
-            <button className={styles.retryButton} onClick={handleAddMiniApp}>Add Mini App</button>
           </>
         ) : (
           <p className={styles.statusMessage}>Fetching wallet stats, please wait…</p>
