@@ -43,6 +43,7 @@ export default function Home() {
     }
   }, [chainId, switchChain])
 
+  
   useEffect(() => {
     if (!isFrameReady) {
       setFrameReady()
@@ -52,12 +53,10 @@ export default function Home() {
   const user = context?.user
   const fid = user?.fid
 
-  const handleClick = async () => {
-    if (!fid || !walletAddress) {
-      console.warn("Missing Farcaster FID or wallet address")
-      return
-    }
+  
+  const ready = fid && walletAddress && chainId === base.id
 
+  const handleClick = async () => {
     setLoading(true)
     try {
       const data = encodeFunctionData({
@@ -109,7 +108,7 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <button className={styles.button} onClick={handleClick} disabled={loading || !walletAddress}>
+          <button className={styles.button} onClick={handleClick} disabled={!ready || loading}>
             {loading ? 'Processing...' : 'Log activity and show wallet stats'}
           </button>
         ) : stats ? (
