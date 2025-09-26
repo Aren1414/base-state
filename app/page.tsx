@@ -39,6 +39,7 @@ export default function Home() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [txFailed, setTxFailed] = useState(false)
 
   useEffect(() => {
     const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
@@ -61,6 +62,7 @@ export default function Home() {
 
   const handleClick = async () => {
     setLoading(true)
+    setTxFailed(false)
     try {
       const data = encodeFunctionData({
         abi: CONTRACT_ABI,
@@ -103,6 +105,7 @@ export default function Home() {
       setStats(result)
     } catch (err) {
       console.error('Transaction failed:', err)
+      setTxFailed(true)
     } finally {
       setLoading(false)
     }
@@ -125,23 +128,31 @@ export default function Home() {
       </header>
 
       <div className={styles.content}>
+        <h1 className={styles.title}>BaseState</h1>
+
         {!txConfirmed ? (
           <>
             <button className={styles.actionButton} onClick={handleClick} disabled={!ready || loading}>
               {loading ? 'Submitting transaction...' : 'Submit activity and retrieve wallet stats'}
             </button>
-            {!ready && (
+
+            {!ready && !loading && (
               <p className={styles.statusMessage}>
                 Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
               </p>
+            )}
+
+            {txFailed && (
+              <>
+                <p className={styles.statusMessage}>Transaction failed. Please try again.</p>
+                <button className={styles.retryButton} onClick={handleClick}>Retry</button>
+              </>
             )}
           </>
         ) : stats ? (
           <WalletStatus stats={stats} />
         ) : (
-          <p className={styles.statusMessage}>
-            No wallet stats available. Try again or check API response.
-          </p>
+          <p className={styles.statusMessage}>Fetching wallet stats, please wait…</p>
         )}
       </div>
     </div>
