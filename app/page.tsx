@@ -8,11 +8,7 @@ import {
   useWalletClient,
 } from 'wagmi'
 import { encodeFunctionData, createWalletClient, custom } from 'viem'
-import {
-  useMiniKit,
-  useAuthenticate,
-  useQuickAuth,
-} from '@coinbase/onchainkit/minikit'
+import { useMiniKit, useAuthenticate } from '@coinbase/onchainkit/minikit'
 import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -40,7 +36,6 @@ export default function Home() {
   const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const { signIn } = useAuthenticate()
-  const { data: verifiedUser, isLoading } = useQuickAuth<{ fid: string }>('/api/me')
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
@@ -50,31 +45,31 @@ export default function Home() {
   const [txFailed, setTxFailed] = useState(false)
 
   useEffect(() => {
-    const initEnvironment = async () => {
-      const isBrowser = typeof window !== 'undefined'
-      const isBaseApp = isBrowser && window.location.href.includes('cbbaseapp://')
+    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+    if (!isBaseApp && chainId !== base.id && switchChain) {
+      switchChain({ chainId: base.id })
+    }
+  }, [chainId, switchChain])
+
+  useEffect(() => {
+    const initMiniApp = async () => {
       const isMiniApp = await sdk.isInMiniApp()
-
-      if (isBaseApp && chainId !== base.id && switchChain) {
-        switchChain({ chainId: base.id })
-      }
-
       if (isMiniApp) {
         await sdk.actions.ready()
         await sdk.actions.addMiniApp()
+        await signIn()
         if (!isFrameReady) {
           setFrameReady()
         }
       }
-
-      await signIn()
     }
+    initMiniApp()
+  }, [isFrameReady, setFrameReady, signIn])
 
-    initEnvironment()
-  }, [chainId, switchChain, isFrameReady, setFrameReady, signIn])
+  const user = context?.user
+  const fid = user?.fid
+  const displayName = user?.displayName || fid || walletAddress || 'Guest'
 
-  const fid = verifiedUser?.fid
-  const displayName = fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
   const handleClick = async () => {
@@ -153,7 +148,7 @@ export default function Home() {
     window.open(shareUrl, '_blank')
   }
 
-  if (isLoading || !fid) {
+  if (!fid) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
