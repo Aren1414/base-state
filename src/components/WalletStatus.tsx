@@ -36,19 +36,29 @@ type AddressStats =
   | { type: 'wallet'; data: WalletStats }
   | { type: 'contract'; data: ContractStats }
 
-const AddressStatus = ({ stats }: { stats: AddressStats }) => {
-  const section = (title: string, children: React.ReactNode) => (
-    <div style={{ marginBottom: '1rem' }}>
-      <div><strong>{title}</strong></div>
-      <div>──────────────────────────────────────────────</div>
-      {children}
-    </div>
-  )
+const containerStyle: React.CSSProperties = {
+  fontFamily: 'monospace',
+  lineHeight: '1.8',
+  padding: '1rem',
+  width: '100%',
+  maxWidth: '600px',
+  margin: '0 auto',
+  boxSizing: 'border-box',
+}
 
+const section = (title: string, children: React.ReactNode) => (
+  <div style={{ marginBottom: '1rem' }}>
+    <div><strong>{title}</strong></div>
+    <div style={{ opacity: 0.3 }}>──────────────────────────────────────────────</div>
+    {children}
+  </div>
+)
+
+const AddressStatus = ({ stats }: { stats: AddressStats }) => {
   if (stats.type === 'wallet') {
     const s = stats.data
     return (
-      <div style={{ fontFamily: 'monospace', lineHeight: '1.8', padding: '1rem' }}>
+      <div style={containerStyle}>
         {section('📊 Wallet Snapshot', <>
           <div><strong>Wallet Age:</strong> <span style={{ opacity: 0.7 }}>{s.walletAge} day</span></div>
           <div><strong>Active Days:</strong> <span style={{ opacity: 0.7 }}>{s.activeDays}</span></div>
@@ -74,7 +84,7 @@ const AddressStatus = ({ stats }: { stats: AddressStats }) => {
   if (stats.type === 'contract') {
     const s = stats.data
     return (
-      <div style={{ fontFamily: 'monospace', lineHeight: '1.8', padding: '1rem' }}>
+      <div style={containerStyle}>
         {section('📊 Contract Snapshot', <>
           <div><strong>Age:</strong> <span style={{ opacity: 0.7 }}>{s.age} day</span></div>
           <div><strong>First Seen:</strong> <span style={{ opacity: 0.7 }}>{s.firstSeen}</span></div>
