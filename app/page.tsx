@@ -77,6 +77,7 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
+      if (!walletAddress) throw new Error('Wallet address is missing')
       const result = await fetchWalletStats(walletAddress, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
