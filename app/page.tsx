@@ -13,7 +13,7 @@ import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
 import styles from './page.module.css'
-import type { WalletStats, ContractStats } from '../types'
+import type { WalletStats, ContractStats } from '../src/types'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const CONTRACT_ABI = [
