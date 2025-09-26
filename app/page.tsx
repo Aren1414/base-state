@@ -13,6 +13,7 @@ import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
 import styles from './page.module.css'
+import { addMiniApp, postCast } from '@coinbase/onchainkit'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const CONTRACT_ABI = [
@@ -111,11 +112,39 @@ export default function Home() {
     }
   }
 
+  const handleShare = async () => {
+    if (!stats || !fid) return
+
+    const s = stats.data
+    const type = stats.type
+
+    let intro = `🔵 Powered by BaseState Mini App\nExplore your wallet or contract stats and share them with the community.`
+    let body = ''
+
+    if (type === 'wallet') {
+      body = `📊 Wallet Snapshot\nWallet Age: ${s.walletAge}d | Active: ${s.activeDays}d\n\n📈 Activity\nTxs: ${s.txCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nContracts: ${s.contracts}\n\n🎯 Tokens & Fees\nReceived: ${s.tokens} | Gas: ${s.feesEth} ETH\nBalance: ${s.balanceEth} ETH`
+    } else if (type === 'contract') {
+      body = `📊 Contract Snapshot\nAge: ${s.age}d | First Seen: ${s.firstSeen}\nBalance: ${s.balanceEth} ETH\n\n📈 Activity\nInternal Txs: ${s.internalTxCount} | Streak: ${s.currentStreak}/${s.bestStreak}d\nSenders: ${s.uniqueSenders} | Zero ETH Txs: ${s.zeroEthTx}\n\n🎯 Tokens\nReceived: ${s.tokensReceived} | Rare: ${s.rareTokens} | Post: ${s.postTokens}\n\n🧠 AA Metrics\nAA Txs: ${s.allAaTransactions} | Paymaster Success: ${s.aaPaymasterSuccess}`
+    }
+
+    const castText = `${intro}\n\n${body}`
+
+    await postCast({
+      text: castText,
+      embeds: [{ url: window.location.href }],
+      fid,
+    })
+  }
+
+  const handleAddMiniApp = () => {
+    addMiniApp()
+  }
+
   if (!fid) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
-          <p>Waiting for Farcaster context...</p>
+          <p className={styles.statusMessage}>Initializing Farcaster session…</p>
         </header>
       </div>
     )
@@ -150,11 +179,15 @@ export default function Home() {
             )}
           </>
         ) : stats ? (
-          <WalletStatus stats={stats} />
+          <>
+            <WalletStatus stats={stats} />
+            <button className={styles.actionButton} onClick={handleShare}>Share as Cast</button>
+            <button className={styles.retryButton} onClick={handleAddMiniApp}>Add Mini App</button>
+          </>
         ) : (
           <p className={styles.statusMessage}>Fetching wallet stats, please wait…</p>
         )}
       </div>
     </div>
   )
-    }
+      }
