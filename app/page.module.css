@@ -1,3 +1,14 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #0a0f2c, #1c1f4a);
+  background-attachment: fixed;
+  background-size: cover;
+  color: #fff;
+  font-family: 'Source Code Pro', monospace;
+}
+
+
 .container {
   display: flex;
   flex-direction: column;
@@ -7,7 +18,9 @@
   padding: 0 16px;
   box-sizing: border-box;
   overflow-x: hidden;
+  backdrop-filter: blur(6px);
 }
+
 
 .headerWrapper {
   width: 100%;
@@ -18,9 +31,10 @@
 .userName {
   font-size: 18px;
   font-weight: 600;
-  color: #222;
+  color: #ffffff;
   margin: 0 auto;
 }
+
 
 .content {
   flex: 1;
@@ -32,7 +46,9 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
+
 
 .title {
   font-size: clamp(2rem, 8vw, 80px);
@@ -40,7 +56,10 @@
   letter-spacing: -0.02em;
   text-align: center;
   margin-bottom: 2rem;
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(0, 82, 255, 0.4);
 }
+
 
 .actionButton {
   background: linear-gradient(135deg, #0052ff, #003fcc);
@@ -64,6 +83,7 @@
   box-shadow: 0 6px 16px rgba(0, 82, 255, 0.4);
 }
 
+
 .statusMessage {
   opacity: 0.7;
   font-size: 14px;
@@ -71,6 +91,7 @@
   text-align: center;
   line-height: 1.5;
 }
+
 
 .retryButton {
   background-color: #ff4d4f;
@@ -89,6 +110,7 @@
 .retryButton:hover {
   background-color: #d9363e;
 }
+
 
 .componentsTitle {
   font-weight: 600;
