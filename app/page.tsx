@@ -9,6 +9,7 @@ import {
 } from 'wagmi'
 import { encodeFunctionData, createWalletClient, custom } from 'viem'
 import { useMiniKit } from '@coinbase/onchainkit/minikit'
+import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -50,9 +51,13 @@ export default function Home() {
   }, [chainId, switchChain])
 
   useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady()
+    const detectMiniApp = async () => {
+      const isMiniApp = await sdk.isInMiniApp()
+      if (isMiniApp && !isFrameReady) {
+        setFrameReady()
+      }
     }
+    detectMiniApp()
   }, [isFrameReady, setFrameReady])
 
   const user = context?.user
@@ -113,27 +118,28 @@ export default function Home() {
   }
 
   const handleShare = () => {
-  if (!stats) return
+    if (!stats) return
 
-  const type = stats.type
-  let body = ''
+    const type = stats.type
+    const divider = '────────────────────'
+    let body = ''
 
-  if (type === 'wallet') {
-    const s = stats.data as WalletStats
-    body = `📊 Wallet Snapshot\n──────────────────────────────────────────────\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\n\n📈 Activity\n──────────────────────────────────────────────\nTx Count: ${s.txCount}\nCurrent Streak: ${s.currentStreak} day\nBest Streak: ${s.bestStreak} day\nContracts Interacted: ${s.contracts}\n\n🎯 Tokens & Fees\n──────────────────────────────────────────────\nTokens Received: ${s.tokens}\nFees Paid (ETH): ${s.feesEth}\nVolume Sent (ETH): ${s.volumeEth}\nWallet Balance (ETH): ${s.balanceEth}`
-  } else {
-    const s = stats.data as ContractStats
-    body = `📊 Contract Snapshot\n──────────────────────────────────────────────\nAge: ${s.age} day\nFirst Seen: ${s.firstSeen}\nETH Balance: ${s.balanceEth}\n\n📈 Activity\n──────────────────────────────────────────────\nInternal Tx Count: ${s.internalTxCount}\nActive Days: ${s.activeDays}\nCurrent Streak: ${s.currentStreak} day\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nZero ETH Internal Tx: ${s.zeroEthTx}\nETH Received: ${s.volumeEth}\n\n🎯 Tokens\n──────────────────────────────────────────────\nTokens Received: ${s.tokensReceived}\nRare Tokens: ${s.rareTokens}\nPost Tokens (MiniApps/Frames): ${s.postTokens}\n\n🧠 AA Metrics\n──────────────────────────────────────────────\nAll AA Transactions: ${s.allAaTransactions}\nAA Paymaster Success: ${s.aaPaymasterSuccess}`
-  }
+    if (type === 'wallet') {
+      const s = stats.data as WalletStats
+      body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\n\n📈 Activity\n${divider}\nTx Count: ${s.txCount}\nCurrent Streak: ${s.currentStreak} day\nBest Streak: ${s.bestStreak} day\nContracts Interacted: ${s.contracts}\n\n🎯 Tokens & Fees\n${divider}\nTokens Received: ${s.tokens}\nFees Paid (ETH): ${s.feesEth}\nVolume Sent (ETH): ${s.volumeEth}\nWallet Balance (ETH): ${s.balanceEth}`
+    } else {
+      const s = stats.data as ContractStats
+      body = `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nFirst Seen: ${s.firstSeen}\nETH Balance: ${s.balanceEth}\n\n📈 Activity\n${divider}\nInternal Tx Count: ${s.internalTxCount}\nActive Days: ${s.activeDays}\nCurrent Streak: ${s.currentStreak} day\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nZero ETH Internal Tx: ${s.zeroEthTx}\nETH Received: ${s.volumeEth}\n\n🎯 Tokens\n${divider}\nTokens Received: ${s.tokensReceived}\nRare Tokens: ${s.rareTokens}\nPost Tokens (MiniApps/Frames): ${s.postTokens}\n\n🧠 AA Metrics\n${divider}\nAll AA Transactions: ${s.allAaTransactions}\nAA Paymaster Success: ${s.aaPaymasterSuccess}`
+    }
 
-  const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'contract'} stats using the BaseState Mini App 👇\n\n${body}`
+    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'contract'} stats using the BaseState Mini App 👇\n\n${body}\n\n🔗 https://base-state.vercel.app`
 
-  const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
-  const shareUrl = isBaseApp
-    ? 'https://base-state.vercel.app'
-    : `https://warpcast.com/~/compose?text=${encodeURIComponent(castText + '\n\n🔗 https://base-state.vercel.app')}`
+    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+    const shareUrl = isBaseApp
+      ? 'https://base-state.vercel.app'
+      : `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}`
 
-  window.open(shareUrl, '_blank')
+    window.open(shareUrl, '_blank')
   }
 
   if (!fid) {
@@ -185,4 +191,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+    }
