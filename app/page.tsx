@@ -6,6 +6,7 @@ import {
   useChainId,
   useSwitchChain,
   useWalletClient,
+  usePublicClient,
 } from 'wagmi'
 import { encodeFunctionData, createWalletClient, custom, parseUnits } from 'viem'
 import { useMiniKit } from '@coinbase/onchainkit/minikit'
@@ -32,6 +33,7 @@ const CONTRACT_ABI = [
 export default function Home() {
   const { address: walletAddress, isConnected } = useAccount()
   const { data: walletClient } = useWalletClient()
+  const publicClient = usePublicClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
@@ -55,6 +57,7 @@ export default function Home() {
 
   const user = context?.user
   const fid = user?.fid
+  const displayName = user?.displayName || fid || walletAddress || 'Guest'
 
   const ready = fid && isConnected && walletAddress && chainId === base.id
 
@@ -70,7 +73,8 @@ export default function Home() {
       let tx
 
       if (walletClient) {
-        const gasEstimate = await walletClient.estimateGas({
+        const gasEstimate = await publicClient.estimateGas({
+          account: walletClient.account!,
           to: CONTRACT_ADDRESS,
           data,
         })
@@ -91,7 +95,7 @@ export default function Home() {
           transport: custom(window.ethereum),
         })
 
-        const gasEstimate = await fallbackSigner.estimateGas({
+        const gasEstimate = await publicClient.estimateGas({
           account: accounts[0],
           to: CONTRACT_ADDRESS,
           data,
@@ -136,35 +140,30 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.headerWrapper}>
-        <div>
-          Welcome,&nbsp;
-          {user?.displayName || fid || walletAddress || 'Guest'}
-        </div>
+      <header className={styles.headerWrapperCentered}>
+        <h2 className={styles.userName}>{displayName}</h2>
       </header>
 
       <div className={styles.content}>
-        <h1 className={styles.title}>BaseState</h1>
-
         {!txConfirmed ? (
           <>
-            <button className={styles.button} onClick={handleClick} disabled={!ready || loading}>
-              {loading ? 'Processing...' : 'Log activity and show wallet stats'}
+            <button className={styles.actionButton} onClick={handleClick} disabled={!ready || loading}>
+              {loading ? 'Submitting transaction...' : 'Submit activity and retrieve wallet stats'}
             </button>
             {!ready && (
-              <p style={{ opacity: 0.6, fontFamily: 'monospace', marginTop: 12 }}>
-                Wallet not ready. Try reconnecting or reload inside Farcaster/Base App.
+              <p className={styles.statusMessage}>
+                Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
               </p>
             )}
           </>
         ) : stats ? (
           <WalletStatus stats={stats} />
         ) : (
-          <p style={{ opacity: 0.6, fontFamily: 'monospace' }}>
+          <p className={styles.statusMessage}>
             No wallet stats available. Try again or check API response.
           </p>
         )}
       </div>
     </div>
   )
-}
+    }
