@@ -55,8 +55,9 @@ export default function Home() {
 
   const user = context?.user
   const fid = user?.fid
+  const connectedAddress = walletAddress || context?.user?.connectedAddress
 
-  const ready = fid && walletAddress && walletClient && chainId === base.id
+  const ready = fid && connectedAddress && walletClient && chainId === base.id
 
   const handleClick = async () => {
     setLoading(true)
@@ -77,8 +78,8 @@ export default function Home() {
       setTxConfirmed(true)
 
       const apiKey = process.env.BASE_API_KEY || ''
-      if (!walletAddress) throw new Error('Wallet address is missing')
-      const result = await fetchWalletStats(walletAddress, apiKey)
+      if (!connectedAddress) throw new Error('Wallet address is missing')
+      const result = await fetchWalletStats(connectedAddress, apiKey)
       console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
@@ -103,7 +104,7 @@ export default function Home() {
       <header className={styles.headerWrapper}>
         <div>
           Welcome,&nbsp;
-          {user?.displayName || fid || walletAddress || 'Guest'}
+          {user?.displayName || fid || connectedAddress || 'Guest'}
         </div>
       </header>
 
@@ -131,4 +132,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+        }
