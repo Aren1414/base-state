@@ -8,7 +8,7 @@ import {
   useWalletClient,
 } from 'wagmi'
 import { encodeFunctionData, createWalletClient, custom } from 'viem'
-import { useMiniKit, useAuthenticate } from '@coinbase/onchainkit/minikit'
+import { useMiniKit, useAuthenticate, useQuickAuth } from '@coinbase/onchainkit/minikit'
 import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -35,7 +35,8 @@ export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
-  const { user: verifiedUser, signIn } = useAuthenticate()
+  const { signIn } = useAuthenticate()
+  const { data: verifiedUser, isLoading } = useQuickAuth('/api/me')
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
@@ -62,14 +63,14 @@ export default function Home() {
         }
       }
 
-      await signIn() // فقط برای فعال‌سازی session
+      await signIn()
     }
 
     initEnvironment()
   }, [chainId, switchChain, isFrameReady, setFrameReady, signIn])
 
   const fid = verifiedUser?.fid
-  const displayName = verifiedUser?.displayName || fid || walletAddress || 'Guest'
+  const displayName = fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
   const handleClick = async () => {
@@ -148,7 +149,7 @@ export default function Home() {
     window.open(shareUrl, '_blank')
   }
 
-  if (!fid) {
+  if (isLoading || !fid) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
@@ -197,4 +198,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+}
