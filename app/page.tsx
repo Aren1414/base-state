@@ -7,7 +7,7 @@ import {
   useSwitchChain,
   useWalletClient,
 } from 'wagmi'
-import { encodeFunctionData } from 'viem'
+import { encodeFunctionData, createWalletClient, custom } from 'viem'
 import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -56,7 +56,7 @@ export default function Home() {
   const user = context?.user
   const fid = user?.fid
 
-  const ready = fid && walletAddress && walletClient && chainId === base.id
+  const ready = fid && walletAddress && chainId === base.id
 
   const handleClick = async () => {
     setLoading(true)
@@ -67,7 +67,18 @@ export default function Home() {
         args: [],
       })
 
-      const tx = await walletClient?.sendTransaction({
+      const signer = walletClient || (
+        typeof window !== 'undefined' && window.ethereum
+          ? createWalletClient({
+              chain: base,
+              transport: custom(window.ethereum),
+            })
+          : null
+      )
+
+      if (!signer) throw new Error('No signer available')
+
+      const tx = await signer.sendTransaction({
         to: CONTRACT_ADDRESS,
         data,
         chain: base,
@@ -131,4 +142,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+    }
