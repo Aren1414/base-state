@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Source_Code_Pro } from "next/font/google";
-import { minikitConfig } from "@/minikit.config";
+import { minikitConfig } from "../minikit.config";
 import { RootProvider } from "./rootProvider";
 import { SafeArea } from "@coinbase/onchainkit/minikit";
-import FrameReady from "@/components/FrameReady";
-import WalletCheck from "@/components/WalletCheck";
+import FrameReady from "./components/FrameReady";
+import WalletCheck from "./components/WalletCheck";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
