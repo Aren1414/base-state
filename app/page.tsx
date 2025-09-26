@@ -67,22 +67,25 @@ export default function Home() {
         args: [],
       })
 
-      const signer = walletClient || (
-        typeof window !== 'undefined' && window.ethereum
-          ? createWalletClient({
-              chain: base,
-              transport: custom(window.ethereum),
-            })
-          : null
-      )
+      let tx
 
-      if (!signer) throw new Error('No signer available')
-
-      const tx = await signer.sendTransaction({
-        to: CONTRACT_ADDRESS,
-        data,
-        chain: base,
-      })
+      if (walletClient) {
+        tx = await walletClient.sendTransaction({
+          to: CONTRACT_ADDRESS,
+          data,
+        })
+      } else if (typeof window !== 'undefined' && window.ethereum) {
+        const fallbackSigner = createWalletClient({
+          chain: base,
+          transport: custom(window.ethereum),
+        })
+        tx = await fallbackSigner.sendTransaction({
+          to: CONTRACT_ADDRESS,
+          data,
+        })
+      } else {
+        throw new Error('No signer available')
+      }
 
       console.log('Transaction sent:', tx)
       setTxConfirmed(true)
