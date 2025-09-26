@@ -7,7 +7,8 @@ import {
   useSwitchChain,
 } from 'wagmi'
 import { encodeFunctionData } from 'viem'
-import { useMiniKit, sdk } from '@coinbase/onchainkit/minikit'
+import { useMiniKit } from '@coinbase/onchainkit/minikit'
+import { sdk } from '@coinbase/onchainkit'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
@@ -142,4 +143,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+          }
