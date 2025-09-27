@@ -1,4 +1,7 @@
 import React from 'react'
+import { mintCard } from '../lib/mintCard'
+import { uploadToStorj } from '../lib/uploadToStorj'
+import { useAccount, useWalletClient } from 'wagmi'
 
 interface MintCardProps {
   stats: any
@@ -9,12 +12,33 @@ interface MintCardProps {
     pfpUrl?: string
   }
   onDownload: () => void
-  onMint: () => void
   onShare: () => void
   minted: boolean
+  setMintedImageUrl: (url: string) => void
 }
 
-export default function MintCard({ stats, type, user, onDownload, onMint, onShare, minted }: MintCardProps) {
+export default function MintCard({ stats, type, user, onDownload, onShare, minted, setMintedImageUrl }: MintCardProps) {
+  const { address: walletAddress } = useAccount()
+  const { data: walletClient } = useWalletClient()
+
+  const handleMint = async () => {
+    try {
+      const card = document.getElementById('walletCard')
+      if (!card || !walletClient || !walletAddress) throw new Error('Missing wallet or card')
+
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+
+      const imageUrl = await uploadToStorj(canvas)
+      setMintedImageUrl(imageUrl)
+
+      await mintCard(walletClient, walletAddress, imageUrl)
+      console.log('✅ Minted:', imageUrl)
+    } catch (err) {
+      console.error('❌ Mint failed:', err)
+    }
+  }
+
   const fields = type === 'wallet'
     ? [
         { label: 'Wallet Age', value: stats.walletAge + ' days' },
@@ -37,16 +61,14 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
 
   return (
     <div style={{ marginTop: '24px', padding: '12px', boxSizing: 'border-box' }}>
-      {/* Card */}
       <div id="walletCard" style={{
         width: '100%',
-        maxWidth: '960px',
-        aspectRatio: '3 / 2',
+        maxWidth: '100%',
         background: 'linear-gradient(135deg, #00f0ff, #7f00ff)',
         borderRadius: '24px',
         padding: '32px',
-        paddingLeft: '40px',
-        paddingRight: '40px',
+        paddingLeft: '48px',
+        paddingRight: '48px',
         color: '#fff',
         boxShadow: '0 0 48px rgba(0,255,255,0.3)',
         display: 'grid',
@@ -55,11 +77,11 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         position: 'relative',
         margin: '0 auto 24px auto',
         fontFamily: "'Segoe UI', sans-serif",
-        overflow: 'hidden',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        minHeight: '480px'
       }}>
         {/* Profile */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingTop: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '8px' }}>
           <img
             src={user.pfpUrl || '/default-avatar.png'}
             alt="pfp"
@@ -73,20 +95,20 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
               marginBottom: '12px'
             }}
           />
-          <div style={{ fontSize: '20px', fontWeight: 700 }}>@{user.username || 'user'}</div>
-          <div style={{ fontSize: '14px', color: '#ccc', marginTop: '4px' }}>FID: {user.fid}</div>
+          <div style={{ fontSize: '18px', fontWeight: 700 }}>@{user.username || 'user'}</div>
+          <div style={{ fontSize: '13px', color: '#ccc', marginTop: '4px' }}>FID: {user.fid}</div>
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', paddingTop: '8px' }}>
-          <div style={{ fontSize: '20px', fontWeight: 800, marginBottom: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+          <div style={{ fontSize: '18px', fontWeight: 800, marginBottom: '16px' }}>
             BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report
           </div>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '16px',
-            fontSize: '14px',
+            fontSize: '13px',
             lineHeight: 1.4
           }}>
             {fields.map((f, i) => (
@@ -100,7 +122,7 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
           position: 'absolute',
           bottom: '12px',
           left: '32px',
-          fontSize: '14px',
+          fontSize: '13px',
           color: '#ccc'
         }}>
           Powered by BaseState
@@ -116,7 +138,7 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         gap: '12px',
         marginTop: '16px'
       }}>
-        <button onClick={onMint} style={buttonStyle('#00ff7f')}>🪙 Mint as NFT</button>
+        <button onClick={handleMint} style={buttonStyle('#00ff7f')}>🪙 Mint as NFT</button>
         <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>📥 Download Card</button>
         <button onClick={onShare} style={buttonStyle('#00f0ff')} disabled={!minted}>📸 Share Minted Card</button>
       </div>
@@ -127,7 +149,7 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
 function buttonStyle(color: string): React.CSSProperties {
   return {
     padding: '8px 16px',
-    fontSize: '14px',
+    fontSize: '13px',
     background: '#fff',
     color,
     border: 'none',
