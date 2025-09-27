@@ -136,17 +136,24 @@ export default function Home() {
   }
 
   const handleShare = () => {
-    if (!stats) return
-    const type = stats.type
-    const s = stats.data
-    const divider = '────────────────────'
-    const body = type === 'wallet'
-      ? `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
-      : `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nETH Balance: ${s.balanceEth}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
+  if (!stats) return
 
-    const castText = `Just minted my ${type} stats as an NFT 👇\n\n${body}`
-    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(mintedImageUrl || MINI_APP_URL)}`
-    window.open(warpcastUrl, '_blank')
+  const type = stats.type
+  const divider = '────────────────────'
+  const body =
+    type === 'wallet'
+      ? (() => {
+          const s = stats.data as WalletStats
+          return `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
+        })()
+      : (() => {
+          const s = stats.data as ContractStats
+          return `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nETH Balance: ${s.balanceEth}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
+        })()
+
+  const castText = `Just minted my ${type} stats as an NFT 👇\n\n${body}`
+  const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(mintedImageUrl || MINI_APP_URL)}`
+  window.open(warpcastUrl, '_blank')
   }
 
   const downloadCard = async () => {
