@@ -10,11 +10,11 @@ interface MintCardProps {
   }
   onDownload: () => void
   onMint: () => void
-  onShare: () => void 
+  onShare: () => void
+  minted: boolean 
 }
 
-export default function MintCard({ stats, type, user, onDownload, onMint, onShare }: MintCardProps) {
-  
+export default function MintCard({ stats, type, user, onDownload, onMint, onShare, minted }: MintCardProps) {
   const fields = type === 'wallet'
     ? [
         { label: 'Wallet Age', value: stats.walletAge + ' days' },
@@ -60,22 +60,22 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
             src={user.pfpUrl || '/default-avatar.png'}
             alt="pfp"
             style={{
-              width: '160px',
-              height: '160px',
+              width: '140px',
+              height: '140px',
               borderRadius: '50%',
-              border: '4px solid #fff',
-              boxShadow: '0 0 24px #00f',
+              border: '3px solid #fff',
+              boxShadow: '0 0 16px #00f',
               objectFit: 'cover'
             }}
           />
-          <div style={{ marginTop: '32px', fontSize: '48px', fontWeight: 700 }}>@{user.username || 'user'}</div>
-          <div style={{ fontSize: '28px', color: '#ccc' }}>FID: {user.fid}</div>
+          <div style={{ marginTop: '24px', fontSize: '36px', fontWeight: 700 }}>@{user.username || 'user'}</div>
+          <div style={{ fontSize: '20px', color: '#ccc' }}>FID: {user.fid}</div>
         </div>
 
         {/* Stats */}
         <div style={{ flex: 1, paddingLeft: '48px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: '48px', fontWeight: 800 }}>BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report</div>
-          <div style={{ marginTop: '48px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', fontSize: '24px', lineHeight: 1.4 }}>
+          <div style={{ fontSize: '36px', fontWeight: 800 }}>BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report</div>
+          <div style={{ marginTop: '32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '20px', lineHeight: 1.4 }}>
             {fields.map((f, i) => (
               <div key={i}><strong>{f.label}</strong><br />{f.value}</div>
             ))}
@@ -83,16 +83,16 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         </div>
 
         {/* Logo */}
-        <div style={{ position: 'absolute', bottom: '32px', right: '48px', fontSize: '24px', color: '#ccc' }}>
+        <div style={{ position: 'absolute', bottom: '24px', right: '32px', fontSize: '18px', color: '#ccc' }}>
           Powered by BaseState
         </div>
       </div>
 
       {/* Buttons */}
-      <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '24px' }}>
-        <button onClick={onDownload} style={buttonStyle('#7f00ff')}>📥 Download Card</button>
+      <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <button onClick={onMint} style={buttonStyle('#00ff7f')}>🪙 Mint as NFT</button>
-        <button onClick={onShare} style={buttonStyle('#00f0ff')}>📸 Share Minted Card</button>
+        <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>📥 Download Card</button>
+        <button onClick={onShare} style={buttonStyle('#00f0ff')} disabled={!minted}>📸 Share Minted Card</button>
       </div>
     </div>
   )
@@ -100,13 +100,14 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
 
 function buttonStyle(color: string): React.CSSProperties {
   return {
-    padding: '20px 40px',
-    fontSize: '24px',
+    padding: '12px 24px',
+    fontSize: '18px',
     background: '#fff',
     color,
     border: 'none',
-    borderRadius: '16px',
+    borderRadius: '12px',
     cursor: 'pointer',
-    boxShadow: '0 0 12px rgba(0,0,0,0.2)'
+    boxShadow: '0 0 8px rgba(0,0,0,0.1)',
+    minWidth: '160px'
   }
 }
