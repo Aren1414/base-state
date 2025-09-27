@@ -9,11 +9,12 @@ interface MintCardProps {
     pfpUrl?: string
   }
   onDownload: () => void
-  onShare: () => void
-  onMint: () => void 
+  onMint: () => void
+  onShare: () => void 
 }
 
-export default function MintCard({ stats, type, user, onDownload, onShare, onMint }: MintCardProps) {
+export default function MintCard({ stats, type, user, onDownload, onMint, onShare }: MintCardProps) {
+  
   const fields = type === 'wallet'
     ? [
         { label: 'Wallet Age', value: stats.walletAge + ' days' },
@@ -36,10 +37,11 @@ export default function MintCard({ stats, type, user, onDownload, onShare, onMin
 
   return (
     <div style={{ marginTop: '32px', padding: '16px' }}>
+      {/* Card */}
       <div id="walletCard" style={{
-        maxWidth: '100%',
         width: '100%',
-        height: 'auto',
+        maxWidth: '960px',
+        aspectRatio: '3 / 2',
         background: 'linear-gradient(135deg, #00f0ff, #7f00ff)',
         borderRadius: '32px',
         padding: '48px',
@@ -49,7 +51,8 @@ export default function MintCard({ stats, type, user, onDownload, onShare, onMin
         flexWrap: 'wrap',
         position: 'relative',
         margin: '0 auto 32px auto',
-        fontFamily: "'Segoe UI', sans-serif"
+        fontFamily: "'Segoe UI', sans-serif",
+        overflow: 'hidden'
       }}>
         {/* Profile */}
         <div style={{ width: '100%', maxWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', paddingRight: '48px', borderRight: '1px solid rgba(255,255,255,0.2)', marginBottom: '32px' }}>
@@ -72,7 +75,7 @@ export default function MintCard({ stats, type, user, onDownload, onShare, onMin
         {/* Stats */}
         <div style={{ flex: 1, paddingLeft: '48px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: '48px', fontWeight: 800 }}>BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report</div>
-          <div style={{ marginTop: '48px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', fontSize: '28px', lineHeight: 1.4 }}>
+          <div style={{ marginTop: '48px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', fontSize: '24px', lineHeight: 1.4 }}>
             {fields.map((f, i) => (
               <div key={i}><strong>{f.label}</strong><br />{f.value}</div>
             ))}
@@ -87,9 +90,9 @@ export default function MintCard({ stats, type, user, onDownload, onShare, onMin
 
       {/* Buttons */}
       <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '24px' }}>
-        <button onClick={onDownload} style={buttonStyle('#7f00ff')}>📥 download</button>
-        <button onClick={onShare} style={buttonStyle('#00f0ff')}>📤 share</button>
-        <button onClick={onMint} style={buttonStyle('#00ff7f')}>🪙 mint</button>
+        <button onClick={onDownload} style={buttonStyle('#7f00ff')}>📥 Download Card</button>
+        <button onClick={onMint} style={buttonStyle('#00ff7f')}>🪙 Mint as NFT</button>
+        <button onClick={onShare} style={buttonStyle('#00f0ff')}>📸 Share Minted Card</button>
       </div>
     </div>
   )
