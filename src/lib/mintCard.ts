@@ -16,8 +16,9 @@ export async function mintCard(wallet: `0x${string}`, tokenURI: string) {
     functionName: 'mint',
     args: [tokenURI],
     account: wallet,
-    value: parseEther('0.0001'), 
+    value: parseEther('0.0001'),
   })
 
+  console.log('Mint tx sent:', tx)
   return tx
 }
