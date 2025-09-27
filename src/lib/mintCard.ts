@@ -8,23 +8,26 @@ export async function mintCard(wallet: `0x${string}`, tokenURI: string) {
   let signer
 
   if (typeof window !== 'undefined' && window.ethereum) {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+    if (!accounts || accounts.length === 0) throw new Error('No accounts found')
+
     signer = createWalletClient({
       chain: base,
       transport: custom(window.ethereum),
     })
+
+    const tx = await signer.writeContract({
+      address: CONTRACT_ADDRESS,
+      abi,
+      functionName: 'mint',
+      args: [tokenURI],
+      account: accounts[0],
+      value: parseEther('0.0001'),
+    })
+
+    console.log('Mint tx sent:', tx)
+    return tx
   } else {
     throw new Error('No wallet provider found')
   }
-
-  const tx = await signer.writeContract({
-    address: CONTRACT_ADDRESS,
-    abi,
-    functionName: 'mint',
-    args: [tokenURI],
-    account: wallet,
-    value: parseEther('0.0001'),
-  })
-
-  console.log('Mint tx sent:', tx)
-  return tx
 }
