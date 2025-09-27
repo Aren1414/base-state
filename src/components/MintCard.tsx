@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { uploadToStorj } from '../lib/uploadToStorj'
 import { useAccount, useWalletClient } from 'wagmi'
 import { parseEther } from 'viem'
@@ -29,17 +29,19 @@ export default function MintCard({
   minted,
   setMintedImageUrl,
 }: MintCardProps) {
-  const { address: walletAddress, isConnected } = useAccount()
+  const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
+  const [mintStatus, setMintStatus] = useState<string | null>(null)
 
   const handleMint = async () => {
-    console.log('🧪 Mint button clicked')
+    setMintStatus('🧪 Mint button clicked')
     try {
       if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
 
       const card = document.getElementById('walletCard')
       if (!card) throw new Error('Card not found in DOM')
 
+      setMintStatus('🧪 Generating canvas…')
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, {
         scale: 2,
@@ -47,13 +49,11 @@ export default function MintCard({
         backgroundColor: null,
       })
 
-      console.log('🧪 Canvas generated')
-
+      setMintStatus('🧪 Uploading image to Storj…')
       const imageUrl = await uploadToStorj(canvas)
-      console.log('🧪 Image uploaded:', imageUrl)
-
       setMintedImageUrl(imageUrl)
 
+      setMintStatus('🧪 Sending mint transaction…')
       const tx = await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
@@ -63,9 +63,9 @@ export default function MintCard({
         value: parseEther('0.0001'),
       })
 
-      console.log('✅ Mint tx sent:', tx)
-    } catch (err) {
-      console.error('❌ Mint failed:', err)
+      setMintStatus(`✅ Mint tx sent: ${tx}`)
+    } catch (err: any) {
+      setMintStatus(`❌ Mint failed: ${err.message || 'Unknown error'}`)
     }
   }
 
@@ -165,6 +165,13 @@ export default function MintCard({
           Powered by BaseState
         </div>
       </div>
+
+      {mintStatus && (
+        <div style={{ fontSize: '11px', color: '#ccc', marginTop: '8px', textAlign: 'center' }}>
+          {mintStatus}
+        </div>
+      )}
+
       <div
         style={{
           textAlign: 'center',
