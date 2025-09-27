@@ -224,18 +224,18 @@ export default function Home() {
             <WalletStatus stats={stats} />
 
             {context?.user && (
-              <MintCard
-                stats={stats.data}
-                type={stats.type}
-                user={{
-                  fid: context.user.fid,
-                  username: context.user.username,
-                  pfp: context.user.pfp ?? { url: '' },
-                }}
-                onDownload={downloadCard}
-                onShare={handleShare}
-              />
-            )}
+  <MintCard
+    stats={stats.data}
+    type={stats.type}
+    user={{
+      fid: context.user.fid,
+      username: context.user.username,
+      pfpUrl: context.user.pfpUrl, 
+    }}
+    onDownload={downloadCard}
+    onShare={handleShare}
+  />
+)}
 
             <div style={{ textAlign: 'center', marginTop: '32px' }}>
               <button className={styles.actionButton} onClick={handleMint}>
