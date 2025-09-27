@@ -8,7 +8,11 @@ import {
   useWalletClient,
 } from 'wagmi'
 import { encodeFunctionData, createWalletClient, custom } from 'viem'
-import { useMiniKit, useAuthenticate } from '@coinbase/onchainkit/minikit'
+import {
+  useMiniKit,
+  useAuthenticate,
+  useComposeCast,
+} from '@coinbase/onchainkit/minikit'
 import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
@@ -17,6 +21,9 @@ import styles from './page.module.css'
 import type { WalletStats, ContractStats } from '../src/types'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
+const MINI_APP_URL = 'https://base-state.vercel.app'
+const APP_FID = 1 // ← باید با fid اپ در Farcaster جایگزین بشه
+
 const CONTRACT_ABI = [
   { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
   {
@@ -36,6 +43,7 @@ export default function Home() {
   const { data: walletClient } = useWalletClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const { signIn } = useAuthenticate()
+  const { composeCast } = useComposeCast()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
@@ -56,7 +64,10 @@ export default function Home() {
       const isMiniApp = await sdk.isInMiniApp()
       if (isMiniApp) {
         await sdk.actions.ready()
-        await sdk.actions.addMiniApp()
+        await sdk.actions.addMiniApp({
+          appFid: APP_FID,
+          url: MINI_APP_URL,
+        })
         await signIn()
         if (!isFrameReady) {
           setFrameReady()
@@ -138,14 +149,19 @@ export default function Home() {
       body = `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nFirst Seen: ${s.firstSeen}\nETH Balance: ${s.balanceEth}\n\n📈 Activity\n${divider}\nInternal Tx Count: ${s.internalTxCount}\nActive Days: ${s.activeDays}\nCurrent Streak: ${s.currentStreak} day\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nZero ETH Internal Tx: ${s.zeroEthTx}\nETH Received: ${s.volumeEth}\n\n🎯 Tokens\n${divider}\nTokens Received: ${s.tokensReceived}\nRare Tokens: ${s.rareTokens}\nPost Tokens (MiniApps/Frames): ${s.postTokens}\n\n🧠 AA Metrics\n${divider}\nAll AA Transactions: ${s.allAaTransactions}\nAA Paymaster Success: ${s.aaPaymasterSuccess}`
     }
 
-    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'contract'} stats using the BaseState Mini App 👇\n\n${body}\n\n🔗 https://base-state.vercel.app`
+    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'contract'} stats using the BaseState Mini App 👇\n\n${body}`
 
     const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
-    const shareUrl = isBaseApp
-      ? 'https://base-state.vercel.app'
-      : `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}`
 
-    window.open(shareUrl, '_blank')
+    if (isBaseApp) {
+      composeCast({
+        text: castText,
+        embeds: [MINI_APP_URL],
+      })
+    } else {
+      const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(MINI_APP_URL)}`
+      window.open(warpcastUrl, '_blank')
+    }
   }
 
   if (!fid) {
