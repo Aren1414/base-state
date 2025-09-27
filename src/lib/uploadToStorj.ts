@@ -1,12 +1,12 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
-const accessKey = process.env.STORJ_ACCESS_KEY!
-const secretKey = process.env.STORJ_SECRET_KEY!
+const accessKey = process.env.STORJACCESSKEY!
+const secretKey = process.env.STORJSECRETKEY!
 const endpoint = process.env.STORJ_ENDPOINT!
 const bucket = process.env.STORJ_BUCKET!
 
 const s3 = new S3Client({
-  region: 'us-east-1', // Storj doesn’t care about region, but AWS SDK requires it
+  region: 'us-east-1',
   endpoint,
   credentials: {
     accessKeyId: accessKey,
@@ -16,6 +16,8 @@ const s3 = new S3Client({
 })
 
 export async function uploadToStorj(canvas: HTMLCanvasElement): Promise<string> {
+  if (!bucket) throw new Error('Bucket name is missing')
+
   const blob = await new Promise<Blob>(resolve =>
     canvas.toBlob(b => resolve(b!), 'image/png', 0.8)
   )
@@ -34,4 +36,4 @@ export async function uploadToStorj(canvas: HTMLCanvasElement): Promise<string> 
   await s3.send(command)
 
   return `${endpoint}/${bucket}/${fileName}`
-    }
+}
