@@ -5,12 +5,18 @@ import abi from './abi/BaseStateCard.json'
 const CONTRACT_ADDRESS = '0x972f0F6D9f1C25eC153729113048Cdfe6828515c'
 
 export async function mintCard(wallet: `0x${string}`, tokenURI: string) {
-  const client = createWalletClient({
-    chain: base,
-    transport: custom(window.ethereum),
-  })
+  let signer
 
-  const tx = await client.writeContract({
+  if (typeof window !== 'undefined' && window.ethereum) {
+    signer = createWalletClient({
+      chain: base,
+      transport: custom(window.ethereum),
+    })
+  } else {
+    throw new Error('No wallet provider found')
+  }
+
+  const tx = await signer.writeContract({
     address: CONTRACT_ADDRESS,
     abi,
     functionName: 'mint',
