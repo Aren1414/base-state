@@ -22,7 +22,6 @@ import type { WalletStats, ContractStats } from '../src/types'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
-const APP_FID = 1 // ← باید با fid اپ در Farcaster جایگزین بشه
 
 const CONTRACT_ABI = [
   { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
@@ -60,19 +59,19 @@ export default function Home() {
   }, [chainId, switchChain])
 
   useEffect(() => {
-  const initMiniApp = async () => {
-    const isMiniApp = await sdk.isInMiniApp()
-    if (isMiniApp) {
-      await sdk.actions.ready()
-      await sdk.actions.addMiniApp() // ← بدون هیچ آرگومان
-      await signIn()
-      if (!isFrameReady) {
-        setFrameReady()
+    const initMiniApp = async () => {
+      const isMiniApp = await sdk.isInMiniApp()
+      if (isMiniApp) {
+        await sdk.actions.ready()
+        await sdk.actions.addMiniApp()
+        await signIn()
+        if (!isFrameReady) {
+          setFrameReady()
+        }
       }
     }
-  }
-  initMiniApp()
-}, [isFrameReady, setFrameReady, signIn])
+    initMiniApp()
+  }, [isFrameReady, setFrameReady, signIn])
 
   const user = context?.user
   const fid = user?.fid
