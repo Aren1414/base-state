@@ -15,7 +15,10 @@ import {
 } from '@coinbase/onchainkit/minikit'
 import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
+import MintCard from '../src/components/MintCard'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
+import { mintCard } from '../src/lib/mintCard'
+import { uploadToStorj } from '../src/lib/uploadToStorj'
 import { base } from 'viem/chains'
 import styles from './page.module.css'
 import type { WalletStats, ContractStats } from '../src/types'
@@ -50,6 +53,7 @@ export default function Home() {
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
+  const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
 
   useEffect(() => {
     const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
@@ -76,7 +80,6 @@ export default function Home() {
   const user = context?.user
   const fid = user?.fid
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
-
   const ready = fid && walletAddress && chainId === base.id
 
   const handleClick = async () => {
@@ -90,26 +93,13 @@ export default function Home() {
       })
 
       let tx
-
       if (walletClient) {
-        tx = await walletClient.sendTransaction({
-          to: CONTRACT_ADDRESS,
-          data,
-        })
+        tx = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
       } else if (typeof window !== 'undefined' && window.ethereum) {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-        if (!accounts || accounts.length === 0) throw new Error('No accounts found in fallback signer')
-
-        const fallbackSigner = createWalletClient({
-          chain: base,
-          transport: custom(window.ethereum),
-        })
-
-        tx = await fallbackSigner.sendTransaction({
-          account: accounts[0],
-          to: CONTRACT_ADDRESS,
-          data,
-        })
+        if (!accounts || accounts.length === 0) throw new Error('No accounts found')
+        const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
+        tx = await fallbackSigner.sendTransaction({ account: accounts[0], to: CONTRACT_ADDRESS, data })
       } else {
         throw new Error('No signer available')
       }
@@ -120,7 +110,6 @@ export default function Home() {
       const apiKey = process.env.BASE_API_KEY || ''
       if (!walletAddress) throw new Error('Wallet address is missing')
       const result = await fetchWalletStats(walletAddress, apiKey)
-      console.log('Wallet stats result:', result)
       setStats(result)
     } catch (err) {
       console.error('Transaction failed:', err)
@@ -130,34 +119,52 @@ export default function Home() {
     }
   }
 
+  const handleMint = async () => {
+    try {
+      const card = document.getElementById('walletCard')
+      if (!card) throw new Error('Card not found')
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+
+      const imageUrl = await uploadToStorj(canvas)
+      setMintedImageUrl(imageUrl)
+      await mintCard(walletAddress!, imageUrl)
+      console.log('Minted successfully:', imageUrl)
+    } catch (err) {
+      console.error('Minting failed:', err)
+    }
+  }
+
   const handleShare = () => {
     if (!stats) return
-
     const type = stats.type
+    const s = stats.data
     const divider = '────────────────────'
-    let body = ''
+    const body = type === 'wallet'
+      ? `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
+      : `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nETH Balance: ${s.balanceEth}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
 
-    if (type === 'wallet') {
-      const s = stats.data as WalletStats
-      body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\n\n📈 Activity\n${divider}\nTx Count: ${s.txCount}\nCurrent Streak: ${s.currentStreak} day\nBest Streak: ${s.bestStreak} day\nContracts Interacted: ${s.contracts}\n\n🎯 Tokens & Fees\n${divider}\nTokens Received: ${s.tokens}\nFees Paid (ETH): ${s.feesEth}\nVolume Sent (ETH): ${s.volumeEth}\nWallet Balance (ETH): ${s.balanceEth}`
-    } else {
-      const s = stats.data as ContractStats
-      body = `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nFirst Seen: ${s.firstSeen}\nETH Balance: ${s.balanceEth}\n\n📈 Activity\n${divider}\nInternal Tx Count: ${s.internalTxCount}\nActive Days: ${s.activeDays}\nCurrent Streak: ${s.currentStreak} day\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nZero ETH Internal Tx: ${s.zeroEthTx}\nETH Received: ${s.volumeEth}\n\n🎯 Tokens\n${divider}\nTokens Received: ${s.tokensReceived}\nRare Tokens: ${s.rareTokens}\nPost Tokens (MiniApps/Frames): ${s.postTokens}\n\n🧠 AA Metrics\n${divider}\nAll AA Transactions: ${s.allAaTransactions}\nAA Paymaster Success: ${s.aaPaymasterSuccess}`
-    }
+    const castText = `Just minted my ${type} stats as an NFT 👇\n\n${body}`
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(mintedImageUrl || MINI_APP_URL)}`
+    window.open(warpcastUrl, '_blank')
+  }
 
-    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'contract'} stats using the BaseState Mini App 👇\n\n${body}`
+  const downloadCard = async () => {
+    const card = document.getElementById('walletCard')
+    if (!card) return
+    const html2canvas = (await import('html2canvas')).default
+    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+    const resizedCanvas = document.createElement('canvas')
+    resizedCanvas.width = 1200
+    resizedCanvas.height = 800
+    const ctx = resizedCanvas.getContext('2d')
+    ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height)
 
-    if (isBaseApp) {
-      composeCast({
-        text: castText,
-        embeds: [MINI_APP_URL],
-      })
-    } else {
-      const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(MINI_APP_URL)}`
-      window.open(warpcastUrl, '_blank')
-    }
+    const link = document.createElement('a')
+    link.download = 'BaseState_Wallet_Card.png'
+    link.href = resizedCanvas.toDataURL('image/png', 0.8)
+    link.click()
   }
 
   if (!fid) {
@@ -201,7 +208,22 @@ export default function Home() {
         ) : stats ? (
           <>
             <WalletStatus stats={stats} />
-            <button className={styles.actionButton} onClick={handleShare}>Share as Cast</button>
+
+            {context?.user && (
+              <MintCard
+                stats={stats.data}
+                type={stats.type}
+                user={context.user}
+                onDownload={downloadCard}
+                onShare={handleShare}
+              />
+            )}
+
+            <div style={{ textAlign: 'center', marginTop: '32px' }}>
+              <button className={styles.actionButton} onClick={handleMint}>
+                🎨 Mint This Card as NFT
+              </button>
+            </div>
           </>
         ) : (
           <p className={styles.statusMessage}>Fetching wallet stats, please wait…</p>
