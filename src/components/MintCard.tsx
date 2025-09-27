@@ -6,7 +6,7 @@ interface MintCardProps {
   user: {
     fid: number
     username?: string
-    pfp: { url: string }
+    pfpUrl?: string 
   }
   onDownload: () => void
   onShare: () => void
@@ -50,7 +50,18 @@ export default function MintCard({ stats, type, user, onDownload, onShare }: Min
       }}>
         {/* Profile */}
         <div style={{ width: '320px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', paddingRight: '64px', borderRight: '1px solid rgba(255,255,255,0.2)' }}>
-          <img src={user.pfp.url} alt="pfp" style={{ width: '160px', height: '160px', borderRadius: '50%', border: '4px solid #fff', boxShadow: '0 0 24px #00f', objectFit: 'cover' }} />
+          <img
+            src={user.pfpUrl || '/default-avatar.png'}
+            alt="pfp"
+            style={{
+              width: '160px',
+              height: '160px',
+              borderRadius: '50%',
+              border: '4px solid #fff',
+              boxShadow: '0 0 24px #00f',
+              objectFit: 'cover'
+            }}
+          />
           <div style={{ marginTop: '32px', fontSize: '56px', fontWeight: 700 }}>@{user.username || 'user'}</div>
           <div style={{ fontSize: '36px', color: '#ccc' }}>FID: {user.fid}</div>
         </div>
