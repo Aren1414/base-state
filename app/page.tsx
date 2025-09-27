@@ -109,26 +109,36 @@ export default function Home() {
 
   const handleMint = async () => {
   try {
+    
     if (!walletAddress) throw new Error('Wallet address is missing')
     if (typeof window === 'undefined' || !window.ethereum) throw new Error('No wallet provider found')
 
+    
     const card = document.getElementById('walletCard')
     if (!card) throw new Error('Card not found')
 
     const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+    const canvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: null,
+    })
 
+    
     const imageUrl = await uploadToStorj(canvas)
     setMintedImageUrl(imageUrl)
 
+    
     const accounts = await window.ethereum.request({ method: 'eth_accounts' })
     if (!accounts || accounts.length === 0) throw new Error('No accounts found')
 
+    
     const signer = createWalletClient({
       chain: base,
       transport: custom(window.ethereum),
     })
 
+    
     const tx = await signer.writeContract({
       address: '0x972f0F6D9f1C25eC153729113048Cdfe6828515c', 
       abi: [
@@ -146,9 +156,9 @@ export default function Home() {
       value: BigInt(1e14), // 0.0001 ETH
     })
 
-    console.log('Mint tx sent:', tx)
-  } catch (err) {
-    console.error('Minting failed:', err)
+    console.log('✅ Mint tx sent:', tx)
+  } catch (err: any) {
+    console.error('❌ Minting failed:', err.message || err)
   }
   }
 
