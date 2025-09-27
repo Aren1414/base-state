@@ -27,16 +27,12 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
   const handleMint = async () => {
     try {
       if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
-
       const card = document.getElementById('walletCard')
       if (!card) throw new Error('Card not found')
-
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
-
       const imageUrl = await uploadToStorj(canvas)
       setMintedImageUrl(imageUrl)
-
       const tx = await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
@@ -45,7 +41,6 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
         account: walletAddress,
         value: parseEther('0.0001'),
       })
-
       console.log('✅ Mint tx sent:', tx)
     } catch (err) {
       console.error('❌ Mint failed:', err)
@@ -73,55 +68,50 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
       ]
 
   return (
-    <div style={{ marginTop: '24px', padding: '12px', boxSizing: 'border-box' }}>
+    <div style={{ marginTop: '20px', padding: '12px', boxSizing: 'border-box' }}>
       <div id="walletCard" style={{
         width: '100%',
-        maxWidth: '960px',
+        maxWidth: '600px',
         background: 'linear-gradient(135deg, #00f0ff, #7f00ff)',
-        borderRadius: '24px',
-        padding: '32px',
-        paddingLeft: '32px',
-        paddingRight: '32px',
+        borderRadius: '20px',
+        padding: '20px',
         color: '#fff',
-        boxShadow: '0 0 48px rgba(0,255,255,0.3)',
+        boxShadow: '0 0 24px rgba(0,255,255,0.25)',
         display: 'grid',
-        gridTemplateColumns: '240px 1fr',
-        gap: '24px',
+        gridTemplateColumns: '140px 1fr',
+        gap: '16px',
         position: 'relative',
-        margin: '0 auto 24px auto',
+        margin: '0 auto 20px auto',
         fontFamily: "'Segoe UI', sans-serif",
         boxSizing: 'border-box',
-        minHeight: '360px'
+        minHeight: '260px'
       }}>
-        {/* Profile */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
           <img
             src={user.pfpUrl || '/default-avatar.png'}
             alt="pfp"
             style={{
-              width: '80px',
-              height: '80px',
+              width: '64px',
+              height: '64px',
               borderRadius: '50%',
               border: '2px solid #fff',
-              boxShadow: '0 0 8px #00f',
+              boxShadow: '0 0 6px #00f',
               objectFit: 'cover',
-              marginBottom: '12px'
+              marginBottom: '8px'
             }}
           />
-          <div style={{ fontSize: '18px', fontWeight: 700 }}>@{user.username || 'user'}</div>
-          <div style={{ fontSize: '13px', color: '#ccc', marginTop: '4px' }}>FID: {user.fid}</div>
+          <div style={{ fontSize: '16px', fontWeight: 700 }}>@{user.username || 'user'}</div>
+          <div style={{ fontSize: '12px', color: '#ccc', marginTop: '2px' }}>FID: {user.fid}</div>
         </div>
-
-        {/* Stats */}
         <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-          <div style={{ fontSize: '18px', fontWeight: 800, marginBottom: '16px' }}>
+          <div style={{ fontSize: '16px', fontWeight: 800, marginBottom: '12px' }}>
             BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report
           </div>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '16px',
-            fontSize: '13px',
+            gap: '12px',
+            fontSize: '12px',
             lineHeight: 1.4
           }}>
             {fields.map((f, i) => (
@@ -129,27 +119,23 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
             ))}
           </div>
         </div>
-
-        {/* Logo */}
         <div style={{
           position: 'absolute',
-          bottom: '12px',
-          left: '24px',
-          fontSize: '13px',
+          bottom: '8px',
+          left: '16px',
+          fontSize: '11px',
           color: '#ccc'
         }}>
           Powered by BaseState
         </div>
       </div>
-
-      {/* Buttons */}
       <div style={{
         textAlign: 'center',
         display: 'flex',
         justifyContent: 'center',
         flexWrap: 'wrap',
-        gap: '12px',
-        marginTop: '16px'
+        gap: '10px',
+        marginTop: '12px'
       }}>
         <button onClick={handleMint} style={buttonStyle('#00ff7f')}>🪙 Mint as NFT</button>
         <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>📥 Download Card</button>
@@ -161,14 +147,14 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
 
 function buttonStyle(color: string): React.CSSProperties {
   return {
-    padding: '8px 16px',
-    fontSize: '13px',
+    padding: '6px 14px',
+    fontSize: '12px',
     background: '#fff',
     color,
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '6px',
     cursor: 'pointer',
-    boxShadow: '0 0 4px rgba(0,0,0,0.1)',
-    minWidth: '120px'
+    boxShadow: '0 0 3px rgba(0,0,0,0.1)',
+    minWidth: '100px'
   }
 }
