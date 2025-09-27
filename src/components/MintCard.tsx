@@ -55,7 +55,8 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
         { label: 'Best Streak', value: stats.bestStreak + ' days' },
         { label: 'Contracts', value: stats.contracts },
         { label: 'Tokens Received', value: stats.tokens },
-        { label: 'Volume Sent (ETH)', value: stats.volumeEth }
+        { label: 'Volume Sent (ETH)', value: stats.volumeEth },
+        { label: 'Fees Paid (ETH)', value: stats.feesEth }   
       ]
     : [
         { label: 'Age', value: stats.age + ' days' },
@@ -64,7 +65,8 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
         { label: 'Best Streak', value: stats.bestStreak + ' days' },
         { label: 'Unique Senders', value: stats.uniqueSenders },
         { label: 'Tokens Received', value: stats.tokensReceived },
-        { label: 'AA Transactions', value: stats.allAaTransactions }
+        { label: 'AA Transactions', value: stats.allAaTransactions },
+        { label: 'Post Tokens', value: stats.postTokens }   
       ]
 
   return (
