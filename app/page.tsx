@@ -219,7 +219,7 @@ export default function Home() {
               </button>
             </div>
 
-            {context?.user && (
+            {context?.user && walletClient && (
               <MintCard
                 stats={stats.data}
                 type={stats.type}
