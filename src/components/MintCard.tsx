@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { uploadToStorj } from '../lib/uploadToStorj'
+import { uploadCanvas } from '../lib/uploadCanvas'
 import { useAccount, useWalletClient } from 'wagmi'
 import { parseEther } from 'viem'
 import abi from '../lib/abi/BaseStateCard.json'
@@ -49,8 +49,8 @@ export default function MintCard({
         backgroundColor: null,
       })
 
-      setMintStatus('🧪 Uploading image to Storj…')
-      const imageUrl = await uploadToStorj(canvas)
+      setMintStatus('🧪 Uploading image to server…')
+      const imageUrl = await uploadCanvas(canvas)
       setMintedImageUrl(imageUrl)
 
       setMintStatus('🧪 Sending mint transaction…')
