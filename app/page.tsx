@@ -26,20 +26,6 @@ import type { WalletStats, ContractStats } from '../src/types'
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
 
-const CONTRACT_ABI = [
-  { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'user', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'timestamp', type: 'uint256' },
-    ],
-    name: 'Ping',
-    type: 'event',
-  },
-  { inputs: [], name: 'owner', outputs: [{ internalType: 'address', name: '', type: 'address' }], stateMutability: 'view', type: 'function' },
-]
-
 export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
@@ -87,7 +73,9 @@ export default function Home() {
     setTxFailed(false)
     try {
       const data = encodeFunctionData({
-        abi: CONTRACT_ABI,
+        abi: [
+          { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
+        ],
         functionName: 'ping',
         args: [],
       })
@@ -135,50 +123,60 @@ export default function Home() {
     }
   }
 
-  const handleShare = () => {
-  if (!stats) return
+  const handleShareText = () => {
+    if (!stats) return
 
-  const type = stats.type
-  const divider = '────────────────────'
-  const body =
-    type === 'wallet'
-      ? (() => {
-          const s = stats.data as WalletStats
-          return `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
-        })()
-      : (() => {
-          const s = stats.data as ContractStats
-          return `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nETH Balance: ${s.balanceEth}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
-        })()
+    const type = stats.type
+    const divider = '────────────────────'
+    let body = ''
 
-  const castText = `Just minted my ${type} stats as an NFT 👇\n\n${body}`
-  const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(mintedImageUrl || MINI_APP_URL)}`
-  window.open(warpcastUrl, '_blank')
+    if (type === 'wallet') {
+      const s = stats.data as WalletStats
+      body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
+    } else {
+      const s = stats.data as ContractStats
+      body = `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nETH Balance: ${s.balanceEth}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
+    }
+
+    const castText = `Just checked my ${type} stats using the BaseState Mini App 👇\n\n${body}`
+
+    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+
+    if (isBaseApp) {
+      composeCast({ text: castText, embeds: [MINI_APP_URL] })
+    } else {
+      const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(MINI_APP_URL)}`
+      window.open(warpcastUrl, '_blank')
+    }
+  }
+
+  const handleShareImage = () => {
+    if (!stats) return
+    const type = stats.type
+    const body = `Just minted my ${type} stats as an NFT 👇`
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(body)}&embeds[]=${encodeURIComponent(mintedImageUrl || MINI_APP_URL)}`
+    window.open(warpcastUrl, '_blank')
   }
 
   const downloadCard = async () => {
-  const card = document.getElementById('walletCard')
-  if (!card) return
+    const card = document.getElementById('walletCard')
+    if (!card) return
 
-  const html2canvas = (await import('html2canvas')).default
-  const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+    const html2canvas = (await import('html2canvas')).default
+    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-  const resizedCanvas = document.createElement('canvas')
-  resizedCanvas.width = 1200
-  resizedCanvas.height = 800
-  const ctx = resizedCanvas.getContext('2d')
+    const resizedCanvas = document.createElement('canvas')
+    resizedCanvas.width = 1200
+    resizedCanvas.height = 800
+    const ctx = resizedCanvas.getContext('2d')
+    if (!ctx) return
 
-  if (!ctx) {
-    console.error('Canvas context is null')
-    return
-  }
+    ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height)
 
-  ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height)
-
-  const link = document.createElement('a')
-  link.download = 'BaseState_Wallet_Card.png'
-  link.href = resizedCanvas.toDataURL('image/png', 0.8)
-  link.click()
+    const link = document.createElement('a')
+    link.download = 'BaseState_Wallet_Card.png'
+    link.href = resizedCanvas.toDataURL('image/png', 0.8)
+    link.click()
   }
 
   if (!fid) {
@@ -201,52 +199,49 @@ export default function Home() {
         <h1 className={styles.title}>BaseState</h1>
 
         {!txConfirmed ? (
-          <>
-            <button className={styles.actionButton} onClick={handleClick} disabled={!ready || loading}>
-              {loading ? 'Submitting transaction...' : 'Submit activity and retrieve wallet stats'}
-            </button>
+  <>
+    <button className={styles.actionButton} onClick={handleClick} disabled={!ready || loading}>
+      {loading ? 'Submitting transaction...' : 'Submit activity and retrieve wallet stats'}
+    </button>
 
-            {!ready && !loading && (
-              <p className={styles.statusMessage}>
-                Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
-              </p>
-            )}
+    {!ready && !loading && (
+      <p className={styles.statusMessage}>
+        Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
+      </p>
+    )}
 
-            {txFailed && (
-              <>
-                <p className={styles.statusMessage}>Transaction failed. Please try again.</p>
-                <button className={styles.retryButton} onClick={handleClick}>Retry</button>
-              </>
-            )}
-          </>
-        ) : stats ? (
-          <>
-            <WalletStatus stats={stats} />
+    {txFailed && (
+      <>
+        <p className={styles.statusMessage}>Transaction failed. Please try again.</p>
+        <button className={styles.retryButton} onClick={handleClick}>Retry</button>
+      </>
+    )}
+  </>
+) : stats ? (
+  <>
+    <WalletStatus stats={stats} />
 
-            {context?.user && (
-  <MintCard
-    stats={stats.data}
-    type={stats.type}
-    user={{
-      fid: context.user.fid,
-      username: context.user.username,
-      pfpUrl: context.user.pfpUrl, 
-    }}
-    onDownload={downloadCard}
-    onShare={handleShare}
-  />
-)}
+    {context?.user && (
+      <MintCard
+        stats={stats.data}
+        type={stats.type}
+        user={{
+          fid: context.user.fid,
+          username: context.user.username,
+          pfpUrl: context.user.pfpUrl,
+        }}
+        onDownload={downloadCard}
+        onShare={handleShareText}   
+        onMint={handleMint}         
+      />
+    )}
 
-            <div style={{ textAlign: 'center', marginTop: '32px' }}>
-              <button className={styles.actionButton} onClick={handleMint}>
-                🎨 Mint This Card as NFT
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className={styles.statusMessage}>Fetching wallet stats, please wait…</p>
-        )}
-      </div>
+    <div style={{ textAlign: 'center', marginTop: '32px' }}>
+      <button className={styles.actionButton} onClick={handleShareImage}>
+        📸 Share Minted Card
+      </button>
     </div>
-  )
-}
+  </>
+) : (
+  <p className={styles.statusMessage}>Fetching wallet stats, please wait…</p>
+)}
