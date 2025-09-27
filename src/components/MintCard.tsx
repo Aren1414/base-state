@@ -33,16 +33,25 @@ export default function MintCard({
   const { data: walletClient } = useWalletClient()
 
   const handleMint = async () => {
+    console.log('🧪 Mint button clicked')
     try {
       if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
 
       const card = document.getElementById('walletCard')
-      if (!card) throw new Error('Card not found')
+      if (!card) throw new Error('Card not found in DOM')
 
       const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+      })
+
+      console.log('🧪 Canvas generated')
 
       const imageUrl = await uploadToStorj(canvas)
+      console.log('🧪 Image uploaded:', imageUrl)
+
       setMintedImageUrl(imageUrl)
 
       const tx = await walletClient.writeContract({
@@ -166,7 +175,11 @@ export default function MintCard({
           marginTop: '10px',
         }}
       >
-        <button onClick={handleMint} style={buttonStyle('#00ff7f')} disabled={!walletClient || !walletAddress}>
+        <button
+          onClick={handleMint}
+          style={buttonStyle('#00ff7f')}
+          disabled={!walletClient || !walletAddress}
+        >
           🪙 Mint as NFT
         </button>
         <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>
