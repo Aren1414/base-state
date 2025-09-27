@@ -17,8 +17,6 @@ import { sdk } from '@farcaster/miniapp-sdk'
 import WalletStatus from '../src/components/WalletStatus'
 import MintCard from '../src/components/MintCard'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
-import { mintCard } from '../src/lib/mintCard'
-import { uploadToStorj } from '../src/lib/uploadToStorj'
 import { base } from 'viem/chains'
 import styles from './page.module.css'
 import type { WalletStats, ContractStats } from '../src/types'
@@ -107,61 +105,6 @@ export default function Home() {
     }
   }
 
-  const handleMint = async () => {
-  try {
-    
-    if (!walletAddress) throw new Error('Wallet address is missing')
-    if (typeof window === 'undefined' || !window.ethereum) throw new Error('No wallet provider found')
-
-    
-    const card = document.getElementById('walletCard')
-    if (!card) throw new Error('Card not found')
-
-    const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(card, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-    })
-
-    
-    const imageUrl = await uploadToStorj(canvas)
-    setMintedImageUrl(imageUrl)
-
-    
-    const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-    if (!accounts || accounts.length === 0) throw new Error('No accounts found')
-
-    
-    const signer = createWalletClient({
-      chain: base,
-      transport: custom(window.ethereum),
-    })
-
-    
-    const tx = await signer.writeContract({
-      address: '0x972f0F6D9f1C25eC153729113048Cdfe6828515c', 
-      abi: [
-        {
-          inputs: [{ name: 'tokenURI', type: 'string' }],
-          name: 'mint',
-          outputs: [],
-          stateMutability: 'payable',
-          type: 'function',
-        },
-      ],
-      functionName: 'mint',
-      args: [imageUrl],
-      account: accounts[0],
-      value: BigInt(1e14), // 0.0001 ETH
-    })
-
-    console.log('✅ Mint tx sent:', tx)
-  } catch (err: any) {
-    console.error('❌ Minting failed:', err.message || err)
-  }
-  }
-
   const handleShareText = () => {
     if (!stats) return
 
@@ -229,78 +172,75 @@ export default function Home() {
   }
 
   return (
-  <div className={styles.container}>
-    <header className={styles.headerCentered}>
-      <h2 className={styles.userName}>{displayName}</h2>
-    </header>
+    <div className={styles.container}>
+      <header className={styles.headerCentered}>
+        <h2 className={styles.userName}>{displayName}</h2>
+      </header>
 
-    <div className={styles.content}>
-      <h1 className={styles.title}>BaseState</h1>
+      <div className={styles.content}>
+        <h1 className={styles.title}>BaseState</h1>
 
-      {!txConfirmed ? (
-        <>
-          <button
-            className={styles.actionButton}
-            onClick={handleClick}
-            disabled={!ready || loading}
-          >
-            {loading
-              ? 'Submitting transaction...'
-              : 'Submit activity and retrieve wallet stats'}
-          </button>
-
-          {!ready && !loading && (
-            <p className={styles.statusMessage}>
-              Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
-            </p>
-          )}
-
-          {txFailed && (
-            <>
-              <p className={styles.statusMessage}>
-                Transaction failed. Please try again.
-              </p>
-              <button className={styles.retryButton} onClick={handleClick}>
-                Retry
-              </button>
-            </>
-          )}
-        </>
-      ) : stats ? (
-        <>
-          
-          <WalletStatus stats={stats} />
-
-          
-          <div style={{ textAlign: 'center', margin: '32px 0' }}>
-            <button className={styles.actionButton} onClick={handleShareText}>
-              📤 Share Stats as Text
+        {!txConfirmed ? (
+          <>
+            <button
+              className={styles.actionButton}
+              onClick={handleClick}
+              disabled={!ready || loading}
+            >
+              {loading
+                ? 'Submitting transaction...'
+                : 'Submit activity and retrieve wallet stats'}
             </button>
-          </div>
 
-          
-          {context?.user && (
-            <MintCard
-              stats={stats.data}
-              type={stats.type}
-              user={{
-                fid: context.user.fid,
-                username: context.user.username,
-                pfpUrl: context.user.pfpUrl,
-              }}
-              onDownload={downloadCard}
-              onShare={handleShareImage}
-              onMint={handleMint}
-              minted={!!mintedImageUrl} 
-            />
-          )}
-        </>
-      ) : (
-        <p className={styles.statusMessage}>
-          Fetching wallet stats, please wait…
-        </p>
-      )}
+            {!ready && !loading && (
+              <p className={styles.statusMessage}>
+                Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
+              </p>
+            )}
+
+            {txFailed && (
+              <>
+                <p className={styles.statusMessage}>
+                  Transaction failed. Please try again.
+                </p>
+                <button className={styles.retryButton} onClick={handleClick}>
+                  Retry
+                </button>
+              </>
+            )}
+          </>
+        ) : stats ? (
+          <>
+            <WalletStatus stats={stats} />
+
+            <div style={{ textAlign: 'center', margin: '32px 0' }}>
+              <button className={styles.actionButton} onClick={handleShareText}>
+                📤 Share Stats as Text
+              </button>
+            </div>
+
+            {context?.user && (
+              <MintCard
+                stats={stats.data}
+                type={stats.type}
+                user={{
+                  fid: context.user.fid,
+                  username: context.user.username,
+                  pfpUrl: context.user.pfpUrl,
+                }}
+                onDownload={downloadCard}
+                onShare={handleShareImage}
+                minted={!!mintedImageUrl}
+                setMintedImageUrl={setMintedImageUrl}
+              />
+            )}
+          </>
+        ) : (
+          <p className={styles.statusMessage}>
+            Fetching wallet stats, please wait…
+          </p>
+        )}
+      </div>
     </div>
-  </div>
-)
+  )
 }
