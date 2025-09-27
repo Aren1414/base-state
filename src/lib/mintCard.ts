@@ -1,28 +1,17 @@
-import { createWalletClient, custom, parseEther } from 'viem'
-import { base } from 'viem/chains'
+import { parseEther } from 'viem'
 import abi from './abi/BaseStateCard.json'
 
 const CONTRACT_ADDRESS = '0x972f0F6D9f1C25eC153729113048Cdfe6828515c'
 
-export async function mintCard(wallet: `0x${string}`, tokenURI: string) {
-  if (typeof window === 'undefined' || !window.ethereum) {
-    throw new Error('No wallet provider found')
-  }
+export async function mintCard(walletClient: any, wallet: `0x${string}`, tokenURI: string) {
+  if (!walletClient || !wallet) throw new Error('Wallet client or address missing')
 
-  const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-  if (!accounts || accounts.length === 0) throw new Error('No accounts found')
-
-  const signer = createWalletClient({
-    chain: base,
-    transport: custom(window.ethereum),
-  })
-
-  const tx = await signer.writeContract({
+  const tx = await walletClient.writeContract({
     address: CONTRACT_ADDRESS,
     abi,
     functionName: 'mint',
     args: [tokenURI],
-    account: accounts[0],
+    account: wallet,
     value: parseEther('0.0001'),
   })
 
