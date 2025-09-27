@@ -1,9 +1,24 @@
 import React from 'react'
 import { uploadToStorj } from '../lib/uploadToStorj'
 import { useAccount, useWalletClient } from 'wagmi'
-import { mintCard } from '../lib/mintCard'
+import { parseEther } from 'viem'
+import abi from '../lib/abi/BaseStateCard.json'
 
 const CONTRACT_ADDRESS = '0x972f0F6D9f1C25eC153729113048Cdfe6828515c'
+
+interface MintCardProps {
+  stats: any
+  type: 'wallet' | 'contract'
+  user: {
+    fid: number
+    username?: string
+    pfpUrl?: string
+  }
+  onDownload: () => void
+  onShare: () => void
+  minted: boolean
+  setMintedImageUrl: (url: string) => void
+}
 
 export default function MintCard({
   stats,
@@ -30,13 +45,20 @@ export default function MintCard({
       const imageUrl = await uploadToStorj(canvas)
       setMintedImageUrl(imageUrl)
 
-      const tx = await mintCard(walletClient, walletAddress, imageUrl)
+      const tx = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'mint',
+        args: [imageUrl],
+        account: walletAddress,
+        value: parseEther('0.0001'),
+      })
+
       console.log('✅ Mint tx sent:', tx)
     } catch (err) {
       console.error('❌ Mint failed:', err)
     }
   }
-
 
   const fields =
     type === 'wallet'
@@ -144,7 +166,7 @@ export default function MintCard({
           marginTop: '10px',
         }}
       >
-        <button onClick={handleMint} style={buttonStyle('#00ff7f')} disabled={!isConnected}>
+        <button onClick={handleMint} style={buttonStyle('#00ff7f')} disabled={!walletClient || !walletAddress}>
           🪙 Mint as NFT
         </button>
         <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>
