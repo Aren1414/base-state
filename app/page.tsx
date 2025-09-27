@@ -60,22 +60,19 @@ export default function Home() {
   }, [chainId, switchChain])
 
   useEffect(() => {
-    const initMiniApp = async () => {
-      const isMiniApp = await sdk.isInMiniApp()
-      if (isMiniApp) {
-        await sdk.actions.ready()
-        await sdk.actions.addMiniApp({
-          appFid: APP_FID,
-          url: MINI_APP_URL,
-        })
-        await signIn()
-        if (!isFrameReady) {
-          setFrameReady()
-        }
+  const initMiniApp = async () => {
+    const isMiniApp = await sdk.isInMiniApp()
+    if (isMiniApp) {
+      await sdk.actions.ready()
+      await sdk.actions.addMiniApp() // ← بدون هیچ آرگومان
+      await signIn()
+      if (!isFrameReady) {
+        setFrameReady()
       }
     }
-    initMiniApp()
-  }, [isFrameReady, setFrameReady, signIn])
+  }
+  initMiniApp()
+}, [isFrameReady, setFrameReady, signIn])
 
   const user = context?.user
   const fid = user?.fid
