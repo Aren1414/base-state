@@ -190,58 +190,74 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.container}>
-      <header className={styles.headerCentered}>
-        <h2 className={styles.userName}>{displayName}</h2>
-      </header>
+  <div className={styles.container}>
+    <header className={styles.headerCentered}>
+      <h2 className={styles.userName}>{displayName}</h2>
+    </header>
 
-      <div className={styles.content}>
-        <h1 className={styles.title}>BaseState</h1>
+    <div className={styles.content}>
+      <h1 className={styles.title}>BaseState</h1>
 
-        {!txConfirmed ? (
-  <>
-    <button className={styles.actionButton} onClick={handleClick} disabled={!ready || loading}>
-      {loading ? 'Submitting transaction...' : 'Submit activity and retrieve wallet stats'}
-    </button>
+      {!txConfirmed ? (
+        <>
+          <button
+            className={styles.actionButton}
+            onClick={handleClick}
+            disabled={!ready || loading}
+          >
+            {loading
+              ? 'Submitting transaction...'
+              : 'Submit activity and retrieve wallet stats'}
+          </button>
 
-    {!ready && !loading && (
-      <p className={styles.statusMessage}>
-        Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
-      </p>
-    )}
+          {!ready && !loading && (
+            <p className={styles.statusMessage}>
+              Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
+            </p>
+          )}
 
-    {txFailed && (
-      <>
-        <p className={styles.statusMessage}>Transaction failed. Please try again.</p>
-        <button className={styles.retryButton} onClick={handleClick}>Retry</button>
-      </>
-    )}
-  </>
-) : stats ? (
-  <>
-    <WalletStatus stats={stats} />
+          {txFailed && (
+            <>
+              <p className={styles.statusMessage}>
+                Transaction failed. Please try again.
+              </p>
+              <button className={styles.retryButton} onClick={handleClick}>
+                Retry
+              </button>
+            </>
+          )}
+        </>
+      ) : stats ? (
+        <>
+          <WalletStatus stats={stats} />
 
-    {context?.user && (
-      <MintCard
-        stats={stats.data}
-        type={stats.type}
-        user={{
-          fid: context.user.fid,
-          username: context.user.username,
-          pfpUrl: context.user.pfpUrl,
-        }}
-        onDownload={downloadCard}
-        onShare={handleShareText}   
-        onMint={handleMint}         
-      />
-    )}
+          {context?.user && (
+            <MintCard
+              stats={stats.data}
+              type={stats.type}
+              user={{
+                fid: context.user.fid,
+                username: context.user.username,
+                pfpUrl: context.user.pfpUrl,
+              }}
+              onDownload={downloadCard}
+              onShare={handleShareText}
+              onMint={handleMint}
+            />
+          )}
 
-    <div style={{ textAlign: 'center', marginTop: '32px' }}>
-      <button className={styles.actionButton} onClick={handleShareImage}>
-        📸 Share Minted Card
-      </button>
+          <div style={{ textAlign: 'center', marginTop: '32px' }}>
+            <button className={styles.actionButton} onClick={handleShareImage}>
+              📸 Share Minted Card
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className={styles.statusMessage}>
+          Fetching wallet stats, please wait…
+        </p>
+      )}
     </div>
-  </>
-) : (
-  <p className={styles.statusMessage}>Fetching wallet stats, please wait…</p>
-)}
+  </div>
+) 
+}
