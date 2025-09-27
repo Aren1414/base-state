@@ -1,7 +1,10 @@
 import React from 'react'
-import { mintCard } from '../lib/mintCard'
 import { uploadToStorj } from '../lib/uploadToStorj'
 import { useAccount, useWalletClient } from 'wagmi'
+import { parseEther } from 'viem'
+import abi from '../lib/abi/BaseStateCard.json' 
+
+const CONTRACT_ADDRESS = '0x972f0F6D9f1C25eC153729113048Cdfe6828515c'
 
 interface MintCardProps {
   stats: any
@@ -23,8 +26,10 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
 
   const handleMint = async () => {
     try {
+      if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
+
       const card = document.getElementById('walletCard')
-      if (!card || !walletClient || !walletAddress) throw new Error('Missing wallet or card')
+      if (!card) throw new Error('Card not found')
 
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
@@ -32,8 +37,16 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
       const imageUrl = await uploadToStorj(canvas)
       setMintedImageUrl(imageUrl)
 
-      await mintCard(walletClient, walletAddress, imageUrl)
-      console.log('✅ Minted:', imageUrl)
+      const tx = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'mint',
+        args: [imageUrl],
+        account: walletAddress,
+        value: parseEther('0.0001'),
+      })
+
+      console.log('✅ Mint tx sent:', tx)
     } catch (err) {
       console.error('❌ Mint failed:', err)
     }
@@ -63,25 +76,25 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
     <div style={{ marginTop: '24px', padding: '12px', boxSizing: 'border-box' }}>
       <div id="walletCard" style={{
         width: '100%',
-        maxWidth: '100%',
+        maxWidth: '960px',
         background: 'linear-gradient(135deg, #00f0ff, #7f00ff)',
         borderRadius: '24px',
         padding: '32px',
-        paddingLeft: '48px',
-        paddingRight: '48px',
+        paddingLeft: '32px',
+        paddingRight: '32px',
         color: '#fff',
         boxShadow: '0 0 48px rgba(0,255,255,0.3)',
         display: 'grid',
         gridTemplateColumns: '240px 1fr',
-        gap: '32px',
+        gap: '24px',
         position: 'relative',
         margin: '0 auto 24px auto',
         fontFamily: "'Segoe UI', sans-serif",
         boxSizing: 'border-box',
-        minHeight: '480px'
+        minHeight: '360px'
       }}>
         {/* Profile */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '4px' }}>
           <img
             src={user.pfpUrl || '/default-avatar.png'}
             alt="pfp"
@@ -106,7 +119,7 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
           </div>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: 'repeat(2, 1fr)', 
             gap: '16px',
             fontSize: '13px',
             lineHeight: 1.4
@@ -121,7 +134,7 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
         <div style={{
           position: 'absolute',
           bottom: '12px',
-          left: '32px',
+          left: '24px',
           fontSize: '13px',
           color: '#ccc'
         }}>
