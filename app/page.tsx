@@ -157,21 +157,28 @@ export default function Home() {
   }
 
   const downloadCard = async () => {
-    const card = document.getElementById('walletCard')
-    if (!card) return
-    const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+  const card = document.getElementById('walletCard')
+  if (!card) return
 
-    const resizedCanvas = document.createElement('canvas')
-    resizedCanvas.width = 1200
-    resizedCanvas.height = 800
-    const ctx = resizedCanvas.getContext('2d')
-    ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height)
+  const html2canvas = (await import('html2canvas')).default
+  const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-    const link = document.createElement('a')
-    link.download = 'BaseState_Wallet_Card.png'
-    link.href = resizedCanvas.toDataURL('image/png', 0.8)
-    link.click()
+  const resizedCanvas = document.createElement('canvas')
+  resizedCanvas.width = 1200
+  resizedCanvas.height = 800
+  const ctx = resizedCanvas.getContext('2d')
+
+  if (!ctx) {
+    console.error('Canvas context is null')
+    return
+  }
+
+  ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height)
+
+  const link = document.createElement('a')
+  link.download = 'BaseState_Wallet_Card.png'
+  link.href = resizedCanvas.toDataURL('image/png', 0.8)
+  link.click()
   }
 
   if (!fid) {
