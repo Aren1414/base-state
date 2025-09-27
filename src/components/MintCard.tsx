@@ -6,13 +6,14 @@ interface MintCardProps {
   user: {
     fid: number
     username?: string
-    pfpUrl?: string 
+    pfpUrl?: string
   }
   onDownload: () => void
   onShare: () => void
+  onMint: () => void 
 }
 
-export default function MintCard({ stats, type, user, onDownload, onShare }: MintCardProps) {
+export default function MintCard({ stats, type, user, onDownload, onShare, onMint }: MintCardProps) {
   const fields = type === 'wallet'
     ? [
         { label: 'Wallet Age', value: stats.walletAge + ' days' },
@@ -34,22 +35,24 @@ export default function MintCard({ stats, type, user, onDownload, onShare }: Min
       ]
 
   return (
-    <div style={{ marginTop: '64px' }}>
+    <div style={{ marginTop: '32px', padding: '16px' }}>
       <div id="walletCard" style={{
-        width: '1200px',
-        height: '800px',
+        maxWidth: '100%',
+        width: '100%',
+        height: 'auto',
         background: 'linear-gradient(135deg, #00f0ff, #7f00ff)',
         borderRadius: '32px',
-        padding: '64px',
+        padding: '48px',
         color: '#fff',
         boxShadow: '0 0 64px rgba(0,255,255,0.3)',
         display: 'flex',
+        flexWrap: 'wrap',
         position: 'relative',
         margin: '0 auto 32px auto',
         fontFamily: "'Segoe UI', sans-serif"
       }}>
         {/* Profile */}
-        <div style={{ width: '320px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', paddingRight: '64px', borderRight: '1px solid rgba(255,255,255,0.2)' }}>
+        <div style={{ width: '100%', maxWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', paddingRight: '48px', borderRight: '1px solid rgba(255,255,255,0.2)', marginBottom: '32px' }}>
           <img
             src={user.pfpUrl || '/default-avatar.png'}
             alt="pfp"
@@ -62,14 +65,14 @@ export default function MintCard({ stats, type, user, onDownload, onShare }: Min
               objectFit: 'cover'
             }}
           />
-          <div style={{ marginTop: '32px', fontSize: '56px', fontWeight: 700 }}>@{user.username || 'user'}</div>
-          <div style={{ fontSize: '36px', color: '#ccc' }}>FID: {user.fid}</div>
+          <div style={{ marginTop: '32px', fontSize: '48px', fontWeight: 700 }}>@{user.username || 'user'}</div>
+          <div style={{ fontSize: '28px', color: '#ccc' }}>FID: {user.fid}</div>
         </div>
 
         {/* Stats */}
-        <div style={{ flex: 1, paddingLeft: '64px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: '64px', fontWeight: 800 }}>BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report</div>
-          <div style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', fontSize: '36px', lineHeight: 1.2 }}>
+        <div style={{ flex: 1, paddingLeft: '48px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ fontSize: '48px', fontWeight: 800 }}>BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report</div>
+          <div style={{ marginTop: '48px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', fontSize: '28px', lineHeight: 1.4 }}>
             {fields.map((f, i) => (
               <div key={i}><strong>{f.label}</strong><br />{f.value}</div>
             ))}
@@ -77,20 +80,30 @@ export default function MintCard({ stats, type, user, onDownload, onShare }: Min
         </div>
 
         {/* Logo */}
-        <div style={{ position: 'absolute', bottom: '48px', right: '64px', fontSize: '28px', color: '#ccc' }}>
+        <div style={{ position: 'absolute', bottom: '32px', right: '48px', fontSize: '24px', color: '#ccc' }}>
           Powered by BaseState
         </div>
       </div>
 
       {/* Buttons */}
-      <div style={{ textAlign: 'center' }}>
-        <button onClick={onDownload} style={{ padding: '20px 40px', fontSize: '28px', background: '#fff', color: '#7f00ff', border: 'none', borderRadius: '16px', cursor: 'pointer', boxShadow: '0 0 12px rgba(0,0,0,0.2)', marginRight: '24px' }}>
-          📥 download 
-        </button>
-        <button onClick={onShare} style={{ padding: '20px 40px', fontSize: '28px', background: '#fff', color: '#00f0ff', border: 'none', borderRadius: '16px', cursor: 'pointer', boxShadow: '0 0 12px rgba(0,0,0,0.2)' }}>
-          📤 share 
-        </button>
+      <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '24px' }}>
+        <button onClick={onDownload} style={buttonStyle('#7f00ff')}>📥 download</button>
+        <button onClick={onShare} style={buttonStyle('#00f0ff')}>📤 share</button>
+        <button onClick={onMint} style={buttonStyle('#00ff7f')}>🪙 mint</button>
       </div>
     </div>
   )
+}
+
+function buttonStyle(color: string): React.CSSProperties {
+  return {
+    padding: '20px 40px',
+    fontSize: '24px',
+    background: '#fff',
+    color,
+    border: 'none',
+    borderRadius: '16px',
+    cursor: 'pointer',
+    boxShadow: '0 0 12px rgba(0,0,0,0.2)'
+  }
 }
