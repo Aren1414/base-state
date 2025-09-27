@@ -36,7 +36,7 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
       ]
 
   return (
-    <div style={{ marginTop: '24px', padding: '12px' }}>
+    <div style={{ marginTop: '24px', padding: '12px', boxSizing: 'border-box' }}>
       {/* Card */}
       <div id="walletCard" style={{
         width: '100%',
@@ -48,12 +48,13 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         color: '#fff',
         boxShadow: '0 0 48px rgba(0,255,255,0.3)',
         display: 'grid',
-        gridTemplateColumns: '280px 1fr',
+        gridTemplateColumns: '240px 1fr',
         gap: '24px',
         position: 'relative',
         margin: '0 auto 24px auto',
         fontFamily: "'Segoe UI', sans-serif",
-        overflow: 'hidden'
+        overflow: 'hidden',
+        boxSizing: 'border-box'
       }}>
         {/* Profile */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
@@ -74,7 +75,7 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
           <div style={{ fontSize: '20px', fontWeight: 800 }}>BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report</div>
           <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px', lineHeight: 1.4 }}>
             {fields.map((f, i) => (
