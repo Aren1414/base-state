@@ -44,12 +44,14 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         aspectRatio: '3 / 2',
         background: 'linear-gradient(135deg, #00f0ff, #7f00ff)',
         borderRadius: '24px',
-        padding: '24px',
+        padding: '32px',
+        paddingLeft: '40px',
+        paddingRight: '40px',
         color: '#fff',
         boxShadow: '0 0 48px rgba(0,255,255,0.3)',
         display: 'grid',
         gridTemplateColumns: '240px 1fr',
-        gap: '24px',
+        gap: '32px',
         position: 'relative',
         margin: '0 auto 24px auto',
         fontFamily: "'Segoe UI', sans-serif",
@@ -57,7 +59,7 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         boxSizing: 'border-box'
       }}>
         {/* Profile */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingTop: '8px' }}>
           <img
             src={user.pfpUrl || '/default-avatar.png'}
             alt="pfp"
@@ -67,17 +69,26 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
               borderRadius: '50%',
               border: '2px solid #fff',
               boxShadow: '0 0 8px #00f',
-              objectFit: 'cover'
+              objectFit: 'cover',
+              marginBottom: '12px'
             }}
           />
-          <div style={{ marginTop: '12px', fontSize: '20px', fontWeight: 700 }}>@{user.username || 'user'}</div>
-          <div style={{ fontSize: '14px', color: '#ccc' }}>FID: {user.fid}</div>
+          <div style={{ fontSize: '20px', fontWeight: 700 }}>@{user.username || 'user'}</div>
+          <div style={{ fontSize: '14px', color: '#ccc', marginTop: '4px' }}>FID: {user.fid}</div>
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-          <div style={{ fontSize: '20px', fontWeight: 800 }}>BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report</div>
-          <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px', lineHeight: 1.4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', paddingTop: '8px' }}>
+          <div style={{ fontSize: '20px', fontWeight: 800, marginBottom: '16px' }}>
+            BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '16px',
+            fontSize: '14px',
+            lineHeight: 1.4
+          }}>
             {fields.map((f, i) => (
               <div key={i}><strong>{f.label}</strong><br />{f.value}</div>
             ))}
@@ -85,13 +96,26 @@ export default function MintCard({ stats, type, user, onDownload, onMint, onShar
         </div>
 
         {/* Logo */}
-        <div style={{ position: 'absolute', bottom: '12px', right: '20px', fontSize: '14px', color: '#ccc' }}>
+        <div style={{
+          position: 'absolute',
+          bottom: '12px',
+          left: '32px',
+          fontSize: '14px',
+          color: '#ccc'
+        }}>
           Powered by BaseState
         </div>
       </div>
 
       {/* Buttons */}
-      <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px' }}>
+      <div style={{
+        textAlign: 'center',
+        display: 'flex',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        gap: '12px',
+        marginTop: '16px'
+      }}>
         <button onClick={onMint} style={buttonStyle('#00ff7f')}>🪙 Mint as NFT</button>
         <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>📥 Download Card</button>
         <button onClick={onShare} style={buttonStyle('#00f0ff')} disabled={!minted}>📸 Share Minted Card</button>
