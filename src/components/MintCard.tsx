@@ -68,51 +68,51 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
       ]
 
   return (
-    <div style={{ marginTop: '20px', padding: '12px', boxSizing: 'border-box' }}>
+    <div style={{ marginTop: '16px', padding: '8px', boxSizing: 'border-box' }}>
       <div id="walletCard" style={{
         width: '100%',
-        maxWidth: '600px',
+        maxWidth: '380px',
         background: 'linear-gradient(135deg, #00f0ff, #7f00ff)',
-        borderRadius: '20px',
-        padding: '20px',
+        borderRadius: '16px',
+        padding: '16px',
         color: '#fff',
-        boxShadow: '0 0 24px rgba(0,255,255,0.25)',
+        boxShadow: '0 0 20px rgba(0,255,255,0.25)',
         display: 'grid',
-        gridTemplateColumns: '140px 1fr',
-        gap: '16px',
+        gridTemplateColumns: '90px 1fr',
+        gap: '12px',
         position: 'relative',
-        margin: '0 auto 20px auto',
+        margin: '0 auto 16px auto',
         fontFamily: "'Segoe UI', sans-serif",
         boxSizing: 'border-box',
-        minHeight: '260px'
+        minHeight: '200px'
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
           <img
             src={user.pfpUrl || '/default-avatar.png'}
             alt="pfp"
             style={{
-              width: '64px',
-              height: '64px',
+              width: '56px',
+              height: '56px',
               borderRadius: '50%',
               border: '2px solid #fff',
-              boxShadow: '0 0 6px #00f',
+              boxShadow: '0 0 4px #00f',
               objectFit: 'cover',
-              marginBottom: '8px'
+              marginBottom: '6px'
             }}
           />
-          <div style={{ fontSize: '16px', fontWeight: 700 }}>@{user.username || 'user'}</div>
-          <div style={{ fontSize: '12px', color: '#ccc', marginTop: '2px' }}>FID: {user.fid}</div>
+          <div style={{ fontSize: '14px', fontWeight: 700 }}>@{user.username || 'user'}</div>
+          <div style={{ fontSize: '11px', color: '#ccc', marginTop: '2px' }}>FID: {user.fid}</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-          <div style={{ fontSize: '16px', fontWeight: 800, marginBottom: '12px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 800, marginBottom: '8px' }}>
             BaseState {type === 'wallet' ? 'Wallet' : 'Contract'} Report
           </div>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '12px',
-            fontSize: '12px',
-            lineHeight: 1.4
+            gap: '8px',
+            fontSize: '11px',
+            lineHeight: 1.3
           }}>
             {fields.map((f, i) => (
               <div key={i}><strong>{f.label}</strong><br />{f.value}</div>
@@ -121,9 +121,9 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
         </div>
         <div style={{
           position: 'absolute',
-          bottom: '8px',
-          left: '16px',
-          fontSize: '11px',
+          bottom: '6px',
+          left: '12px',
+          fontSize: '10px',
           color: '#ccc'
         }}>
           Powered by BaseState
@@ -134,8 +134,8 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
         display: 'flex',
         justifyContent: 'center',
         flexWrap: 'wrap',
-        gap: '10px',
-        marginTop: '12px'
+        gap: '8px',
+        marginTop: '10px'
       }}>
         <button onClick={handleMint} style={buttonStyle('#00ff7f')}>🪙 Mint as NFT</button>
         <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>📥 Download Card</button>
@@ -147,14 +147,14 @@ export default function MintCard({ stats, type, user, onDownload, onShare, minte
 
 function buttonStyle(color: string): React.CSSProperties {
   return {
-    padding: '6px 14px',
-    fontSize: '12px',
+    padding: '5px 12px',
+    fontSize: '11px',
     background: '#fff',
     color,
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',
-    boxShadow: '0 0 3px rgba(0,0,0,0.1)',
-    minWidth: '100px'
+    boxShadow: '0 0 2px rgba(0,0,0,0.1)',
+    minWidth: '90px'
   }
 }
