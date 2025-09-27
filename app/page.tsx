@@ -250,8 +250,9 @@ export default function Home() {
                 pfpUrl: context.user.pfpUrl,
               }}
               onDownload={downloadCard}
-              onShare={handleShareImage} // فقط برای تصویر
+              onShare={handleShareImage}
               onMint={handleMint}
+              minted={!!mintedImageUrl} 
             />
           )}
         </>
@@ -263,4 +264,4 @@ export default function Home() {
     </div>
   </div>
 )
-} 
+}
