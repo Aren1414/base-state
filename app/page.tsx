@@ -229,8 +229,17 @@ export default function Home() {
         </>
       ) : stats ? (
         <>
+          
           <WalletStatus stats={stats} />
 
+          
+          <div style={{ textAlign: 'center', margin: '32px 0' }}>
+            <button className={styles.actionButton} onClick={handleShareText}>
+              📤 Share Stats as Text
+            </button>
+          </div>
+
+          
           {context?.user && (
             <MintCard
               stats={stats.data}
@@ -241,16 +250,10 @@ export default function Home() {
                 pfpUrl: context.user.pfpUrl,
               }}
               onDownload={downloadCard}
-              onShare={handleShareText}
+              onShare={handleShareImage} // فقط برای تصویر
               onMint={handleMint}
             />
           )}
-
-          <div style={{ textAlign: 'center', marginTop: '32px' }}>
-            <button className={styles.actionButton} onClick={handleShareImage}>
-              📸 Share Minted Card
-            </button>
-          </div>
         </>
       ) : (
         <p className={styles.statusMessage}>
@@ -259,5 +262,5 @@ export default function Home() {
       )}
     </div>
   </div>
-) 
-}
+)
+} 
