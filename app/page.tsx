@@ -227,7 +227,11 @@ export default function Home() {
               <MintCard
                 stats={stats.data}
                 type={stats.type}
-                user={context.user}
+                user={{
+                  fid: context.user.fid,
+                  username: context.user.username,
+                  pfp: context.user.pfp ?? { url: '' },
+                }}
                 onDownload={downloadCard}
                 onShare={handleShare}
               />
