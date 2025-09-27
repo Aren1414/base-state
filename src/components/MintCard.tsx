@@ -1,24 +1,9 @@
 import React from 'react'
 import { uploadToStorj } from '../lib/uploadToStorj'
-import { useAccount, useWriteContract } from 'wagmi'
-import { parseEther } from 'viem'
-import abi from '../lib/abi/BaseStateCard.json'
+import { useAccount, useWalletClient } from 'wagmi'
+import { mintCard } from '../lib/mintCard'
 
 const CONTRACT_ADDRESS = '0x972f0F6D9f1C25eC153729113048Cdfe6828515c'
-
-interface MintCardProps {
-  stats: any
-  type: 'wallet' | 'contract'
-  user: {
-    fid: number
-    username?: string
-    pfpUrl?: string
-  }
-  onDownload: () => void
-  onShare: () => void
-  minted: boolean
-  setMintedImageUrl: (url: string) => void
-}
 
 export default function MintCard({
   stats,
@@ -30,34 +15,28 @@ export default function MintCard({
   setMintedImageUrl,
 }: MintCardProps) {
   const { address: walletAddress, isConnected } = useAccount()
-  const { writeContractAsync } = useWriteContract()
+  const { data: walletClient } = useWalletClient()
 
   const handleMint = async () => {
     try {
-      if (!isConnected || !walletAddress) throw new Error('Wallet not connected')
+      if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
 
-      
       const card = document.getElementById('walletCard')
       if (!card) throw new Error('Card not found')
+
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+
       const imageUrl = await uploadToStorj(canvas)
       setMintedImageUrl(imageUrl)
 
-      
-      const txHash = await writeContractAsync({
-        address: CONTRACT_ADDRESS,
-        abi,
-        functionName: 'mint',
-        args: [imageUrl],
-        value: parseEther('0.0001'), 
-      })
-
-      console.log('✅ Mint tx sent:', txHash)
+      const tx = await mintCard(walletClient, walletAddress, imageUrl)
+      console.log('✅ Mint tx sent:', tx)
     } catch (err) {
       console.error('❌ Mint failed:', err)
     }
   }
+
 
   const fields =
     type === 'wallet'
