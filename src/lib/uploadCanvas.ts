@@ -3,15 +3,15 @@ export async function uploadCanvas(
   setMintStatus: (msg: string) => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    setMintStatus('🧪 Converting canvas to blob…')
+    setMintStatus('🧪 Step 1: Converting canvas to blob…')
 
     canvas.toBlob(async (blob) => {
       if (!blob) {
-        setMintStatus('❌ Canvas is empty')
+        setMintStatus('❌ Step 1 failed: Canvas is empty')
         return reject('Canvas is empty')
       }
 
-      setMintStatus('📤 Sending image to /api/upload…')
+      setMintStatus('📤 Step 2: Sending image to /api/upload…')
 
       const formData = new FormData()
       formData.append('file', blob, 'canvas.png')
@@ -25,15 +25,19 @@ export async function uploadCanvas(
         const data = await res.json()
 
         if (!res.ok) {
-          setMintStatus(`❌ Upload failed: ${data.error || 'Unknown error'}`)
+          setMintStatus(`❌ Step 2 failed: ${data.error || 'Upload failed'}`)
           return reject(data.error || 'Upload failed')
         }
 
-        setMintStatus(`✅ Image uploaded: ${data.url}`)
+        setMintStatus(`✅ Step 2 success: Image uploaded`)
         resolve(data.url)
       } catch (err: any) {
-        setMintStatus(`❌ Upload error: ${err.message || 'Unknown error'}`)
-        reject(err.message || 'Upload error')
+        const message =
+          typeof err === 'string'
+            ? err
+            : err?.message || JSON.stringify(err) || 'Upload error'
+        setMintStatus(`❌ Step 2 error: ${message}`)
+        reject(message)
       }
     }, 'image/png', 0.8)
   })
