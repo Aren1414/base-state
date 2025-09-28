@@ -45,15 +45,17 @@ export default function MintCard({
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-      const { fileName, downloadUrl } = await uploadCanvas(canvas)
-      setDownloadUrl(downloadUrl)
-      setMintedImageUrl(downloadUrl)
+      
+      const downloadLink = await uploadCanvas(canvas, setMintStatus)
+
+      setDownloadUrl(downloadLink)
+      setMintedImageUrl(downloadLink)
 
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mint',
-        args: [downloadUrl],
+        args: [downloadLink],
         account: walletAddress,
         value: parseEther('0.0001'),
       })
@@ -186,11 +188,11 @@ export default function MintCard({
           🪙 Mint as NFT
         </button>
 
-        <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>
+        <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!downloadUrl}>
           📥 Download Card
         </button>
 
-        <button onClick={onShare} style={buttonStyle('#00f0ff')} disabled={!minted}>
+        <button onClick={onShare} style={buttonStyle('#00f0ff')} disabled={!downloadUrl}>
           📸 Share Minted Card
         </button>
       </div>
