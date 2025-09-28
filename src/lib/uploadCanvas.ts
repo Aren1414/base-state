@@ -1,37 +1,40 @@
 export async function uploadCanvas(
-  canvas: HTMLCanvasElement
-): Promise<{ fileName: string; downloadUrl: string }> {
+  canvas: HTMLCanvasElement,
+  setMintStatus: (msg: string) => void
+): Promise<string> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(async (blob) => {
-      if (!blob) return reject('Canvas is empty')
+      if (!blob) {
+        return reject('Canvas is empty')
+      }
 
       try {
         
-        const formData = new FormData()
-        formData.append('file', blob, 'wallet-card.png')
-
         const apiUrl = `${window.location.origin}/api/upload`
-        const res = await fetch(apiUrl, { method: 'POST', body: formData })
-        if (!res.ok) return reject('Failed to get presigned URL')
+        const res = await fetch(apiUrl)
+        const data: {
+          uploadUrl?: string
+          downloadUrl?: string
+          error?: string
+        } = await res.json()
 
-        const data = await res.json()
-        if (!data.url || !data.fileName) return reject('Invalid response from server')
+        if (!res.ok || !data.uploadUrl || !data.downloadUrl) {
+          return reject(data.error || 'Failed to get presigned URL')
+        }
 
-        
-        const uploadRes = await fetch(data.url, {
+        // آپلود فایل به presigned URL
+        const uploadRes = await fetch(data.uploadUrl, {
           method: 'PUT',
           body: blob,
           headers: { 'Content-Type': 'image/png' },
         })
+
         if (!uploadRes.ok) return reject('Upload failed')
 
         
-        const SHARE_ID = 'jxfrnll6xmowipbfjfhb2xxcrm6q'
-        const downloadUrl = `https://link.storjshare.io/raw/${SHARE_ID}/wallet-cards/${data.fileName}`
-
-        resolve({ fileName: data.fileName, downloadUrl })
+        resolve(data.downloadUrl)
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Unknown error'
+        const message = err instanceof Error ? err.message : 'Unknown client error'
         reject(message)
       }
     }, 'image/png', 0.9)
