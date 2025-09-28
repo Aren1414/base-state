@@ -3,60 +3,50 @@ export async function uploadCanvas(
   setMintStatus: (msg: string) => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    setMintStatus('🧪 Step 1: Converting canvas to blob…')
+    setMintStatus('🧪 Step 1: Converting canvas to blob…');
 
     canvas.toBlob(async (blob) => {
       if (!blob) {
-        setMintStatus('❌ Step 1 failed: Canvas is empty')
-        return reject('Canvas is empty')
+        setMintStatus('❌ Step 1 failed: Canvas is empty');
+        return reject('Canvas is empty');
       }
 
-      setMintStatus('📤 Step 2: Preparing image for upload…')
+      setMintStatus('📤 Step 2: Requesting presigned URL…');
 
       try {
-        const formData = new FormData()
-        formData.append('file', blob, 'canvas.png') 
+        const res = await fetch('/api/upload');
+        const data = await res.json();
 
-        setMintStatus('📤 Step 3: Sending image to /api/upload…')
+        if (!res.ok || !data.url) {
+          setMintStatus(`❌ Step 2 failed: ${data.error || 'Failed to get presigned URL'}`);
+          return reject(data.error || 'Failed to get presigned URL');
+        }
 
-        const res = await fetch('/api/upload', {
-          method: 'POST',
+        const formData = new FormData();
+        formData.append('file', blob, data.fileName);
+
+        setMintStatus('📤 Step 3: Uploading image to Storj…');
+
+        const uploadRes = await fetch(data.url, {
+          method: 'PUT',
           body: formData,
-        })
+        });
 
-        const raw = await res.text()
-        let data: any = {}
-
-        try {
-          data = raw ? JSON.parse(raw) : {}
-        } catch (parseErr) {
-          setMintStatus(`❌ Step 3 failed: Invalid JSON → ${raw}`)
-          return reject('Invalid JSON response')
+        if (!uploadRes.ok) {
+          setMintStatus(`❌ Step 3 failed: Upload failed`);
+          return reject('Upload failed');
         }
 
-        
-        if (!res.ok) {
-          setMintStatus(
-            `❌ Step 3 failed [${data.stage || 'unknown'}]: ${data.error || 'Upload failed'} → ${data.debug || ''}`
-          )
-          return reject(data.error || 'Upload failed')
-        }
-
-        if (!data.url) {
-          setMintStatus(`❌ Step 3 failed: No URL returned, stage: ${data.stage || 'unknown'}`)
-          return reject('No URL returned')
-        }
-
-        setMintStatus(`✅ Step 3 success [${data.stage}]: Image uploaded → ${data.url}`)
-        resolve(data.url)
+        setMintStatus(`✅ Step 3 success: Image uploaded → ${data.url}`);
+        resolve(data.url);
       } catch (err: any) {
         const message =
           typeof err === 'string'
             ? err
-            : err?.message || JSON.stringify(err) || 'Upload error'
-        setMintStatus(`❌ Step 3 error: ${message}`)
-        reject(message)
+            : err?.message || JSON.stringify(err) || 'Upload error';
+        setMintStatus(`❌ Step 2 error: ${message}`);
+        reject(message);
       }
-    }, 'image/png', 0.8)
-  })
+    }, 'image/png', 0.8);
+  });
 }
