@@ -24,7 +24,6 @@ export async function uploadCanvas(
         })
         if (!uploadRes.ok) return reject('Upload failed')
 
-        
         const rawUrl = data.downloadUrl.replace('/s/', '/raw/')
 
         resolve(rawUrl)
