@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { s3, storjBucket } from '../../../lib/storjClient'
 
@@ -8,7 +7,10 @@ export async function POST(req: Request) {
     const file = formData.get('file') as File | null
 
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
+      return new Response(JSON.stringify({ error: 'No file uploaded' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
@@ -24,11 +26,21 @@ export async function POST(req: Request) {
 
     await s3.send(command)
 
-    return NextResponse.json({
-      url: `${process.env.STORJ_ENDPOINT}/${storjBucket}/${fileName}`,
+    const url = `${process.env.STORJ_ENDPOINT}/${storjBucket}/${fileName}`
+
+    return new Response(JSON.stringify({ url }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     })
-  } catch (err) {
-    console.error('Upload failed:', err)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+  } catch (err: any) {
+    const message =
+      typeof err === 'string'
+        ? err
+        : err?.message || JSON.stringify(err) || 'Upload failed'
+
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
