@@ -185,7 +185,11 @@ export default function MintCard({
         </button>
 
         
-        <a href={downloadUrl || '#'} download="BaseState_Wallet_Card.png" style={{ pointerEvents: downloadUrl ? 'auto' : 'none' }}>
+        <a
+          href={downloadUrl || '#'}
+          download="BaseState_Wallet_Card.png"
+          style={{ pointerEvents: downloadUrl ? 'auto' : 'none' }}
+        >
           <button style={buttonStyle('#7f00ff')} disabled={!downloadUrl}>
             📥 Download Card
           </button>
