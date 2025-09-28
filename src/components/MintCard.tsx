@@ -49,19 +49,15 @@ export default function MintCard({
 
       
       const uploadedLink = await uploadCanvas(canvas, setMintStatus)
-
-      
-      const rawLink = uploadedLink.replace('/s/', '/raw/')
-
-      setDownloadUrl(rawLink)
-      setMintedImageUrl(rawLink)
+      setDownloadUrl(uploadedLink)
+      setMintedImageUrl(uploadedLink)
 
       
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mint',
-        args: [rawLink],
+        args: [uploadedLink],
         account: walletAddress,
         value: parseEther('0.0001'),
       })
@@ -196,15 +192,17 @@ export default function MintCard({
           🪙 Mint as NFT
         </button>
 
-        <a
-          href={downloadUrl || '#'}
-          download="BaseState_Wallet_Card.png"
-          style={{ pointerEvents: downloadUrl ? 'auto' : 'none' }}
+        <button
+          onClick={() => {
+            if (!downloadUrl) return
+            
+            window.open(downloadUrl, '_blank')
+          }}
+          style={buttonStyle('#7f00ff')}
+          disabled={!downloadUrl}
         >
-          <button style={buttonStyle('#7f00ff')} disabled={!downloadUrl}>
-            📥 Download Card
-          </button>
-        </a>
+          📥 Download Card
+        </button>
 
         <button
           onClick={() => {
@@ -236,4 +234,4 @@ function buttonStyle(color: string): React.CSSProperties {
     boxShadow: '0 0 2px rgba(0,0,0,0.1)',
     minWidth: '90px',
   }
-}
+  }
