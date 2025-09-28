@@ -11,12 +11,14 @@ export async function uploadCanvas(
         return reject('Canvas is empty')
       }
 
-      setMintStatus('📤 Step 2: Sending image to /api/upload…')
-
-      const formData = new FormData()
-      formData.append('file', blob, 'canvas.png') 
+      setMintStatus('📤 Step 2: Preparing image for upload…')
 
       try {
+        const formData = new FormData()
+        formData.append('file', blob, 'canvas.png') 
+
+        setMintStatus('📤 Step 3: Sending image to /api/upload…')
+
         const res = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
@@ -28,29 +30,31 @@ export async function uploadCanvas(
         try {
           data = raw ? JSON.parse(raw) : {}
         } catch (parseErr) {
-          setMintStatus(`❌ Step 2 failed: Invalid JSON → ${raw}`)
+          setMintStatus(`❌ Step 3 failed: Invalid JSON → ${raw}`)
           return reject('Invalid JSON response')
         }
 
         
         if (!res.ok) {
-          setMintStatus(`❌ Step 2 failed [${data.stage || 'unknown'}]: ${data.error || 'Upload failed'} → ${data.debug || ''}`)
+          setMintStatus(
+            `❌ Step 3 failed [${data.stage || 'unknown'}]: ${data.error || 'Upload failed'} → ${data.debug || ''}`
+          )
           return reject(data.error || 'Upload failed')
         }
 
         if (!data.url) {
-          setMintStatus(`❌ Step 2 failed: No URL returned, stage: ${data.stage || 'unknown'}`)
+          setMintStatus(`❌ Step 3 failed: No URL returned, stage: ${data.stage || 'unknown'}`)
           return reject('No URL returned')
         }
 
-        setMintStatus(`✅ Step 2 success [${data.stage}]: Image uploaded → ${data.url}`)
+        setMintStatus(`✅ Step 3 success [${data.stage}]: Image uploaded → ${data.url}`)
         resolve(data.url)
       } catch (err: any) {
         const message =
           typeof err === 'string'
             ? err
             : err?.message || JSON.stringify(err) || 'Upload error'
-        setMintStatus(`❌ Step 2 error: ${message}`)
+        setMintStatus(`❌ Step 3 error: ${message}`)
         reject(message)
       }
     }, 'image/png', 0.8)
