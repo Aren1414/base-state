@@ -34,6 +34,7 @@ export async function POST(req: Request) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
       },
     })
   } catch (err: any) {
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
       },
     })
   }
