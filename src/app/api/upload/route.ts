@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import formidable, { File, Fields, Files } from 'formidable'
+import formidable from 'formidable'
 import fs from 'fs'
 import { storjBucket, s3 } from '../../../lib/storjClient'
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const form = new formidable.IncomingForm()
   
   return new Promise((resolve) => {
-    form.parse(req as any, async (err: Error | null, fields: Fields, files: Files) => {
+    form.parse(req as any, async (err: any, fields: any, files: any) => {
       if (err) {
         return resolve(
           new Response(JSON.stringify({
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         )
       }
 
-      const file = files.file as File
+      const file = files.file
       if (!file) {
         return resolve(
           new Response(JSON.stringify({ error: 'No file uploaded' }), {
