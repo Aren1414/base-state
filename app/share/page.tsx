@@ -6,8 +6,7 @@ type Props = {
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const imageUrl =
-    searchParams.image ||
-    "https://base-state.vercel.app/embed.png" 
+    searchParams.image || "https://base-state.vercel.app/embed.png" 
 
   return {
     title: "My Minted NFT",
