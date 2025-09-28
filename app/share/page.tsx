@@ -1,7 +1,6 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import ShareHead from './ShareHead'
 
 export default function SharePage() {
   const searchParams = useSearchParams()
@@ -9,7 +8,26 @@ export default function SharePage() {
 
   return (
     <>
-      <ShareHead />
+      <head>
+        <title>My Minted NFT</title>
+        <meta
+          name="fc:frame"
+          content={JSON.stringify({
+            version: '1',
+            imageUrl,
+            button: {
+              title: 'View in Mini App',
+              action: {
+                type: 'launch_frame',
+                name: 'base-state',
+                url: 'https://base-state.vercel.app',
+              },
+            },
+          })}
+        />
+        <meta property="og:image" content={imageUrl} />
+      </head>
+
       <main style={{ padding: '20px', textAlign: 'center' }}>
         <h1>Shared NFT</h1>
         <p>This is the preview of your minted NFT card 👇</p>
