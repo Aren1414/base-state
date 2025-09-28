@@ -13,8 +13,10 @@ export async function uploadCanvas(
 
       try {
         setMintStatus('📤 Step 2: Requesting presigned URL…');
-        const res = await fetch('/api/upload'); // GET
+        const res = await fetch('/api/upload'); // GET request
         const text = await res.text();
+
+        console.log('Raw server response:', text);
 
         let data: any;
         try {
