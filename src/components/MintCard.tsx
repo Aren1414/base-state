@@ -43,7 +43,6 @@ export default function MintCard({
 
       
       const downloadLink = await uploadCanvas(canvas, setMintStatus)
-
       setDownloadUrl(downloadLink)
       setMintedImageUrl(downloadLink)
 
