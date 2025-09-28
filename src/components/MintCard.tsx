@@ -16,6 +16,8 @@ interface MintCardProps {
   }
   minted: boolean
   setMintedImageUrl: (url: string) => void
+  onDownload: () => void
+  onShare: () => void
 }
 
 export default function MintCard({
@@ -24,6 +26,8 @@ export default function MintCard({
   user,
   minted,
   setMintedImageUrl,
+  onDownload,
+  onShare,
 }: MintCardProps) {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
@@ -31,7 +35,7 @@ export default function MintCard({
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
 
   const handleMint = async () => {
-    setMintStatus('Minting…')
+    setMintStatus('🧪 Minting…')
     try {
       if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
 
@@ -39,29 +43,25 @@ export default function MintCard({
       if (!card) throw new Error('Card not found in DOM')
 
       const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(card, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-      })
+      const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-      const imageUrl = await uploadCanvas(canvas, setMintStatus)
-      setDownloadUrl(imageUrl)
-      setMintedImageUrl(imageUrl)
+      const { fileName, downloadUrl } = await uploadCanvas(canvas)
+      setDownloadUrl(downloadUrl)
+      setMintedImageUrl(downloadUrl)
 
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mint',
-        args: [imageUrl],
+        args: [downloadUrl],
         account: walletAddress,
         value: parseEther('0.0001'),
       })
 
-      setMintStatus('Mint successful!')
+      setMintStatus('✅ Mint successful!')
     } catch (err: any) {
       const message = typeof err === 'string' ? err : err?.message || 'Unknown error'
-      setMintStatus(`Mint failed: ${message}`)
+      setMintStatus(`❌ Mint failed: ${message}`)
     }
   }
 
@@ -186,11 +186,13 @@ export default function MintCard({
           🪙 Mint as NFT
         </button>
 
-        <a href={downloadUrl || '#'} download style={{ pointerEvents: downloadUrl ? 'auto' : 'none' }}>
-          <button style={buttonStyle('#7f00ff')} disabled={!downloadUrl}>
-            📥 Download Card
-          </button>
-        </a>
+        <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!minted}>
+          📥 Download Card
+        </button>
+
+        <button onClick={onShare} style={buttonStyle('#00f0ff')} disabled={!minted}>
+          📸 Share Minted Card
+        </button>
       </div>
     </div>
   )
