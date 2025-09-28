@@ -16,8 +16,6 @@ interface MintCardProps {
   }
   minted: boolean
   setMintedImageUrl: (url: string) => void
-  onDownload: () => void
-  onShare: () => void
 }
 
 export default function MintCard({
@@ -26,8 +24,6 @@ export default function MintCard({
   user,
   minted,
   setMintedImageUrl,
-  onDownload,
-  onShare,
 }: MintCardProps) {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
@@ -188,11 +184,25 @@ export default function MintCard({
           🪙 Mint as NFT
         </button>
 
-        <button onClick={onDownload} style={buttonStyle('#7f00ff')} disabled={!downloadUrl}>
-          📥 Download Card
-        </button>
+        
+        <a href={downloadUrl || '#'} download="BaseState_Wallet_Card.png" style={{ pointerEvents: downloadUrl ? 'auto' : 'none' }}>
+          <button style={buttonStyle('#7f00ff')} disabled={!downloadUrl}>
+            📥 Download Card
+          </button>
+        </a>
 
-        <button onClick={onShare} style={buttonStyle('#00f0ff')} disabled={!downloadUrl}>
+        
+        <button
+          onClick={() => {
+            if (!downloadUrl) return
+            const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+              '📸 Just minted my BaseState NFT card!'
+            )}&embeds[]=${encodeURIComponent(downloadUrl)}`
+            window.open(warpcastUrl, '_blank')
+          }}
+          style={buttonStyle('#00f0ff')}
+          disabled={!downloadUrl}
+        >
           📸 Share Minted Card
         </button>
       </div>
