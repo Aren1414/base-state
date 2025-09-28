@@ -50,7 +50,7 @@ export default function MintCard({
       })
 
       setMintStatus('🧪 Uploading image to server…')
-      const imageUrl = await uploadCanvas(canvas)
+      const imageUrl = await uploadCanvas(canvas, setMintStatus)
       setMintedImageUrl(imageUrl)
 
       setMintStatus('🧪 Sending mint transaction…')
