@@ -22,6 +22,7 @@ export async function GET() {
 
   try {
     const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 * 365 });
+
     return new Response(JSON.stringify({ url, fileName }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
