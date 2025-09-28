@@ -228,8 +228,6 @@ export default function Home() {
                   username: context.user.username,
                   pfpUrl: context.user.pfpUrl,
                 }}
-                onDownload={downloadCard}
-                onShare={handleShareImage}
                 minted={!!mintedImageUrl}
                 setMintedImageUrl={setMintedImageUrl}
               />
