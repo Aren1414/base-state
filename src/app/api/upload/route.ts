@@ -12,9 +12,7 @@ export async function POST(req: Request) {
         debug: 'formData.get("file") returned null',
       }), {
         status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       })
     }
 
@@ -26,7 +24,6 @@ export async function POST(req: Request) {
       Key: fileName,
       Body: buffer,
       ContentType: file.type || 'image/png',
-      ACL: 'public-read',
     })
 
     await s3.send(command)
@@ -35,26 +32,17 @@ export async function POST(req: Request) {
 
     return new Response(JSON.stringify({ url }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      },
+      headers: { 'Content-Type': 'application/json' },
     })
   } catch (err: any) {
-    const message =
-      typeof err === 'string'
-        ? err
-        : err?.message || 'Upload failed'
+    console.error("❌ Upload error:", err)  
 
     return new Response(JSON.stringify({
       error: 'Upload failed',
-      debug: message,
+      debug: err?.message || JSON.stringify(err),
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      },
+      headers: { 'Content-Type': 'application/json' },
     })
   }
 }
