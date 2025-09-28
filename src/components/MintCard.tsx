@@ -234,4 +234,4 @@ function buttonStyle(color: string): React.CSSProperties {
     boxShadow: '0 0 2px rgba(0,0,0,0.1)',
     minWidth: '90px',
   }
-  }
+}
