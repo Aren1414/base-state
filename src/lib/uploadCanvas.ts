@@ -22,16 +22,15 @@ export async function uploadCanvas(
           body: formData,
         })
 
-        const contentType = res.headers.get('Content-Type') || ''
-        const isJson = contentType.includes('application/json')
+        const raw = await res.text()
+        let data: any = {}
 
-        if (!isJson) {
-          setMintStatus('❌ Step 2 failed: Server did not return JSON')
-          return reject('Server response is not JSON')
+        try {
+          data = raw ? JSON.parse(raw) : {}
+        } catch (parseErr) {
+          setMintStatus(`❌ Step 2 failed: Invalid JSON → ${raw}`)
+          return reject('Invalid JSON response')
         }
-
-        const text = await res.text()
-        const data = text ? JSON.parse(text) : {}
 
         if (!res.ok || !data.url) {
           setMintStatus(`❌ Step 2 failed: ${data.error || 'Upload failed'}`)
