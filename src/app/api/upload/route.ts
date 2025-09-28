@@ -9,7 +9,9 @@ export async function POST(req: Request) {
     if (!file) {
       return new Response(JSON.stringify({ error: 'No file uploaded' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
     }
 
@@ -30,7 +32,9 @@ export async function POST(req: Request) {
 
     return new Response(JSON.stringify({ url }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
   } catch (err: any) {
     const message =
@@ -40,7 +44,9 @@ export async function POST(req: Request) {
 
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
   }
 }
