@@ -22,7 +22,8 @@ export async function uploadCanvas(
         })
         if (!uploadRes.ok) return reject('Upload failed')
 
-        resolve(data.downloadUrl)
+        const rawUrl = getRawUrl(data.downloadUrl)
+        resolve(rawUrl)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown client error'
         reject(message)
@@ -31,14 +32,12 @@ export async function uploadCanvas(
   })
 }
 
-
 export function getRawUrl(presignedUrl: string) {
-  
   try {
     const url = new URL(presignedUrl)
-    url.search = '' 
+    url.search = ''
     return url.toString()
   } catch {
-    return presignedUrl 
+    return presignedUrl
   }
 }
