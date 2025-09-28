@@ -26,9 +26,13 @@ export async function GET() {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (err) {
+  } catch (err: unknown) {
+    let debugMessage = 'Unknown error';
+    if (err instanceof Error) {
+      debugMessage = err.message;
+    }
     return new Response(
-      JSON.stringify({ error: 'Failed to generate presigned URL', debug: err.message }),
+      JSON.stringify({ error: 'Failed to generate presigned URL', debug: debugMessage }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
