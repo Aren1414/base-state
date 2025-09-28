@@ -34,14 +34,15 @@ export default function MintCard({
   const [mintStatus, setMintStatus] = useState<string | null>(null)
 
   const handleMint = async () => {
-    setMintStatus('🧪 Mint button clicked')
+    setMintStatus('🧪 Step 0: Mint button clicked')
     try {
       if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
 
+      setMintStatus('🧪 Step 1: Locating walletCard DOM…')
       const card = document.getElementById('walletCard')
       if (!card) throw new Error('Card not found in DOM')
 
-      setMintStatus('🧪 Generating canvas…')
+      setMintStatus('🧪 Step 2: Generating canvas from DOM…')
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, {
         scale: 2,
@@ -49,11 +50,11 @@ export default function MintCard({
         backgroundColor: null,
       })
 
-      setMintStatus('🧪 Uploading image to server…')
+      setMintStatus('🧪 Step 3: Uploading canvas to server…')
       const imageUrl = await uploadCanvas(canvas, setMintStatus)
       setMintedImageUrl(imageUrl)
 
-      setMintStatus('🧪 Sending mint transaction…')
+      setMintStatus('🧪 Step 4: Sending mint transaction…')
       const tx = await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
@@ -63,9 +64,13 @@ export default function MintCard({
         value: parseEther('0.0001'),
       })
 
-      setMintStatus(`✅ Mint tx sent: ${tx}`)
+      setMintStatus(`✅ Step 4 success: Mint tx sent → ${tx}`)
     } catch (err: any) {
-      setMintStatus(`❌ Mint failed: ${err.message || 'Unknown error'}`)
+      const message =
+        typeof err === 'string'
+          ? err
+          : err?.message || JSON.stringify(err) || 'Unknown error'
+      setMintStatus(`❌ Mint failed: ${message}`)
     }
   }
 
