@@ -1,37 +1,42 @@
 export async function uploadCanvas(
-  canvas: HTMLCanvasElement,
-  setMintStatus: (msg: string) => void
-): Promise<string> {
+  canvas: HTMLCanvasElement
+): Promise<{ fileName: string; downloadUrl: string }> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(async (blob) => {
-      if (!blob) {
-        return reject('Canvas is empty')
-      }
+      if (!blob) return reject('Canvas is empty')
 
       try {
         const apiUrl = `${window.location.origin}/api/upload`
-        const res = await fetch(apiUrl)
-        const data = await res.json()
+        const res = await fetch(apiUrl, { method: 'GET' })
+        const raw = await res.text()
 
-        if (!res.ok || !data.uploadUrl) {
-          return reject(data.error || 'Failed to get presigned URL')
+        let data: any
+        try {
+          data = JSON.parse(raw)
+        } catch {
+          return reject('Invalid JSON from server')
+        }
+
+        if (!res.ok || !data.url || !data.fileName) {
+          return reject('Failed to get presigned URL')
         }
 
         
-        const uploadRes = await fetch(data.uploadUrl, {
+        const uploadRes = await fetch(data.url, {
           method: 'PUT',
           body: blob,
           headers: { 'Content-Type': 'image/png' },
         })
 
-        if (!uploadRes.ok) {
-          return reject('Upload failed')
-        }
+        if (!uploadRes.ok) return reject('Upload failed')
 
         
-        resolve(data.downloadUrl)
+        const SHARE_ID = 'jxfrnll6xmowipbfjfhb2xxcrm6q' 
+        const downloadUrl = `https://link.storjshare.io/raw/${SHARE_ID}/wallet-cards/${data.fileName}`
+
+        resolve({ fileName: data.fileName, downloadUrl })
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Unknown client error'
+        const message = err instanceof Error ? err.message : 'Unknown error'
         reject(message)
       }
     }, 'image/png', 0.9)
