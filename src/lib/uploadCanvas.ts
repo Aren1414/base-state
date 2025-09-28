@@ -36,9 +36,7 @@ export async function uploadCanvas(
         const uploadRes = await fetch(data.url, {
           method: 'PUT',
           body: blob,
-          headers: {
-            'Content-Type': 'image/png',
-          },
+          headers: { 'Content-Type': 'image/png' },
         });
 
         if (!uploadRes.ok) {
