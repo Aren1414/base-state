@@ -51,20 +51,22 @@ export default function MintCard({
       const uploadedLink = await uploadCanvas(canvas, setMintStatus)
 
       
-      setDownloadUrl(uploadedLink)
+      const rawLink = uploadedLink.replace('/s/', '/raw/')
+
+      setDownloadUrl(rawLink)
+      setMintedImageUrl(rawLink)
 
       
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mint',
-        args: [uploadedLink],
+        args: [rawLink],
         account: walletAddress,
         value: parseEther('0.0001'),
       })
 
       setMintStatus('✅ Mint successful!')
-      setMintedImageUrl(uploadedLink)
     } catch (err: any) {
       const message = typeof err === 'string' ? err : err?.message || 'Unknown error'
       setMintStatus(`❌ Mint failed: ${message}`)
