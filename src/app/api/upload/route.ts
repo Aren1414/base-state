@@ -15,6 +15,7 @@ export async function POST(req: Request) {
   return new Promise((resolve) => {
     form.parse(req as any, async (err: any, fields: any, files: any) => {
       if (err) {
+        console.error("❌ Form parse error:", err)
         return resolve(
           new Response(JSON.stringify({
             error: 'Form parse error',
@@ -36,19 +37,20 @@ export async function POST(req: Request) {
         )
       }
 
-      
-      const buffer = await file.arrayBuffer ? Buffer.from(await file.arrayBuffer()) : Buffer.from(file._writeStream?.toBuffer?.() || [])
-
-      const fileName = `BaseStateCard_${Date.now()}.png`
-
-      const command = new PutObjectCommand({
-        Bucket: storjBucket,
-        Key: fileName,
-        Body: buffer,
-        ContentType: file.mimetype || 'image/png',
-      })
-
       try {
+        
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
+        const fileName = `BaseStateCard_${Date.now()}.png`
+
+        const command = new PutObjectCommand({
+          Bucket: storjBucket,
+          Key: fileName,
+          Body: buffer,
+          ContentType: file.mimetype || 'image/png',
+        })
+
         await s3.send(command)
 
         
