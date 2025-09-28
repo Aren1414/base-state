@@ -1,7 +1,7 @@
 import { S3Client } from '@aws-sdk/client-s3'
 
-const accessKey = process.env.STORJ_ACCESSKEY!
-const secretKey = process.env.STORJ_SECRETKEY!
+const accessKey = process.env.STORJ_ACCESS_KEY!
+const secretKey = process.env.STORJ_SECRET_KEY!
 const endpoint = process.env.STORJ_ENDPOINT!
 const bucket = process.env.STORJ_BUCKET!
 
