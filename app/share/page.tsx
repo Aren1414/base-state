@@ -1,12 +1,11 @@
 import { Metadata } from "next"
 
-type Props = {
+interface PageProps {
   searchParams: { image?: string }
 }
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const imageUrl =
-    searchParams.image || "https://base-state.vercel.app/embed.png" 
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const imageUrl = searchParams?.image ?? "https://base-state.vercel.app/embed.png"
 
   return {
     title: "My Minted NFT",
@@ -32,9 +31,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 }
 
-export default function SharePage({ searchParams }: Props) {
-  const imageUrl =
-    searchParams.image || "https://base-state.vercel.app/embed.png"
+export default function SharePage({ searchParams }: PageProps) {
+  const imageUrl = searchParams?.image ?? "https://base-state.vercel.app/embed.png"
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
