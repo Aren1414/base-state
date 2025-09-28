@@ -14,7 +14,7 @@ export async function uploadCanvas(
       setMintStatus('📤 Step 2: Sending image to /api/upload…')
 
       const formData = new FormData()
-      formData.append('file', blob, 'canvas.png')
+      formData.append('file', blob, 'canvas.png') 
 
       try {
         const res = await fetch('/api/upload', {
@@ -32,12 +32,17 @@ export async function uploadCanvas(
           return reject('Invalid JSON response')
         }
 
-        if (!res.ok || !data.url) {
+        if (!res.ok) {
           setMintStatus(`❌ Step 2 failed: ${data.error || 'Upload failed'}`)
           return reject(data.error || 'Upload failed')
         }
 
-        setMintStatus(`✅ Step 2 success: Image uploaded`)
+        if (!data.url) {
+          setMintStatus(`❌ Step 2 failed: No URL returned`)
+          return reject('No URL returned')
+        }
+
+        setMintStatus(`✅ Step 2 success: Image uploaded → ${data.url}`)
         resolve(data.url)
       } catch (err: any) {
         const message =
