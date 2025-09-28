@@ -9,7 +9,7 @@ export async function uploadCanvas(
       try {
         const apiUrl = `${window.location.origin}/api/upload`
         const res = await fetch(apiUrl)
-        const data: { uploadUrl?: string; downloadUrl?: string; error?: string } = await res.json()
+        const data: { uploadUrl?: string; downloadUrl?: string; fileName?: string; error?: string } = await res.json()
 
         if (!res.ok || !data.uploadUrl || !data.downloadUrl) {
           return reject(data.error || 'Failed to get presigned URL')
@@ -23,9 +23,8 @@ export async function uploadCanvas(
         })
         if (!uploadRes.ok) return reject('Upload failed')
 
-        const publicUrl = data.downloadUrl  
-
-        resolve(publicUrl)
+        
+        resolve(data.downloadUrl)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown client error'
         reject(message)
