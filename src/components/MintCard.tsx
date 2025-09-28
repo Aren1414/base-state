@@ -194,14 +194,14 @@ export default function MintCard({
 
         <button
           onClick={() => {
-            if (!downloadUrl) return
-            
-            window.open(downloadUrl, '_blank')
-          }}
-          style={buttonStyle('#7f00ff')}
-          disabled={!downloadUrl}
+          if (!downloadUrl) return
+  
+          window.open(downloadUrl, '_blank')
+         }}
+         style={buttonStyle('#7f00ff')}
+         disabled={!downloadUrl}
         >
-          📥 Download Card
+         📥 Download Card
         </button>
 
         <button
