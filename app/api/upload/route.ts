@@ -18,7 +18,12 @@ export async function GET() {
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 600 })
 
     
-    const downloadUrl = `https://link.storjshare.io/s/${storjBucket}/${fileName}`
+    const downloadCommand = new PutObjectCommand({
+      Bucket: storjBucket,
+      Key: fileName,
+      ContentType: 'image/png',
+    })
+    const downloadUrl = await getSignedUrl(s3, downloadCommand, { expiresIn: 600 })
 
     return new Response(
       JSON.stringify({ uploadUrl, downloadUrl }),
