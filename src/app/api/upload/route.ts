@@ -1,11 +1,11 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import formidable from 'formidable'
-import { s3, storjBucket } from '../../../lib/storjClient'
+import { storjBucket, s3 } from '../../../lib/storjClient'
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, 
   },
 }
 
@@ -37,8 +37,17 @@ export async function POST(req: Request) {
       }
 
       try {
-        const arrayBuffer = await file.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
+        
+        let buffer: Buffer
+        if (file.arrayBuffer) {
+          buffer = Buffer.from(await file.arrayBuffer())
+        } else if (file.filepath) {
+          // Node.js environment
+          const fs = await import('fs')
+          buffer = fs.readFileSync(file.filepath)
+        } else {
+          throw new Error('Cannot read uploaded file')
+        }
 
         const fileName = `BaseStateCard_${Date.now()}.png`
         const command = new PutObjectCommand({
@@ -50,6 +59,7 @@ export async function POST(req: Request) {
 
         await s3.send(command)
 
+        
         const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 * 365 })
 
         resolve(
