@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     const message =
       typeof err === 'string'
         ? err
-        : err?.message || JSON.stringify(err) || 'Upload failed'
+        : err?.message || 'Upload failed'
 
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
