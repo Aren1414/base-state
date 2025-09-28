@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { uploadCanvas } from '../lib/uploadCanvas'
+import { uploadCanvas, getRawUrl } from '../lib/uploadCanvas'
 import { useAccount, useWalletClient } from 'wagmi'
 import { parseEther } from 'viem'
 import abi from '../lib/abi/BaseStateCard.json'
@@ -93,6 +93,15 @@ export default function MintCard({
           { label: 'AA Transactions', value: stats.allAaTransactions },
           { label: 'Post Tokens', value: stats.postTokens },
         ]
+
+  const handleShareCard = () => {
+    if (!downloadUrl) return
+    const rawUrl = getRawUrl(downloadUrl) // لینک دائمی برای preview
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+      '📸 Just minted my BaseState NFT card!'
+    )}&embeds[]=${encodeURIComponent(rawUrl)}`
+    window.open(warpcastUrl, '_blank')
+  }
 
   return (
     <div style={{ marginTop: '16px', padding: '8px', boxSizing: 'border-box' }}>
@@ -194,24 +203,17 @@ export default function MintCard({
 
         <button
           onClick={() => {
-          if (!downloadUrl) return
-  
-          window.open(downloadUrl, '_blank')
-         }}
-         style={buttonStyle('#7f00ff')}
-         disabled={!downloadUrl}
+            if (!downloadUrl) return
+            window.open(downloadUrl, '_blank')
+          }}
+          style={buttonStyle('#7f00ff')}
+          disabled={!downloadUrl}
         >
-         📥 Download Card
+          📥 Download Card
         </button>
 
         <button
-          onClick={() => {
-            if (!downloadUrl) return
-            const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-              '📸 Just minted my BaseState NFT card!'
-            )}&embeds[]=${encodeURIComponent(downloadUrl)}`
-            window.open(warpcastUrl, '_blank')
-          }}
+          onClick={handleShareCard}
           style={buttonStyle('#00f0ff')}
           disabled={!downloadUrl}
         >
@@ -234,4 +236,4 @@ function buttonStyle(color: string): React.CSSProperties {
     boxShadow: '0 0 2px rgba(0,0,0,0.1)',
     minWidth: '90px',
   }
-}
+  }
