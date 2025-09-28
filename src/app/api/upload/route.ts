@@ -7,7 +7,10 @@ export async function POST(req: Request) {
     const file = formData.get('file') as File | null
 
     if (!file) {
-      return new Response(JSON.stringify({ error: 'No file uploaded' }), {
+      return new Response(JSON.stringify({
+        error: 'No file uploaded',
+        debug: 'formData.get("file") returned null',
+      }), {
         status: 400,
         headers: {
           'Content-Type': 'application/json',
@@ -43,7 +46,10 @@ export async function POST(req: Request) {
         ? err
         : err?.message || 'Upload failed'
 
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({
+      error: 'Upload failed',
+      debug: message,
+    }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
