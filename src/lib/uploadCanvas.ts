@@ -12,59 +12,38 @@ export async function uploadCanvas(
       }
 
       try {
-        setMintStatus('📤 Step 2: Requesting presigned URL from server…')
+        setMintStatus('📤 Step 2: Sending image to /api/upload…')
 
-        // Use absolute origin to avoid relative-route issues in Mini Apps
         const apiUrl =
           typeof window !== 'undefined'
             ? `${window.location.origin}/api/upload`
             : '/api/upload'
 
-        const res = await fetch(apiUrl, { method: 'GET' })
+        const formData = new FormData()
+        formData.append('file', blob, 'canvas.png')
+
+        const res = await fetch(apiUrl, { method: 'POST', body: formData })
         const raw = await res.text()
 
-        // If server returned non-JSON, show the raw prefix to UI for debugging
-        if (!res.ok) {
-          try {
-            const parsed = JSON.parse(raw)
-            setMintStatus(`❌ Step 2 failed: ${parsed.error || 'error'} → ${parsed.debug || ''}`)
-            return reject(parsed.error || 'Failed to get presigned URL')
-          } catch {
-            setMintStatus(`❌ Step 2 failed: Server returned non-JSON → ${raw.slice(0, 400)}`)
-            return reject('Invalid JSON from server')
-          }
-        }
-
-        let data: any
+        let data: any = {}
         try {
-          data = JSON.parse(raw)
+          data = raw ? JSON.parse(raw) : {}
         } catch {
-          setMintStatus(`❌ Step 2 failed: Expected JSON but got → ${raw.slice(0, 400)}`)
+          setMintStatus(`❌ Step 2 failed: Invalid JSON → ${raw.slice(0, 400)}`)
           return reject('Invalid JSON from server')
         }
 
+        if (!res.ok) {
+          setMintStatus(`❌ Step 2 failed: ${data.error || 'Upload failed'} → ${data.debug || ''}`)
+          return reject(data.error || 'Upload failed')
+        }
+
         if (!data.url) {
-          setMintStatus(`❌ Step 2 failed: presigned URL missing → ${JSON.stringify(data).slice(0,400)}`)
-          return reject('No presigned URL')
+          setMintStatus(`❌ Step 2 failed: No URL returned → ${JSON.stringify(data).slice(0,400)}`)
+          return reject('No URL returned')
         }
 
-        setMintStatus('📤 Step 3: Uploading blob to presigned URL (PUT)…')
-
-        const uploadRes = await fetch(data.url, {
-          method: 'PUT',
-          body: blob,
-          headers: {
-            'Content-Type': 'image/png',
-          },
-        })
-
-        if (!uploadRes.ok) {
-          const errText = await uploadRes.text()
-          setMintStatus(`❌ Step 3 failed: upload response ${uploadRes.status} → ${errText.slice(0,400)}`)
-          return reject('Upload failed')
-        }
-
-        setMintStatus(`✅ Step 3 success: uploaded → ${data.url}`)
+        setMintStatus(`✅ Step 2 success: Image uploaded → ${data.url}`)
         resolve(data.url)
       } catch (err: unknown) {
         let message = 'Unknown client error'
