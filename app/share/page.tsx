@@ -1,10 +1,6 @@
 import { Metadata } from "next"
 
-interface PageProps {
-  searchParams: { image?: string }
-}
-
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: { searchParams: { image?: string } }): Promise<Metadata> {
   const imageUrl = searchParams?.image ?? "https://base-state.vercel.app/embed.png"
 
   return {
@@ -31,7 +27,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 }
 
-export default function SharePage({ searchParams }: PageProps) {
+export default function SharePage({ searchParams }: { searchParams: { image?: string } }) {
   const imageUrl = searchParams?.image ?? "https://base-state.vercel.app/embed.png"
 
   return (
