@@ -12,27 +12,24 @@ export async function uploadCanvas(
         
         const apiUrl = `${window.location.origin}/api/upload`
         const res = await fetch(apiUrl)
-        const data: {
-          uploadUrl?: string
-          downloadUrl?: string
-          error?: string
-        } = await res.json()
+        const data: { uploadUrl?: string; fileName?: string; error?: string } = await res.json()
 
-        if (!res.ok || !data.uploadUrl || !data.downloadUrl) {
+        if (!res.ok || !data.uploadUrl || !data.fileName) {
           return reject(data.error || 'Failed to get presigned URL')
         }
 
-        // آپلود فایل به presigned URL
+        
         const uploadRes = await fetch(data.uploadUrl, {
           method: 'PUT',
           body: blob,
           headers: { 'Content-Type': 'image/png' },
         })
-
         if (!uploadRes.ok) return reject('Upload failed')
 
         
-        resolve(data.downloadUrl)
+        const rawUrl = `https://link.storjshare.io/raw/${data.fileName}`
+
+        resolve(rawUrl)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown client error'
         reject(message)
