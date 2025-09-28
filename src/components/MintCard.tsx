@@ -29,12 +29,18 @@ export default function MintCard({
   const { data: walletClient } = useWalletClient()
   const [mintStatus, setMintStatus] = useState<string | null>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+  const [isMinting, setIsMinting] = useState(false)
 
   const handleMint = async () => {
-    setMintStatus('🧪 Minting…')
-    try {
-      if (!walletClient || !walletAddress) throw new Error('Wallet not connected')
+    if (!walletClient || !walletAddress) {
+      setMintStatus('❌ Wallet not connected')
+      return
+    }
 
+    setMintStatus('🧪 Minting…')
+    setIsMinting(true)
+
+    try {
       const card = document.getElementById('walletCard')
       if (!card) throw new Error('Card not found in DOM')
 
@@ -42,23 +48,28 @@ export default function MintCard({
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
       
-      const downloadLink = await uploadCanvas(canvas, setMintStatus)
-      setDownloadUrl(downloadLink)
-      setMintedImageUrl(downloadLink)
+      const uploadedLink = await uploadCanvas(canvas, setMintStatus)
 
+      
+      setDownloadUrl(uploadedLink)
+
+      
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mint',
-        args: [downloadLink],
+        args: [uploadedLink],
         account: walletAddress,
         value: parseEther('0.0001'),
       })
 
       setMintStatus('✅ Mint successful!')
+      setMintedImageUrl(uploadedLink)
     } catch (err: any) {
       const message = typeof err === 'string' ? err : err?.message || 'Unknown error'
       setMintStatus(`❌ Mint failed: ${message}`)
+    } finally {
+      setIsMinting(false)
     }
   }
 
@@ -178,12 +189,11 @@ export default function MintCard({
         <button
           onClick={handleMint}
           style={buttonStyle('#00ff7f')}
-          disabled={!walletClient || !walletAddress}
+          disabled={!walletClient || !walletAddress || isMinting}
         >
           🪙 Mint as NFT
         </button>
 
-        
         <a
           href={downloadUrl || '#'}
           download="BaseState_Wallet_Card.png"
@@ -194,7 +204,6 @@ export default function MintCard({
           </button>
         </a>
 
-        
         <button
           onClick={() => {
             if (!downloadUrl) return
