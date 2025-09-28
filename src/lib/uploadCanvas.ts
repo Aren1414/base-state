@@ -7,7 +7,6 @@ export async function uploadCanvas(
       if (!blob) return reject('Canvas is empty')
 
       try {
-        
         const apiUrl = `${window.location.origin}/api/upload`
         const res = await fetch(apiUrl)
         const data: { uploadUrl?: string; downloadUrl?: string; error?: string } = await res.json()
@@ -24,9 +23,8 @@ export async function uploadCanvas(
         })
         if (!uploadRes.ok) return reject('Upload failed')
 
-        const rawUrl = data.downloadUrl.replace('/s/', '/raw/')
-
-        resolve(rawUrl)
+        
+        resolve(data.downloadUrl)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown client error'
         reject(message)
