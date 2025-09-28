@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             error: 'Form parse error',
             stage: 'parsing',
             debug: err.message,
-            files,
+            files
           }), { status: 500 })
         )
       }
@@ -31,13 +31,12 @@ export async function POST(req: Request) {
           new Response(JSON.stringify({
             error: 'No file uploaded',
             stage: 'checking file',
-            files,
+            files
           }), { status: 400 })
         )
       }
 
       try {
-        
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
           new Response(JSON.stringify({
             error: 'Upload failed',
             stage: 'uploading',
-            debug: uploadErr.message,
+            debug: uploadErr.message
           }), { status: 500 })
         )
       }
