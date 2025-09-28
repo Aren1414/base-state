@@ -11,40 +11,46 @@ export async function uploadCanvas(
         return reject('Canvas is empty');
       }
 
-      setMintStatus('📤 Step 2: Requesting presigned URL…');
-
       try {
-        const res = await fetch('/api/upload');
-        const data = await res.json();
+        setMintStatus('📤 Step 2: Requesting presigned URL…');
+        const res = await fetch('/api/upload'); // GET
+        const text = await res.text();
+
+        let data: any;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          setMintStatus(`❌ Step 2 failed: Expected JSON but got → ${text}`);
+          return reject('Invalid JSON from server');
+        }
 
         if (!res.ok || !data.url) {
-          setMintStatus(`❌ Step 2 failed: ${data.error || 'Failed to get presigned URL'}`);
+          setMintStatus(`❌ Step 2 failed: ${data.error || 'Failed to get presigned URL'} → ${data.debug || ''}`);
           return reject(data.error || 'Failed to get presigned URL');
         }
 
-        const formData = new FormData();
-        formData.append('file', blob, data.fileName);
-
-        setMintStatus('📤 Step 3: Uploading image to Storj…');
+        setMintStatus('📤 Step 3: Uploading canvas to Storj…');
 
         const uploadRes = await fetch(data.url, {
           method: 'PUT',
-          body: formData,
+          body: blob,
+          headers: {
+            'Content-Type': 'image/png',
+          },
         });
 
         if (!uploadRes.ok) {
-          setMintStatus(`❌ Step 3 failed: Upload failed`);
+          const errorText = await uploadRes.text();
+          setMintStatus(`❌ Step 3 failed: Upload failed → ${errorText}`);
           return reject('Upload failed');
         }
 
         setMintStatus(`✅ Step 3 success: Image uploaded → ${data.url}`);
         resolve(data.url);
-      } catch (err: any) {
-        const message =
-          typeof err === 'string'
-            ? err
-            : err?.message || JSON.stringify(err) || 'Upload error';
-        setMintStatus(`❌ Step 2 error: ${message}`);
+      } catch (err: unknown) {
+        let message = 'Unknown error';
+        if (err instanceof Error) message = err.message;
+        setMintStatus(`❌ Step failed: ${message}`);
         reject(message);
       }
     }, 'image/png', 0.8);
