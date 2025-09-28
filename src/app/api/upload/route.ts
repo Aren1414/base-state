@@ -1,8 +1,7 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import formidable from 'formidable'
-import fs from 'fs'
-import { storjBucket, s3 } from '../../../lib/storjClient'
+import { s3, storjBucket } from '../../../lib/storjClient'
 
 export const config = {
   api: {
@@ -12,7 +11,7 @@ export const config = {
 
 export async function POST(req: Request) {
   const form = new formidable.IncomingForm()
-  
+
   return new Promise((resolve) => {
     form.parse(req as any, async (err: any, fields: any, files: any) => {
       if (err) {
@@ -37,13 +36,15 @@ export async function POST(req: Request) {
         )
       }
 
-      const fileStream = fs.createReadStream(file.filepath)
+      
+      const buffer = await file.arrayBuffer ? Buffer.from(await file.arrayBuffer()) : Buffer.from(file._writeStream?.toBuffer?.() || [])
+
       const fileName = `BaseStateCard_${Date.now()}.png`
 
       const command = new PutObjectCommand({
         Bucket: storjBucket,
         Key: fileName,
-        Body: fileStream,
+        Body: buffer,
         ContentType: file.mimetype || 'image/png',
       })
 
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
           })
         )
       } catch (uploadErr: any) {
+        console.error("❌ Upload error:", uploadErr)
         resolve(
           new Response(JSON.stringify({
             error: 'Upload failed',
