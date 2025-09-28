@@ -32,17 +32,18 @@ export async function uploadCanvas(
           return reject('Invalid JSON response')
         }
 
+        
         if (!res.ok) {
-          setMintStatus(`❌ Step 2 failed: ${data.error || 'Upload failed'}`)
+          setMintStatus(`❌ Step 2 failed [${data.stage || 'unknown'}]: ${data.error || 'Upload failed'} → ${data.debug || ''}`)
           return reject(data.error || 'Upload failed')
         }
 
         if (!data.url) {
-          setMintStatus(`❌ Step 2 failed: No URL returned`)
+          setMintStatus(`❌ Step 2 failed: No URL returned, stage: ${data.stage || 'unknown'}`)
           return reject('No URL returned')
         }
 
-        setMintStatus(`✅ Step 2 success: Image uploaded → ${data.url}`)
+        setMintStatus(`✅ Step 2 success [${data.stage}]: Image uploaded → ${data.url}`)
         resolve(data.url)
       } catch (err: any) {
         const message =
