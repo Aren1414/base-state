@@ -1,82 +1,35 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import formidable from 'formidable'
-import { storjBucket, s3 } from '../../../lib/storjClient'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-export const config = {
-  api: {
-    bodyParser: false, 
+const s3 = new S3Client({
+  region: 'us-east-1',
+  endpoint: process.env.STORJ_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.STORJ_ACCESS_KEY!,
+    secretAccessKey: process.env.STORJ_SECRET_KEY!,
   },
-}
+  forcePathStyle: true,
+});
 
-export async function POST(req: Request) {
-  const form = new formidable.IncomingForm()
+export async function GET() {
+  const fileName = `BaseStateCard_${Date.now()}.png`;
 
-  return new Promise((resolve) => {
-    form.parse(req as any, async (err: any, fields: any, files: any) => {
-      if (err) {
-        return resolve(
-          new Response(JSON.stringify({
-            error: 'Form parse error',
-            stage: 'parsing',
-            debug: err.message,
-            files
-          }), { status: 500 })
-        )
-      }
+  const command = new PutObjectCommand({
+    Bucket: process.env.STORJ_BUCKET!,
+    Key: fileName,
+    ContentType: 'image/png',
+  });
 
-      const file = files.file
-      if (!file) {
-        return resolve(
-          new Response(JSON.stringify({
-            error: 'No file uploaded',
-            stage: 'checking file',
-            files
-          }), { status: 400 })
-        )
-      }
-
-      try {
-        
-        let buffer: Buffer
-        if (file.arrayBuffer) {
-          buffer = Buffer.from(await file.arrayBuffer())
-        } else if (file.filepath) {
-          // Node.js environment
-          const fs = await import('fs')
-          buffer = fs.readFileSync(file.filepath)
-        } else {
-          throw new Error('Cannot read uploaded file')
-        }
-
-        const fileName = `BaseStateCard_${Date.now()}.png`
-        const command = new PutObjectCommand({
-          Bucket: storjBucket,
-          Key: fileName,
-          Body: buffer,
-          ContentType: file.mimetype || 'image/png',
-        })
-
-        await s3.send(command)
-
-        
-        const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 * 365 })
-
-        resolve(
-          new Response(JSON.stringify({
-            url,
-            stage: 'upload success',
-          }), { status: 200 })
-        )
-      } catch (uploadErr: any) {
-        resolve(
-          new Response(JSON.stringify({
-            error: 'Upload failed',
-            stage: 'uploading',
-            debug: uploadErr.message
-          }), { status: 500 })
-        )
-      }
-    })
-  })
+  try {
+    const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 * 365 });
+    return new Response(JSON.stringify({ url, fileName }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (err) {
+    return new Response(
+      JSON.stringify({ error: 'Failed to generate presigned URL', debug: err.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 }
