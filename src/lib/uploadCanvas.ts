@@ -4,40 +4,31 @@ export async function uploadCanvas(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(async (blob) => {
-      if (!blob) return reject('Canvas is empty')
+      if (!blob) return reject("Canvas is empty")
 
       try {
         const apiUrl = `${window.location.origin}/api/upload`
         const res = await fetch(apiUrl)
-        const data: { uploadUrl?: string; downloadUrl?: string; fileName?: string; error?: string } = await res.json()
+        const data: { uploadUrl?: string; downloadUrl?: string; error?: string } = await res.json()
 
         if (!res.ok || !data.uploadUrl || !data.downloadUrl) {
-          return reject(data.error || 'Failed to get presigned URL')
+          return reject(data.error || "Failed to get presigned URL")
         }
 
+        
         const uploadRes = await fetch(data.uploadUrl, {
-          method: 'PUT',
+          method: "PUT",
           body: blob,
-          headers: { 'Content-Type': 'image/png' },
+          headers: { "Content-Type": "image/png" },
         })
-        if (!uploadRes.ok) return reject('Upload failed')
+        if (!uploadRes.ok) return reject("Upload failed")
 
-        const rawUrl = getRawUrl(data.downloadUrl)
-        resolve(rawUrl)
+        
+        resolve(data.downloadUrl)
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Unknown client error'
+        const message = err instanceof Error ? err.message : "Unknown client error"
         reject(message)
       }
-    }, 'image/png', 0.9)
+    }, "image/png", 0.9)
   })
-}
-
-export function getRawUrl(presignedUrl: string) {
-  try {
-    const url = new URL(presignedUrl)
-    url.search = ''
-    return url.toString()
-  } catch {
-    return presignedUrl
-  }
 }
