@@ -1,41 +1,24 @@
-'use client'
+import { Metadata } from "next"
 
-import React, { Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+export const dynamic = "force-dynamic"
 
-export default function SharePageWrapper() {
-  return (
-    <Suspense fallback={<p>Loading preview…</p>}>
-      <SharePage />
-    </Suspense>
-  )
+type SharePageProps = {
+  searchParams: { image?: string }
 }
 
-function SharePage() {
-  const searchParams = useSearchParams()
-  const imageUrl = searchParams.get('image') || 'https://base-state.vercel.app/embed.png'
 
-  return (
-    <>
-      <Head imageUrl={imageUrl} />
-      <main style={{ padding: '20px', textAlign: 'center' }}>
-        <h1>Shared NFT</h1>
-        <p>This is the preview of your minted NFT card 👇</p>
-        <img
-          src={imageUrl}
-          alt="Minted NFT"
-          style={{ maxWidth: '400px', borderRadius: '12px' }}
-        />
-      </main>
-    </>
-  )
-}
+export async function generateMetadata({ searchParams }: SharePageProps): Promise<Metadata> {
+  const imageUrl = searchParams?.image || "https://base-state.vercel.app/embed.png"
 
-function Head({ imageUrl }: { imageUrl: string }) {
-  return (
-    <>
-      <title>My Minted NFT</title>
-      <meta name="fc:frame" content={JSON.stringify({
+  return {
+    title: "Shared NFT",
+    openGraph: {
+      title: "My Minted NFT",
+      description: "Check out my freshly minted BaseState NFT card!",
+      images: [imageUrl],
+    },
+    other: {
+      "fc:frame": JSON.stringify({
         version: "next",
         imageUrl,
         button: {
@@ -43,13 +26,26 @@ function Head({ imageUrl }: { imageUrl: string }) {
           action: {
             type: "launch_frame",
             name: "base-state",
-            url: "https://base-state.vercel.app"
-          }
-        }
-      })} />
-      <meta property="og:title" content="My Minted NFT" />
-      <meta property="og:description" content="Check out my freshly minted BaseState NFT card!" />
-      <meta property="og:image" content={imageUrl} />
-    </>
+            url: "https://base-state.vercel.app",
+          },
+        },
+      }),
+    },
+  }
+}
+
+export default function SharePage({ searchParams }: SharePageProps) {
+  const imageUrl = searchParams?.image || "https://base-state.vercel.app/embed.png"
+
+  return (
+    <main style={{ padding: "20px", textAlign: "center" }}>
+      <h1>Shared NFT</h1>
+      <p>This is the preview of your minted NFT card 👇</p>
+      <img
+        src={imageUrl}
+        alt="Minted NFT"
+        style={{ maxWidth: "400px", borderRadius: "12px" }}
+      />
+    </main>
   )
 }
