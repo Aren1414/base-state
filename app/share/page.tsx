@@ -2,12 +2,11 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-type SharePageProps = {
-  searchParams: { image?: string }
+type PageProps = {
+  searchParams?: { image?: string }
 }
 
-
-export async function generateMetadata({ searchParams }: SharePageProps): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const imageUrl = searchParams?.image || "https://base-state.vercel.app/embed.png"
 
   return {
@@ -34,7 +33,7 @@ export async function generateMetadata({ searchParams }: SharePageProps): Promis
   }
 }
 
-export default function SharePage({ searchParams }: SharePageProps) {
+export default function SharePage({ searchParams }: PageProps) {
   const imageUrl = searchParams?.image || "https://base-state.vercel.app/embed.png"
 
   return (
