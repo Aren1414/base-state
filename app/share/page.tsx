@@ -1,13 +1,18 @@
-import { Metadata } from "next"
+import { Metadata, ResolvingMetadata } from "next"
 
 export const dynamic = "force-dynamic"
 
 type PageProps = {
-  searchParams?: { [key: string]: string | undefined }
+  params: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const imageUrl = searchParams?.image || "https://base-state.vercel.app/embed.png"
+export async function generateMetadata(
+  { params, searchParams }: PageProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { image } = await searchParams
+  const imageUrl = image?.[0] || "https://base-state.vercel.app/embed.png"
 
   return {
     title: "Shared NFT",
@@ -33,8 +38,12 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 }
 
-export default function SharePage({ searchParams }: PageProps) {
-  const imageUrl = searchParams?.image || "https://base-state.vercel.app/embed.png"
+export default async function SharePage({
+  params,
+  searchParams,
+}: PageProps) {
+  const { image } = await searchParams
+  const imageUrl = image?.[0] || "https://base-state.vercel.app/embed.png"
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
