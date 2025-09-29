@@ -3,7 +3,7 @@ import { Metadata } from "next"
 export const dynamic = "force-dynamic"
 
 type PageProps = {
-  searchParams?: { image?: string }
+  searchParams?: { [key: string]: string | undefined }
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
