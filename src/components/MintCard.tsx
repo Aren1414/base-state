@@ -47,17 +47,17 @@ export default function MintCard({
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-      
       const uploadedLink = await uploadCanvas(canvas, setMintStatus)
-      setDownloadUrl(uploadedLink)
-      setMintedImageUrl(uploadedLink)
 
       
+      setDownloadUrl(uploadedLink.imageUrl)
+      setMintedImageUrl(uploadedLink.imageUrl)
+
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mint',
-        args: [uploadedLink],
+        args: [uploadedLink.imageUrl],
         account: walletAddress,
         value: parseEther('0.0001'),
       })
@@ -96,7 +96,7 @@ export default function MintCard({
 
   const handleShareCard = () => {
     if (!downloadUrl) return
-    const rawUrl = getRawUrl(downloadUrl) // لینک دائمی برای preview
+    const rawUrl = getRawUrl(downloadUrl)
     const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
       '📸 Just minted my BaseState NFT card!'
     )}&embeds[]=${encodeURIComponent(rawUrl)}`
@@ -236,4 +236,4 @@ function buttonStyle(color: string): React.CSSProperties {
     boxShadow: '0 0 2px rgba(0,0,0,0.1)',
     minWidth: '90px',
   }
-  }
+}
