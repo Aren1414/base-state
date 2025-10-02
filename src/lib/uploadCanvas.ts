@@ -1,7 +1,7 @@
 export async function uploadCanvas(
   canvas: HTMLCanvasElement,
   setMintStatus: (msg: string) => void
-): Promise<string> {
+): Promise<{ fileName: string; imageUrl: string }> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(async (blob) => {
       if (!blob) return reject("Canvas is empty")
@@ -9,9 +9,10 @@ export async function uploadCanvas(
       try {
         const apiUrl = `${window.location.origin}/api/upload`
         const res = await fetch(apiUrl)
-        const data: { uploadUrl?: string; downloadUrl?: string; error?: string } = await res.json()
+        const data: { uploadUrl?: string; imageUrl?: string; fileName?: string; error?: string } =
+          await res.json()
 
-        if (!res.ok || !data.uploadUrl || !data.downloadUrl) {
+        if (!res.ok || !data.uploadUrl || !data.imageUrl || !data.fileName) {
           return reject(data.error || "Failed to get presigned URL")
         }
 
@@ -22,7 +23,7 @@ export async function uploadCanvas(
         })
         if (!uploadRes.ok) return reject("Upload failed")
 
-        resolve(getRawUrl(data.downloadUrl))
+        resolve({ fileName: data.fileName, imageUrl: data.imageUrl })
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown client error"
         reject(message)
