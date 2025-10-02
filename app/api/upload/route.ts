@@ -4,12 +4,15 @@ import { storjBucket, s3Client } from "@lib/storjClient"
 
 export const runtime = "nodejs"
 
-const PUBLIC_RAW = "https://link.storjshare.io/raw"
+
+const STORJ_SHARE_ID = "jwehpt5oybcnyzdpzgkvbodeireq"
+const PUBLIC_GATEWAY = "https://link.storjshare.io/raw"
 
 export async function GET() {
   try {
     const fileName = `BaseStateCard_${Date.now()}.png`
 
+    // presigned url برای آپلود
     const putCommand = new PutObjectCommand({
       Bucket: storjBucket,
       Key: fileName,
@@ -17,10 +20,11 @@ export async function GET() {
     })
     const uploadUrl = await getSignedUrl(s3Client, putCommand, { expiresIn: 3600 })
 
-    const imageUrl = `${PUBLIC_RAW}/${storjBucket}/${fileName}`
+    // لینک دانلود درست (raw + share-id + bucket + filename)
+    const downloadUrl = `${PUBLIC_GATEWAY}/${STORJ_SHARE_ID}/${storjBucket}/${fileName}`
 
     return new Response(
-      JSON.stringify({ uploadUrl, imageUrl, fileName }),
+      JSON.stringify({ uploadUrl, downloadUrl, fileName }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     )
   } catch (err: unknown) {
