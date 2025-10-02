@@ -4,7 +4,7 @@ import { storjBucket, s3Client } from "@lib/storjClient"
 
 export const runtime = "nodejs"
 
-const PUBLIC_GATEWAY = "https://link.storjshare.io/raw"
+const PUBLIC_RAW = "https://link.storjshare.io/raw"
 
 export async function GET() {
   try {
@@ -15,9 +15,9 @@ export async function GET() {
       Key: fileName,
       ContentType: "image/png",
     })
-
     const uploadUrl = await getSignedUrl(s3Client, putCommand, { expiresIn: 3600 })
-    const imageUrl = `${PUBLIC_GATEWAY}/${storjBucket}/${fileName}`
+
+    const imageUrl = `${PUBLIC_RAW}/${storjBucket}/${fileName}`
 
     return new Response(
       JSON.stringify({ uploadUrl, imageUrl, fileName }),
