@@ -47,17 +47,17 @@ export default function MintCard({
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-      const uploadedLink = await uploadCanvas(canvas, setMintStatus)
-
       
-      setDownloadUrl(uploadedLink.imageUrl)
-      setMintedImageUrl(uploadedLink.imageUrl)
+      const uploadedLink: string = await uploadCanvas(canvas, setMintStatus)
+
+      setDownloadUrl(uploadedLink)
+      setMintedImageUrl(uploadedLink)
 
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mint',
-        args: [uploadedLink.imageUrl],
+        args: [uploadedLink],
         account: walletAddress,
         value: parseEther('0.0001'),
       })
