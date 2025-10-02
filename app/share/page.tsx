@@ -1,12 +1,11 @@
-// app/share/page.tsx
 import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
 type PageProps = {
+  params: { [key: string]: string }
   searchParams?: { [key: string]: string | string[] | undefined }
 }
-
 
 export async function generateMetadata(
   { searchParams }: PageProps
@@ -14,6 +13,7 @@ export async function generateMetadata(
   const image = Array.isArray(searchParams?.image)
     ? searchParams?.image[0]
     : searchParams?.image
+
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return {
@@ -25,7 +25,6 @@ export async function generateMetadata(
       images: [imageUrl],
     },
     other: {
-      
       "fc:frame": JSON.stringify({
         version: "next",
         imageUrl,
@@ -40,7 +39,6 @@ export async function generateMetadata(
           },
         ],
       }),
-      
       "fc:miniapp": JSON.stringify({
         url: "https://base-state.vercel.app",
         title: "BaseState NFT",
@@ -54,6 +52,7 @@ export default async function SharePage({ searchParams }: PageProps) {
   const image = Array.isArray(searchParams?.image)
     ? searchParams?.image[0]
     : searchParams?.image
+
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return (
