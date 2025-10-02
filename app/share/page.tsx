@@ -2,14 +2,16 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined }
-}): Promise<Metadata> {
-  const image = Array.isArray(searchParams?.image)
-    ? searchParams?.image[0]
-    : searchParams?.image
+type PageProps = {
+  params: Promise<Record<string, string>>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+export async function generateMetadata(
+  { searchParams }: PageProps
+): Promise<Metadata> {
+  const sp = await searchParams
+  const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
 
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
@@ -45,14 +47,9 @@ export async function generateMetadata({
   }
 }
 
-export default function SharePage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined }
-}) {
-  const image = Array.isArray(searchParams?.image)
-    ? searchParams?.image[0]
-    : searchParams?.image
+export default async function SharePage({ searchParams }: PageProps) {
+  const sp = await searchParams
+  const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
 
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
