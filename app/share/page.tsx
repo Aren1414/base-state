@@ -1,49 +1,60 @@
-import { Metadata, ResolvingMetadata } from "next"
+// app/share/page.tsx
+import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
 type PageProps = {
-  params: Promise<{ [key: string]: string | string[] | undefined }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams?: { [key: string]: string | string[] | undefined }
 }
 
+
 export async function generateMetadata(
-  { params, searchParams }: PageProps,
-  parent: ResolvingMetadata
+  { searchParams }: PageProps
 ): Promise<Metadata> {
-  const { image } = await searchParams
-  const imageUrl = image?.[0] || "https://base-state.vercel.app/embed.png"
+  const image = Array.isArray(searchParams?.image)
+    ? searchParams?.image[0]
+    : searchParams?.image
+  const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return {
-    title: "Shared NFT",
+    title: "My Minted NFT",
+    description: "Check out my freshly minted BaseState NFT card!",
     openGraph: {
       title: "My Minted NFT",
       description: "Check out my freshly minted BaseState NFT card!",
       images: [imageUrl],
     },
     other: {
+      
       "fc:frame": JSON.stringify({
         version: "next",
         imageUrl,
-        button: {
-          title: "View in Mini App",
-          action: {
-            type: "launch_frame",
-            name: "base-state",
-            url: "https://base-state.vercel.app",
+        buttons: [
+          {
+            title: "View in Mini App",
+            action: {
+              type: "launch_frame",
+              name: "base-state",
+              url: "https://base-state.vercel.app",
+            },
           },
-        },
+        ],
+      }),
+      
+      "fc:miniapp": JSON.stringify({
+        url: "https://base-state.vercel.app",
+        title: "BaseState NFT",
+        image: imageUrl,
       }),
     },
   }
 }
 
-export default async function SharePage({
-  params,
-  searchParams,
-}: PageProps) {
-  const { image } = await searchParams
-  const imageUrl = image?.[0] || "https://base-state.vercel.app/embed.png"
+export default async function SharePage({ searchParams }: PageProps) {
+  const image = Array.isArray(searchParams?.image)
+    ? searchParams?.image[0]
+    : searchParams?.image
+  const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
