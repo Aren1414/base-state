@@ -10,7 +10,6 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
     )
   }
 
-  
   const proxyImageUrl = `https://base-state.vercel.app/api/image?src=${encodeURIComponent(imageParam)}`
 
   return (
