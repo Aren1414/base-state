@@ -96,10 +96,15 @@ export default function MintCard({
 
   const handleShareCard = () => {
   if (!downloadUrl) return
+
+  
   const shareUrl = `https://base-state.vercel.app/share?image=${encodeURIComponent(downloadUrl)}`
+
+  
   const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
     '📸 Just minted my BaseState NFT card!'
   )}&embeds[]=${encodeURIComponent(shareUrl)}`
+
   window.open(warpcastUrl, '_blank')
   }
 
