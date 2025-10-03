@@ -2,12 +2,15 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
 export async function generateMetadata(
-  { searchParams }: { searchParams?: Record<string, string | string[] | undefined> }
+  { searchParams }: PageProps
 ): Promise<Metadata> {
-  const image = Array.isArray(searchParams?.image)
-    ? searchParams?.image[0]
-    : searchParams?.image
+  const sp = await searchParams
+  const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return {
@@ -19,11 +22,14 @@ export async function generateMetadata(
       images: [imageUrl],
     },
     other: {
+      
       "fc:miniapp": JSON.stringify({
-        url: "https://base-state.vercel.app",
+        url: "https://base-state.vercel.app",   
         title: "BaseState NFT",
-        image: imageUrl,
+        image: imageUrl,                        
       }),
+
+      
       "fc:frame": JSON.stringify({
         version: "next",
         imageUrl,
@@ -42,12 +48,9 @@ export async function generateMetadata(
   }
 }
 
-export default function SharePage(
-  { searchParams }: { searchParams?: Record<string, string | string[] | undefined> }
-) {
-  const image = Array.isArray(searchParams?.image)
-    ? searchParams?.image[0]
-    : searchParams?.image
+export default async function SharePage({ searchParams }: PageProps) {
+  const sp = await searchParams
+  const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return (
