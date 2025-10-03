@@ -94,22 +94,18 @@ export default function MintCard({
           { label: 'Post Tokens', value: stats.postTokens },
         ]
 
-  const handleShareCard = () => {
+const handleShareCard = () => {
   if (!downloadUrl) return
 
   
-  const rawImageUrl = getRawUrl(downloadUrl)
-
-  
-  const shareUrl = `https://base-state.vercel.app/share?image=${encodeURIComponent(rawImageUrl)}`
-
-  
+  const shareUrl = `https://base-state.vercel.app/share?image=${encodeURIComponent(downloadUrl)}`
   const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
     '📸 Just minted my BaseState NFT card!'
   )}&embeds[]=${encodeURIComponent(shareUrl)}`
 
   window.open(warpcastUrl, '_blank')
-  }
+}
+  
   return (
     <div style={{ marginTop: '16px', padding: '8px', boxSizing: 'border-box' }}>
       <div
