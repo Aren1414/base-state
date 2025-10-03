@@ -5,6 +5,7 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
       <>
         <title>BaseState Mini App</title>
         <meta name="description" content="BaseState NFT viewer" />
+        <meta property="og:image" content="https://base-state.vercel.app/embed.png" />
       </>
     )
   }
