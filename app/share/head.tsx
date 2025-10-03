@@ -1,26 +1,32 @@
-export default function Head({ params, searchParams }: any) {
-  const image = Array.isArray(searchParams?.image)
-    ? searchParams.image[0]
-    : searchParams?.image
-
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
+export default function Head({ searchParams }: { searchParams: { image?: string | string[] } }) {
+  const imageParam = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
+  const imageUrl = imageParam || "https://base-state.vercel.app/embed.png"
 
   return (
     <>
       <title>My Minted NFT</title>
       <meta name="description" content="Check out my freshly minted BaseState NFT card!" />
 
-      {/* ✅ Miniapp Embed */}
+      {/* ✅ Farcaster Mini App Embed */}
       <meta
         name="fc:miniapp"
         content={JSON.stringify({
-          url: "https://base-state.vercel.app",
-          title: "BaseState NFT",
-          image: imageUrl,
+          version: "1",
+          imageUrl,
+          button: {
+            title: "🎉 View My NFT",
+            action: {
+              type: "launch_miniapp",
+              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(imageUrl)}`,
+              name: "BaseState",
+              splashImageUrl: "https://base-state.vercel.app/logo.png",
+              splashBackgroundColor: "#000000"
+            }
+          }
         })}
       />
 
-      {/* ✅ Optional: Frame for action button */}
+      {/* ✅ Optional Farcaster Frame */}
       <meta
         name="fc:frame"
         content={JSON.stringify({
@@ -32,10 +38,10 @@ export default function Head({ params, searchParams }: any) {
               action: {
                 type: "launch_frame",
                 name: "base-state",
-                url: "https://base-state.vercel.app",
-              },
-            },
-          ],
+                url: `https://base-state.vercel.app/share?image=${encodeURIComponent(imageUrl)}`
+              }
+            }
+          ]
         })}
       />
 
