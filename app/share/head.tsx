@@ -25,7 +25,7 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
             title: "🎉 View My NFT",
             action: {
               type: "launch_miniapp",
-              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(imageParam)}`,
+              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(proxyImageUrl)}`,
               name: "BaseState",
               splashImageUrl: "https://base-state.vercel.app/logo.png",
               splashBackgroundColor: "#000000"
@@ -42,7 +42,7 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
             title: "🎉 View My NFT",
             action: {
               type: "launch_frame",
-              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(imageParam)}`,
+              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(proxyImageUrl)}`,
               name: "BaseState",
               splashImageUrl: "https://base-state.vercel.app/logo.png",
               splashBackgroundColor: "#000000"
