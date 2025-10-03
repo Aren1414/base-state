@@ -71,10 +71,7 @@ export default function MintCard({
   }
 
   const handleShareCard = () => {
-    if (!downloadUrl) return
-
-    const proxyUrl = `https://base-state.vercel.app/api/image?src=${encodeURIComponent(downloadUrl)}`
-    const shareUrl = `https://base-state.vercel.app/share?image=${encodeURIComponent(proxyUrl)}`
+    const shareUrl = `https://base-state.vercel.app/`
     const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
       '📸 Just minted my BaseState NFT card!'
     )}&embeds[]=${encodeURIComponent(shareUrl)}`
@@ -217,7 +214,6 @@ export default function MintCard({
         <button
           onClick={handleShareCard}
           style={buttonStyle('#00f0ff')}
-          disabled={!downloadUrl}
         >
           📸 Share Minted Card
         </button>
