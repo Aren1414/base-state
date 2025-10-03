@@ -1,6 +1,5 @@
 export default function Head({ searchParams }: { searchParams: { image?: string | string[] } }) {
   const imageParam = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
-
   if (!imageParam) {
     return (
       <>
@@ -16,7 +15,6 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
     <>
       <title>My Minted NFT</title>
       <meta name="description" content="Check out my freshly minted BaseState NFT card!" />
-
       <meta
         name="fc:miniapp"
         content={JSON.stringify({
@@ -34,7 +32,6 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
           }
         })}
       />
-
       <meta
         name="fc:frame"
         content={JSON.stringify({
@@ -52,7 +49,6 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
           }
         })}
       />
-
       <meta property="og:title" content="My Minted NFT" />
       <meta property="og:description" content="Check out my freshly minted BaseState NFT card!" />
       <meta property="og:image" content={proxyImageUrl} />
