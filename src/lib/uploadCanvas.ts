@@ -7,7 +7,7 @@ export async function uploadCanvas(
       if (!blob) return reject("Canvas is empty")
 
       try {
-        const apiUrl = `${window.location.origin}/api/upload`
+        const apiUrl = "/api/upload"
         const res = await fetch(apiUrl)
         const data: { uploadUrl?: string; downloadUrl?: string; error?: string } = await res.json()
 
@@ -25,7 +25,8 @@ export async function uploadCanvas(
         })
         if (!uploadRes.ok) return reject("Upload failed")
 
-        resolve(getRawUrl(data.downloadUrl))
+        const proxyUrl = `/api/image?src=${encodeURIComponent(data.downloadUrl)}`
+        resolve(`https://base-state.vercel.app${proxyUrl}`)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown client error"
         reject(message)
