@@ -11,6 +11,11 @@ const sourceCodePro = Source_Code_Pro({ variable: "--font-source-code-pro", subs
 export const metadata = {
   title: "BaseState Mini App",
   description: "Mint your blockchain identity as an NFT card",
+  openGraph: {
+    title: "BaseState Mini App",
+    description: "Mint your blockchain identity as an NFT card",
+    images: ["https://base-state.vercel.app/embed.png"],
+  },
   other: {
     "fc:frame": JSON.stringify({
       version: "1",
@@ -41,7 +46,7 @@ export const metadata = {
       },
     }),
   },
-}
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
