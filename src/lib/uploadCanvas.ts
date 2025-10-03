@@ -20,13 +20,11 @@ export async function uploadCanvas(
           body: blob,
           headers: {
             "Content-Type": "image/png",
-            
             "Cache-Control": "public, immutable, no-transform, max-age=300"
           },
         })
         if (!uploadRes.ok) return reject("Upload failed")
 
-        
         resolve(getRawUrl(data.downloadUrl))
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown client error"
