@@ -1,13 +1,23 @@
 export default function Head({ searchParams }: { searchParams: { image?: string | string[] } }) {
   const imageParam = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
-  const imageUrl = imageParam || "https://base-state.vercel.app/embed.png"
+
+  
+  if (!imageParam || !imageParam.startsWith("https://link.storjshare.io/raw/")) {
+    return (
+      <>
+        <title>BaseState Mini App</title>
+        <meta name="description" content="BaseState NFT viewer" />
+      </>
+    )
+  }
+
+  const imageUrl = imageParam
 
   return (
     <>
       <title>My Minted NFT</title>
       <meta name="description" content="Check out my freshly minted BaseState NFT card!" />
 
-      {/* ✅ Farcaster Mini App Embed */}
       <meta
         name="fc:miniapp"
         content={JSON.stringify({
@@ -26,7 +36,6 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
         })}
       />
 
-      {/* ✅ Optional Farcaster Frame */}
       <meta
         name="fc:frame"
         content={JSON.stringify({
@@ -45,7 +54,6 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
         })}
       />
 
-      {/* ✅ OG fallback */}
       <meta property="og:title" content="My Minted NFT" />
       <meta property="og:description" content="Check out my freshly minted BaseState NFT card!" />
       <meta property="og:image" content={imageUrl} />
