@@ -23,14 +23,11 @@ export async function generateMetadata(
       images: [imageUrl],
     },
     other: {
-      
       "fc:miniapp": JSON.stringify({
-        url: "https://base-state.vercel.app",   
+        url: "https://base-state.vercel.app",
         title: "BaseState NFT",
-        image: imageUrl,                        
+        image: imageUrl,
       }),
-
-      
       "fc:frame": JSON.stringify({
         version: "next",
         imageUrl,
