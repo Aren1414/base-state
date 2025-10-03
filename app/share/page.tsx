@@ -2,12 +2,8 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-type PageProps = {
-  searchParams?: Record<string, string | string[] | undefined>
-}
-
 export async function generateMetadata(
-  { searchParams }: PageProps
+  { searchParams }: { searchParams?: Record<string, string | string[] | undefined> }
 ): Promise<Metadata> {
   const image = Array.isArray(searchParams?.image)
     ? searchParams?.image[0]
@@ -46,7 +42,9 @@ export async function generateMetadata(
   }
 }
 
-export default function SharePage({ searchParams }: PageProps) {
+export default function SharePage(
+  { searchParams }: { searchParams?: Record<string, string | string[] | undefined> }
+) {
   const image = Array.isArray(searchParams?.image)
     ? searchParams?.image[0]
     : searchParams?.image
