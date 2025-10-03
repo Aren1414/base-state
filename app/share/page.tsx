@@ -12,7 +12,6 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const sp = await searchParams
   const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
-
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return {
@@ -24,6 +23,13 @@ export async function generateMetadata(
       images: [imageUrl],
     },
     other: {
+      // Miniapp embed
+      "fc:miniapp": JSON.stringify({
+        url: "https://base-state.vercel.app",
+        title: "BaseState NFT",
+        image: imageUrl,
+      }),
+      // Frame (backward compatibility)
       "fc:frame": JSON.stringify({
         version: "next",
         imageUrl,
@@ -38,11 +44,6 @@ export async function generateMetadata(
           },
         ],
       }),
-      "fc:miniapp": JSON.stringify({
-        url: "https://base-state.vercel.app",
-        title: "BaseState NFT",
-        image: imageUrl,
-      }),
     },
   }
 }
@@ -50,7 +51,6 @@ export async function generateMetadata(
 export default async function SharePage({ searchParams }: PageProps) {
   const sp = await searchParams
   const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
-
   const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return (
