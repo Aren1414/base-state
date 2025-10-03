@@ -1,57 +1,12 @@
-import { Metadata } from "next"
-
 export const dynamic = "force-dynamic"
 
 type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Record<string, string | string[] | undefined>
 }
 
-export async function generateMetadata(
-  { searchParams }: PageProps
-): Promise<Metadata> {
-  const sp = await searchParams
-  const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
-
-  return {
-    title: "My Minted NFT",
-    description: "Check out my freshly minted BaseState NFT card!",
-    openGraph: {
-      title: "My Minted NFT",
-      description: "Check out my freshly minted BaseState NFT card!",
-      images: [imageUrl],
-    },
-    other: {
-      
-      "fc:miniapp": JSON.stringify({
-        url: "https://base-state.vercel.app",   
-        title: "BaseState NFT",
-        image: imageUrl,                        
-      }),
-
-      
-      "fc:frame": JSON.stringify({
-        version: "next",
-        imageUrl,
-        buttons: [
-          {
-            title: "Open in Mini App",
-            action: {
-              type: "launch_frame",
-              name: "base-state",
-              url: "https://base-state.vercel.app",
-            },
-          },
-        ],
-      }),
-    },
-  }
-}
-
-export default async function SharePage({ searchParams }: PageProps) {
-  const sp = await searchParams
-  const image = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
+export default function SharePage({ searchParams }: PageProps) {
+  const imageParam = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
+  const imageUrl = imageParam || "https://base-state.vercel.app/embed.png"
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
@@ -62,6 +17,23 @@ export default async function SharePage({ searchParams }: PageProps) {
         alt="Minted NFT"
         style={{ maxWidth: "400px", borderRadius: "12px" }}
       />
+      <br />
+      <a
+        href={`https://warpcast.com/~/compose?text=Check out my NFT&embeds[]=https://base-state.vercel.app/share?image=${encodeURIComponent(imageUrl)}`}
+        target="_blank"
+        style={{
+          display: "inline-block",
+          marginTop: "20px",
+          padding: "10px 20px",
+          backgroundColor: "#8247e5",
+          color: "#fff",
+          borderRadius: "8px",
+          textDecoration: "none",
+          fontWeight: "bold"
+        }}
+      >
+        Share in Farcaster 🚀
+      </a>
     </main>
   )
 }
