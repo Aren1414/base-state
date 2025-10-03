@@ -26,6 +26,20 @@ export const metadata = {
         },
       },
     }),
+    "fc:miniapp": JSON.stringify({
+      version: "1",
+      imageUrl: "https://base-state.vercel.app/embed.png",
+      button: {
+        title: "Launch Mini App",
+        action: {
+          type: "launch_miniapp",
+          name: "BaseState",
+          url: "https://base-state.vercel.app/",
+          splashImageUrl: "https://base-state.vercel.app/logo.png",
+          splashBackgroundColor: "#000000",
+        },
+      },
+    }),
   },
 }
 
