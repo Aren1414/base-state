@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { uploadCanvas, getRawUrl } from '../lib/uploadCanvas'
+import { uploadCanvas } from '../lib/uploadCanvas'
 import { useAccount, useWalletClient } from 'wagmi'
 import { parseEther } from 'viem'
 import abi from '../lib/abi/BaseStateCard.json'
@@ -47,7 +47,6 @@ export default function MintCard({
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
 
-      
       const uploadedLink: string = await uploadCanvas(canvas, setMintStatus)
 
       setDownloadUrl(uploadedLink)
@@ -69,6 +68,17 @@ export default function MintCard({
     } finally {
       setIsMinting(false)
     }
+  }
+
+  const handleShareCard = () => {
+    if (!downloadUrl) return
+
+    const shareUrl = `https://base-state.vercel.app/share?image=${encodeURIComponent(downloadUrl)}`
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+      '📸 Just minted my BaseState NFT card!'
+    )}&embeds[]=${encodeURIComponent(shareUrl)}`
+
+    window.open(warpcastUrl, '_blank')
   }
 
   const fields =
@@ -94,17 +104,6 @@ export default function MintCard({
           { label: 'Post Tokens', value: stats.postTokens },
         ]
 
-const handleShareCard = () => {
-  if (!downloadUrl) return
-
-  const shareUrl = `https://base-state.vercel.app/share?image=${encodeURIComponent(downloadUrl)}`
-  const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-    '📸 Just minted my BaseState NFT card!'
-  )}&embeds[]=${encodeURIComponent(shareUrl)}`
-
-  window.open(warpcastUrl, '_blank')
-}
-  
   return (
     <div style={{ marginTop: '16px', padding: '8px', boxSizing: 'border-box' }}>
       <div
