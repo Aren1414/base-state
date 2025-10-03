@@ -3,7 +3,6 @@ import { Metadata } from "next"
 export const dynamic = "force-dynamic"
 
 type PageProps = {
-  params: Promise<Record<string, string>>
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
@@ -23,19 +22,20 @@ export async function generateMetadata(
       images: [imageUrl],
     },
     other: {
-      // Miniapp embed
+      
       "fc:miniapp": JSON.stringify({
-        url: "https://base-state.vercel.app",
+        url: "https://base-state.vercel.app",   
         title: "BaseState NFT",
-        image: imageUrl,
+        image: imageUrl,                        
       }),
-      // Frame (backward compatibility)
+
+      
       "fc:frame": JSON.stringify({
         version: "next",
         imageUrl,
         buttons: [
           {
-            title: "View in Mini App",
+            title: "Open in Mini App",
             action: {
               type: "launch_frame",
               name: "base-state",
