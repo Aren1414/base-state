@@ -22,7 +22,8 @@ export async function uploadCanvas(
         })
         if (!uploadRes.ok) return reject("Upload failed")
 
-        resolve(data.downloadUrl) 
+      
+        resolve(data.downloadUrl)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown client error"
         reject(message)
