@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic"
 
 type PageProps = {
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default function SharePage({ searchParams }: PageProps) {
-  const imageParam = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
+export default async function SharePage({ searchParams }: PageProps) {
+  const sp = await searchParams
+  const imageParam = Array.isArray(sp?.image) ? sp.image[0] : sp?.image
   const imageUrl = imageParam || "https://base-state.vercel.app/embed.png"
 
   return (
