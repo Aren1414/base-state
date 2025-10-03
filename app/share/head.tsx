@@ -39,18 +39,18 @@ export default function Head({ searchParams }: { searchParams: { image?: string 
       <meta
         name="fc:frame"
         content={JSON.stringify({
-          version: "next",
+          version: "1",
           imageUrl,
-          buttons: [
-            {
-              title: "Open in Mini App",
-              action: {
-                type: "launch_frame",
-                name: "base-state",
-                url: `https://base-state.vercel.app/share?image=${encodeURIComponent(imageUrl)}`
-              }
+          button: {
+            title: "🎉 View My NFT",
+            action: {
+              type: "launch_frame",
+              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(imageUrl)}`,
+              name: "BaseState",
+              splashImageUrl: "https://base-state.vercel.app/logo.png",
+              splashBackgroundColor: "#000000"
             }
-          ]
+          }
         })}
       />
 
