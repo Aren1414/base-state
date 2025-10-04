@@ -1,44 +1,60 @@
+import { storjBucket, s3Client } from "./storjClient"
+
 export async function uploadCanvas(
   canvas: HTMLCanvasElement,
   setMintStatus: (msg: string) => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(async (blob) => {
-      if (!blob) return reject("Canvas is empty")
+      if (!blob) return reject("❌ Canvas is empty")
 
       try {
-        const apiUrl = `${window.location.origin}/api/upload`
-        const res = await fetch(apiUrl)
-        const data: { uploadUrl?: string; downloadUrl?: string; publicUrl?: string; error?: string } = await res.json()
+        setMintStatus("⏫ Uploading image to Storj…")
 
-        if (!res.ok || !data.uploadUrl || (!data.downloadUrl && !data.publicUrl)) {
-          return reject(data.error || "Failed to get upload info")
+    
+        const res = await fetch("/api/upload", { method: "POST" })
+        const data: {
+          uploadUrl?: string
+          downloadUrl?: string
+          fileName?: string
+          error?: string
+        } = await res.json()
+
+        if (!res.ok || !data.uploadUrl || !data.downloadUrl) {
+          console.error("Upload init error:", data)
+          return reject(data.error || "Failed to get presigned URL")
         }
 
-        setMintStatus("Uploading…")
+        
         const uploadRes = await fetch(data.uploadUrl, {
           method: "PUT",
           body: blob,
           headers: { "Content-Type": "image/png" },
         })
-        if (!uploadRes.ok) return reject("Upload failed")
 
-        const finalUrl = data.publicUrl || data.downloadUrl!
-        setMintStatus("Upload complete")
-        resolve(finalUrl)
+        if (!uploadRes.ok) {
+          console.error("Upload failed:", uploadRes.statusText)
+          return reject("❌ Upload failed")
+        }
+
+        setMintStatus("✅ Uploaded to Storj successfully")
+
+        
+        resolve(data.downloadUrl)
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Unknown client error"
+        const message = err instanceof Error ? err.message : "Unknown upload error"
+        console.error("UploadCanvas error:", message)
         reject(message)
       }
     }, "image/png", 0.9)
   })
 }
 
-export function getRawUrl(presignedUrl: string) {
+export function getRawUrl(presignedUrl: string): string {
   try {
     const url = new URL(presignedUrl)
     url.search = ""
-    return url.toString().replace("/s/", "/raw/").replace("/d/", "/raw/")
+    return url.toString()
   } catch {
     return presignedUrl
   }
