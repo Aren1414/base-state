@@ -1,46 +1,42 @@
-import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3"
+import { NextResponse } from "next/server"
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import { storjBucket, s3Client } from "@lib/storjClient"
 
-export const runtime = "nodejs"
+const accessKey = process.env.STORJ_ACCESS_KEY!
+const secretKey = process.env.STORJ_SECRET_KEY!
+const endpoint = process.env.STORJ_ENDPOINT!
+const bucket = process.env.STORJ_BUCKET!
 
-const PUBLIC_GATEWAY = "https://link.storjshare.io"
+const s3 = new S3Client({
+  region: "us-east-1",
+  endpoint,
+  credentials: {
+    accessKeyId: accessKey,
+    secretAccessKey: secretKey,
+  },
+  forcePathStyle: true,
+})
 
-export async function GET() {
+export async function POST() {
   try {
-    const fileName = `BaseStateCard_${Date.now()}.png`
+    const fileName = `mint_${Date.now()}.png`
 
-    const putCommand = new PutObjectCommand({
-      Bucket: storjBucket,
+    const command = new PutObjectCommand({
+      Bucket: bucket,
       Key: fileName,
       ContentType: "image/png",
     })
-    const uploadUrl = await getSignedUrl(s3Client, putCommand, { expiresIn: 600 })
 
-    const getCommand = new GetObjectCommand({
-      Bucket: storjBucket,
-      Key: fileName,
+    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
+    const downloadUrl = `${endpoint.replace(/\/+$/, "")}/${bucket}/${fileName}`
+
+    return NextResponse.json({
+      uploadUrl,
+      downloadUrl,
+      fileName,
     })
-    const downloadUrl = await getSignedUrl(s3Client, getCommand, { expiresIn: 60 * 60 * 24 * 7 })
-
-    const sharePrefix = process.env.STORJ_SHARE_PREFIX
-    let publicUrl: string | undefined = undefined
-    if (sharePrefix) {
-      publicUrl = `${PUBLIC_GATEWAY}/s/${sharePrefix}/${storjBucket}/${fileName}`
-    }
-
-    return new Response(
-      JSON.stringify({ uploadUrl, downloadUrl, publicUrl, fileName }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    )
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error"
-    return new Response(
-      JSON.stringify({ error: "Failed to generate URL", debug: message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    )
+  } catch (error) {
+    console.error("❌ Storj Upload Route Error:", error)
+    return NextResponse.json({ error: "Failed to create presigned URL" }, { status: 500 })
   }
 }
