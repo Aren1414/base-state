@@ -1,4 +1,4 @@
-import { S3Client } from '@aws-sdk/client-s3'
+import { S3Client } from "@aws-sdk/client-s3"
 
 const accessKey = process.env.STORJ_ACCESS_KEY
 const secretKey = process.env.STORJ_SECRET_KEY
@@ -7,15 +7,15 @@ const bucket = process.env.STORJ_BUCKET
 
 if (!accessKey || !secretKey || !endpoint || !bucket) {
   throw new Error(
-    `❌ Missing STORJ environment variables. Check that STORJ_ACCESS_KEY, STORJ_SECRET_KEY, STORJ_ENDPOINT, and STORJ_BUCKET are set.`
+    "Missing STORJ environment variables. Please set STORJ_ACCESS_KEY, STORJ_SECRET_KEY, STORJ_ENDPOINT, STORJ_BUCKET."
   )
 }
 
 export const storjBucket = bucket
 
 export const s3Client = new S3Client({
-  region: 'us-east-1',
-  endpoint,
+  region: "us-east-1",
+  endpoint: endpoint,
   credentials: {
     accessKeyId: accessKey,
     secretAccessKey: secretKey,
