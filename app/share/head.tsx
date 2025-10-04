@@ -1,58 +1,47 @@
-export default function Head({ searchParams }: { searchParams: { image?: string | string[] } }) {
-  const imageParam = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
-  if (!imageParam) {
-    return (
-      <>
-        <title>BaseState Mini App</title>
-        <meta name="description" content="BaseState NFT viewer" />
-        <meta property="og:image" content="https://base-state.vercel.app/api/image?src=https://base-state.vercel.app/embed.png" />
-      </>
-    )
-  }
-
-  const proxyImageUrl = `https://base-state.vercel.app/api/image?src=${encodeURIComponent(imageParam)}`
+export default function Head({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>
+}) {
+  const image = Array.isArray(searchParams?.image)
+    ? searchParams.image[0]
+    : searchParams?.image
+  const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return (
     <>
       <title>My Minted NFT</title>
       <meta name="description" content="Check out my freshly minted BaseState NFT card!" />
+
       <meta
         name="fc:miniapp"
         content={JSON.stringify({
-          version: "1",
-          imageUrl: proxyImageUrl,
-          button: {
-            title: "🎉 View My NFT",
-            action: {
-              type: "launch_miniapp",
-              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(proxyImageUrl)}`,
-              name: "BaseState",
-              splashImageUrl: "https://base-state.vercel.app/logo.png",
-              splashBackgroundColor: "#000000"
-            }
-          }
+          url: "https://base-state.vercel.app",
+          title: "BaseState NFT",
+          image: imageUrl,
         })}
       />
       <meta
         name="fc:frame"
         content={JSON.stringify({
-          version: "1",
-          imageUrl: proxyImageUrl,
-          button: {
-            title: "🎉 View My NFT",
-            action: {
-              type: "launch_frame",
-              url: `https://base-state.vercel.app/share?image=${encodeURIComponent(proxyImageUrl)}`,
-              name: "BaseState",
-              splashImageUrl: "https://base-state.vercel.app/logo.png",
-              splashBackgroundColor: "#000000"
-            }
-          }
+          version: "next",
+          imageUrl,
+          buttons: [
+            {
+              title: "Open in Mini App",
+              action: {
+                type: "launch_frame",
+                name: "base-state",
+                url: "https://base-state.vercel.app",
+              },
+            },
+          ],
         })}
       />
+
       <meta property="og:title" content="My Minted NFT" />
       <meta property="og:description" content="Check out my freshly minted BaseState NFT card!" />
-      <meta property="og:image" content={proxyImageUrl} />
+      <meta property="og:image" content={imageUrl} />
     </>
   )
 }
