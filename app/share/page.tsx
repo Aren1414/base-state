@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 export async function generateMetadata({ searchParams }: any): Promise<Metadata> {
   const id = Array.isArray(searchParams?.id) ? searchParams.id[0] : searchParams?.id
   const imageUrl = id
-    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/base-state/${id}.png`
+    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`
     : "https://base-state.vercel.app/embed.png"
 
   return {
@@ -24,7 +24,7 @@ export async function generateMetadata({ searchParams }: any): Promise<Metadata>
           title: "🪙 View Minted Card",
           action: {
             type: "launch_miniapp",
-            url: "https://base-state.vercel.app", 
+            url: "https://base-state.vercel.app",
           },
         },
       }),
@@ -35,7 +35,7 @@ export async function generateMetadata({ searchParams }: any): Promise<Metadata>
 export default function SharePage({ searchParams }: any) {
   const id = Array.isArray(searchParams?.id) ? searchParams.id[0] : searchParams?.id
   const imageUrl = id
-    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/base-state/${id}.png`
+    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`
     : "https://base-state.vercel.app/embed.png"
 
   return (
