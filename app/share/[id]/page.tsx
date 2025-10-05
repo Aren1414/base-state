@@ -2,16 +2,8 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-type GenerateMetadataProps = {
-  searchParams?: { [key: string]: string | string[] }
-}
-
-export async function generateMetadata({ searchParams }: GenerateMetadataProps): Promise<Metadata> {
-  const rawId = searchParams?.id
-  const id = Array.isArray(rawId) ? rawId[0] : rawId
-  const imageUrl = id
-    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`
-    : "https://base-state.vercel.app/embed.png"
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return {
     title: "My Minted NFT",
@@ -37,12 +29,8 @@ export async function generateMetadata({ searchParams }: GenerateMetadataProps):
   }
 }
 
-export default function SharePage({ searchParams }: GenerateMetadataProps) {
-  const rawId = searchParams?.id
-  const id = Array.isArray(rawId) ? rawId[0] : rawId
-  const imageUrl = id
-    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`
-    : "https://base-state.vercel.app/embed.png"
+export default function SharePage({ params }: { params: { id: string } }) {
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
