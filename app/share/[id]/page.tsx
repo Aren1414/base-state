@@ -3,10 +3,13 @@ import { Metadata } from "next"
 export const dynamic = "force-dynamic"
 
 export async function generateMetadata(
-  props: Promise<{ params: { id: string } }>
+  props: Promise<{ params: { id: string }; searchParams?: { image?: string | string[] } }>
 ): Promise<Metadata> {
-  const { params } = await props
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
+  const { searchParams } = await props
+  const image = Array.isArray(searchParams?.image)
+    ? searchParams.image[0]
+    : searchParams?.image
+  const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return {
     title: "My Minted NFT",
@@ -18,32 +21,47 @@ export async function generateMetadata(
     },
     other: {
       "fc:miniapp": JSON.stringify({
-        version: "1",
+        url: "https://base-state.vercel.app",
+        title: "BaseState NFT",
+        image: imageUrl,
+      }),
+      "fc:frame": JSON.stringify({
+        version: "next",
         imageUrl,
-        button: {
-          title: "🪙 View Minted Card",
-          action: {
-            type: "launch_miniapp",
-            url: "https://base-state.vercel.app",
+        buttons: [
+          {
+            title: "Open in Mini App",
+            action: {
+              type: "launch_frame",
+              name: "base-state",
+              url: "https://base-state.vercel.app",
+            },
           },
-        },
+        ],
       }),
     },
   }
 }
 
 export default function SharePage({
-  params,
+  searchParams,
 }: {
-  params: { id: string }
+  searchParams?: { image?: string | string[] }
 }) {
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
+  const image = Array.isArray(searchParams?.image)
+    ? searchParams.image[0]
+    : searchParams?.image
+  const imageUrl = image || "https://base-state.vercel.app/embed.png"
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
       <h1>Shared NFT</h1>
       <p>This is the preview of your minted NFT card 👇</p>
-      <img src={imageUrl} alt="Minted NFT" style={{ maxWidth: "400px", borderRadius: "12px" }} />
+      <img
+        src={imageUrl}
+        alt="Minted NFT"
+        style={{ maxWidth: "400px", borderRadius: "12px" }}
+      />
     </main>
   )
 }
