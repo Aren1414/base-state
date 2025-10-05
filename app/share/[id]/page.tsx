@@ -4,9 +4,10 @@ import { minikitConfig } from "../../../minikit.config"
 export const dynamic = "force-dynamic"
 
 export async function generateMetadata(
-  _: any
+  props: Promise<{ params: { id: string } }>
 ): Promise<Metadata> {
-  const imageUrl = minikitConfig.frame.heroImageUrl
+  const { params } = await props
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return {
     title: minikitConfig.frame.name,
@@ -49,8 +50,12 @@ export async function generateMetadata(
   }
 }
 
-export default function SharePage(_: any) {
-  const imageUrl = minikitConfig.frame.heroImageUrl
+export default function SharePage({
+  params,
+}: {
+  params: { id: string }
+}) {
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
