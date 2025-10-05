@@ -2,12 +2,8 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { id: string }
-}): Promise<Metadata> {
-  const imageUrl = params.id
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const imageUrl = params?.id
     ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
     : "https://base-state.vercel.app/embed.png"
 
@@ -35,8 +31,8 @@ export async function generateMetadata({
   }
 }
 
-export default function SharePage({ params }: { params: { id: string } }) {
-  const imageUrl = params.id
+export default function SharePage({ params }) {
+  const imageUrl = params?.id
     ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
     : "https://base-state.vercel.app/embed.png"
 
