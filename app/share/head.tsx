@@ -1,18 +1,17 @@
-export default function Head({
-  searchParams,
-}: {
-  searchParams?: Record<string, string | string[] | undefined>
-}) {
+export default function Head({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
   const image = Array.isArray(searchParams?.image)
     ? searchParams.image[0]
     : searchParams?.image
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
+  const imageUrl = image?.startsWith("http")
+    ? image
+    : "https://base-state.vercel.app/embed.png"
 
   return (
     <>
       <title>My Minted NFT</title>
       <meta name="description" content="Check out my freshly minted BaseState NFT card!" />
 
+      {/* ✅ Farcaster Mini App Embed */}
       <meta
         name="fc:miniapp"
         content={JSON.stringify({
@@ -21,6 +20,8 @@ export default function Head({
           image: imageUrl,
         })}
       />
+
+      {/* ✅ Farcaster Frame */}
       <meta
         name="fc:frame"
         content={JSON.stringify({
@@ -39,6 +40,7 @@ export default function Head({
         })}
       />
 
+      {/* ✅ OpenGraph fallback */}
       <meta property="og:title" content="My Minted NFT" />
       <meta property="og:description" content="Check out my freshly minted BaseState NFT card!" />
       <meta property="og:image" content={imageUrl} />
