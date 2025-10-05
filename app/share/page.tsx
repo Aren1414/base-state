@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic"
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>
+  params: { [key: string]: string }
+  searchParams?: { [key: string]: string | string[] }
 }): Promise<Metadata> {
   const idRaw = searchParams?.id
   const id = Array.isArray(idRaw) ? idRaw[0] : idRaw
@@ -40,7 +41,8 @@ export async function generateMetadata({
 export default function SharePage({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>
+  params: { [key: string]: string }
+  searchParams?: { [key: string]: string | string[] }
 }) {
   const idRaw = searchParams?.id
   const id = Array.isArray(idRaw) ? idRaw[0] : idRaw
