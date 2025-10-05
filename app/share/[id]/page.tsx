@@ -3,10 +3,11 @@ import { minikitConfig } from "../../../minikit.config"
 
 export const dynamic = "force-dynamic"
 
-export async function generateMetadata(
-  props: Promise<{ params: { id: string } }>
-): Promise<Metadata> {
-  const { params } = await props
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string }
+}): Promise<Metadata> {
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return {
