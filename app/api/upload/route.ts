@@ -7,7 +7,7 @@ const secretKey = process.env.STORJ_SECRET_KEY!
 const endpoint = process.env.STORJ_ENDPOINT!
 const bucket = process.env.STORJ_BUCKET!
 
-const STORJ_SHARE_ID = "jwehpt5oybcnyzdpzgkvbodeireq" 
+const STORJ_SHARE_ID = "jwehpt5oybcnyzdpzgkvbodeireq"
 const PUBLIC_GATEWAY = "https://link.storjshare.io/raw"
 
 const s3 = new S3Client({
@@ -20,7 +20,7 @@ const s3 = new S3Client({
   forcePathStyle: true,
 })
 
-export async function GET() {
+export async function POST() {
   try {
     const fileName = `mint_${Date.now()}.png`
 
@@ -31,7 +31,6 @@ export async function GET() {
     })
 
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
-
     const downloadUrl = `${PUBLIC_GATEWAY}/${STORJ_SHARE_ID}/${bucket}/${fileName}`
 
     return NextResponse.json({
@@ -41,6 +40,9 @@ export async function GET() {
     })
   } catch (error) {
     console.error("❌ Storj Upload Error:", error)
-    return NextResponse.json({ error: "Failed to create presigned URL" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to create presigned URL" },
+      { status: 500 }
+    )
   }
 }
