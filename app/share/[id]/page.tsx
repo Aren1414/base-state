@@ -1,57 +1,61 @@
 import { Metadata } from "next"
+import { minikitConfig } from "../../../minikit.config"
 
 export const dynamic = "force-dynamic"
 
 export async function generateMetadata(
-  props: Promise<{ params: { id: string }; searchParams?: { image?: string | string[] } }>
+  props: Promise<{ params: { id: string } }>
 ): Promise<Metadata> {
-  const { searchParams } = await props
-  const image = Array.isArray(searchParams?.image)
-    ? searchParams.image[0]
-    : searchParams?.image
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
+  const { params } = await props
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return {
-    title: "My Minted NFT",
-    description: "Check out my freshly minted BaseState NFT card!",
+    title: minikitConfig.frame.name,
+    description: minikitConfig.frame.description,
     openGraph: {
-      title: "My Minted NFT",
-      description: "Check out my freshly minted BaseState NFT card!",
+      title: minikitConfig.frame.name,
+      description: minikitConfig.frame.description,
       images: [imageUrl],
     },
     other: {
-      "fc:miniapp": JSON.stringify({
-        url: "https://base-state.vercel.app",
-        title: "BaseState NFT",
-        image: imageUrl,
-      }),
       "fc:frame": JSON.stringify({
-        version: "next",
+        version: minikitConfig.frame.version,
         imageUrl,
-        buttons: [
-          {
-            title: "Open in Mini App",
-            action: {
-              type: "launch_frame",
-              name: "base-state",
-              url: "https://base-state.vercel.app",
-            },
+        button: {
+          title: "Launch Mini App",
+          action: {
+            type: "launch_frame",
+            name: minikitConfig.frame.name,
+            url: minikitConfig.frame.homeUrl,
+            splashImageUrl: minikitConfig.frame.splashImageUrl,
+            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
           },
-        ],
+        },
+      }),
+      "fc:miniapp": JSON.stringify({
+        version: minikitConfig.frame.version,
+        imageUrl,
+        button: {
+          title: "Launch Mini App",
+          action: {
+            type: "launch_miniapp",
+            name: minikitConfig.frame.name,
+            url: minikitConfig.frame.homeUrl,
+            splashImageUrl: minikitConfig.frame.splashImageUrl,
+            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
+          },
+        },
       }),
     },
   }
 }
 
 export default function SharePage({
-  searchParams,
+  params,
 }: {
-  searchParams?: { image?: string | string[] }
+  params: { id: string }
 }) {
-  const image = Array.isArray(searchParams?.image)
-    ? searchParams.image[0]
-    : searchParams?.image
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
