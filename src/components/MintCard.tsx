@@ -79,7 +79,7 @@ export default function MintCard({
   const fileName = downloadUrl.split("/").pop()?.replace(".png", "")
   if (!fileName) return
 
-  const sharePage = `${window.location.origin}/share/${fileName}`
+  const sharePage = `${window.location.origin}/share?id=${fileName}`
   const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
     "📸 Just minted my BaseState NFT card!"
   )}&embeds[]=${encodeURIComponent(sharePage)}`
