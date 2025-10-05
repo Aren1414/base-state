@@ -27,8 +27,12 @@ export async function POST() {
       ContentType: "image/png",
     })
 
+    
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
-    const downloadUrl = `${endpoint.replace(/\/+$/, "")}/${bucket}/${fileName}`
+
+    
+    const publicGateway = "https://link.storjshare.io/raw"
+    const downloadUrl = `${publicGateway}/${accessKey}/${bucket}/${fileName}`
 
     return NextResponse.json({
       uploadUrl,
