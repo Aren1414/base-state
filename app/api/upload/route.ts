@@ -4,6 +4,10 @@ import { storjBucket, s3Client } from "@lib/storjClient"
 
 export const runtime = "nodejs"
 
+const accessKey = process.env.STORJ_ACCESS_KEY!
+const secretKey = process.env.STORJ_SECRET_KEY!
+const endpoint = process.env.STORJ_ENDPOINT!
+const bucket = process.env.STORJ_BUCKET!
 
 const STORJ_SHARE_ID = "jwehpt5oybcnyzdpzgkvbodeireq"
 const PUBLIC_GATEWAY = "https://link.storjshare.io/raw"
