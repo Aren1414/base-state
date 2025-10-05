@@ -1,13 +1,17 @@
-import { Metadata } from "next"
+import { Metadata, ResolvingMetadata } from "next"
 import { minikitConfig } from "../../../minikit.config"
 
 export const dynamic = "force-dynamic"
 
-export async function generateMetadata({
-  params,
-}: {
+
+interface SharePageProps {
   params: { id: string }
-}): Promise<Metadata> {
+}
+
+export async function generateMetadata(
+  { params }: SharePageProps,
+  parent?: ResolvingMetadata
+): Promise<Metadata> {
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return {
@@ -51,11 +55,7 @@ export async function generateMetadata({
   }
 }
 
-export default function SharePage({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default function SharePage({ params }: SharePageProps) {
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return (
