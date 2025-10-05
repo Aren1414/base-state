@@ -3,20 +3,7 @@ import { minikitConfig } from "../../../minikit.config";
 
 export const dynamic = "force-dynamic";
 
-interface PageParams {
-  id: string;
-}
-
-interface SharePageProps {
-  params: PageParams;
-}
-
-
-export async function generateMetadata({
-  params,
-}: {
-  params: PageParams;
-}): Promise<import("next").Metadata> {
+export async function generateMetadata({ params }: { params: { id: string } }) {
   const { id } = params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
@@ -52,8 +39,8 @@ export async function generateMetadata({
   };
 }
 
-
-export default async function SharePage({ params }: { params: PageParams }) {
+// صفحه اصلی
+export default async function SharePage({ params }: { params: { id: string } }) {
   const { id } = params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
