@@ -2,8 +2,13 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-export async function generateMetadata({ searchParams }: { searchParams: URLSearchParams }): Promise<Metadata> {
-  const id = searchParams.get("id")
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>
+}): Promise<Metadata> {
+  const idRaw = searchParams?.id
+  const id = Array.isArray(idRaw) ? idRaw[0] : idRaw
   const imageUrl = id
     ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`
     : "https://base-state.vercel.app/embed.png"
@@ -32,8 +37,13 @@ export async function generateMetadata({ searchParams }: { searchParams: URLSear
   }
 }
 
-export default function SharePage({ searchParams }: { searchParams: URLSearchParams }) {
-  const id = searchParams.get("id")
+export default function SharePage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>
+}) {
+  const idRaw = searchParams?.id
+  const id = Array.isArray(idRaw) ? idRaw[0] : idRaw
   const imageUrl = id
     ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`
     : "https://base-state.vercel.app/embed.png"
