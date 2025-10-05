@@ -2,13 +2,10 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-type Props = {
-  params: {
-    id: string
-  }
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(
+  props: Promise<{ params: { id: string } }>
+): Promise<Metadata> {
+  const { params } = await props
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return {
@@ -35,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function SharePage({ params }: Props) {
+export default function SharePage({ params }: { params: { id: string } }) {
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return (
