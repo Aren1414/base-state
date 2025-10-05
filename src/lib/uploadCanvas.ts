@@ -11,21 +11,27 @@ export async function uploadCanvas(
       try {
         setMintStatus("⏫ Uploading image to Storj…")
 
-    
         const res = await fetch("/api/upload", { method: "POST" })
-        const data: {
+
+        let data: {
           uploadUrl?: string
           downloadUrl?: string
           fileName?: string
           error?: string
-        } = await res.json()
+        } = {}
+
+        try {
+          data = await res.json()
+        } catch (jsonErr) {
+          console.error("❌ Failed to parse JSON:", jsonErr)
+          return reject("Invalid response from upload API")
+        }
 
         if (!res.ok || !data.uploadUrl || !data.downloadUrl) {
           console.error("Upload init error:", data)
           return reject(data.error || "Failed to get presigned URL")
         }
 
-        
         const uploadRes = await fetch(data.uploadUrl, {
           method: "PUT",
           body: blob,
@@ -38,8 +44,6 @@ export async function uploadCanvas(
         }
 
         setMintStatus("✅ Uploaded to Storj successfully")
-
-        
         resolve(data.downloadUrl)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown upload error"
