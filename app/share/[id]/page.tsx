@@ -1,17 +1,35 @@
 import { Metadata } from "next";
 import { minikitConfig } from "../../../minikit.config";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static"; 
 
-type SharePageProps = {
-  params: Promise<{ id: string }>;
-};
+interface ShareParams {
+  id: string;
+}
 
-export async function generateMetadata(
-  { params }: SharePageProps
-): Promise<Metadata> {
-  const { id } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: ShareParams;
+}): Promise<Metadata> {
+  const id = params.id;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
+
+  // ساخت json برای fc:miniapp طبق مستندات
+  const miniappEmbed = {
+    version: "1",
+    imageUrl,
+    button: {
+      title: "Launch Mini App",
+      action: {
+        type: "launch_miniapp",
+        url: `${minikitConfig.frame.homeUrl}/share/${id}`,
+        name: minikitConfig.frame.name,
+        splashImageUrl: minikitConfig.frame.splashImageUrl,
+        splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
+      },
+    },
+  };
 
   return {
     title: minikitConfig.frame.name,
@@ -19,46 +37,27 @@ export async function generateMetadata(
     openGraph: {
       title: minikitConfig.frame.name,
       description: minikitConfig.frame.description,
-      images: [imageUrl],
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 800, 
+        },
+      ],
     },
     other: {
-      "fc:frame": JSON.stringify({
-        version: minikitConfig.frame.version,
-        imageUrl,
-        button: {
-          title: "Launch Mini App",
-          action: {
-            type: "launch_frame",
-            name: minikitConfig.frame.name,
-            url: minikitConfig.frame.homeUrl,
-            splashImageUrl: minikitConfig.frame.splashImageUrl,
-            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
-          },
-        },
-      }),
-      "fc:miniapp": JSON.stringify({
-        version: minikitConfig.frame.version,
-        imageUrl,
-        button: {
-          title: "Launch Mini App",
-          action: {
-            type: "launch_miniapp",
-            name: minikitConfig.frame.name,
-            url: minikitConfig.frame.homeUrl,
-            splashImageUrl: minikitConfig.frame.splashImageUrl,
-            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
-          },
-        },
-      }),
+      "fc:miniapp": JSON.stringify(miniappEmbed),
+      "fc:frame": JSON.stringify(miniappEmbed), 
     },
   };
 }
 
-export default async function SharePage({
+export default function SharePage({
   params,
-}: SharePageProps) {
-  const { id } = await params;
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
+}: {
+  params: ShareParams;
+}) {
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
