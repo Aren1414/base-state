@@ -1,8 +1,9 @@
 import { Metadata } from "next"
+import { type PageProps } from "next"
 
 export const dynamic = "force-dynamic"
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return {
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default function SharePage({ params }: { params: { id: string } }) {
+export default function SharePage({ params }: PageProps) {
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return (
