@@ -32,7 +32,11 @@ export async function generateMetadata(
   }
 }
 
-export default function SharePage({ params }: { params: { id: string } }) {
+export default function SharePage({
+  params,
+}: {
+  params: { id: string }
+}) {
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
 
   return (
