@@ -1,65 +1,58 @@
-import { Metadata } from "next";
+import React from "react";
 import { minikitConfig } from "../../../minikit.config";
 
 export const dynamic = "force-dynamic";
 
 interface SharePageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
-export async function generateMetadata({ params }: SharePageProps): Promise<Metadata> {
-  const { id } = await params; 
+export async function generateMetadata({
+  params,
+}: SharePageProps): Promise<import("next").Metadata> {
+  const { id } = params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
+  const cfg = (minikitConfig as any).miniapp;
+
+  const embed = {
+    version: cfg.version ?? "1",
+    imageUrl,
+    button: {
+      title: "Launch Mini App",
+      action: {
+        type: "launch_miniapp",
+        name: cfg.name,
+        url: `${cfg.homeUrl}/share/${id}`,
+        splashImageUrl: cfg.splashImageUrl,
+        splashBackgroundColor: cfg.splashBackgroundColor,
+      },
+    },
+  };
+
   return {
-    title: minikitConfig.frame.name,
-    description: minikitConfig.frame.description,
+    title: `${cfg.name} — Shared NFT`,
+    description: cfg.ogDescription ?? cfg.description,
     openGraph: {
-      title: minikitConfig.frame.name,
-      description: minikitConfig.frame.description,
+      title: cfg.ogTitle ?? cfg.name,
+      description: cfg.ogDescription ?? cfg.description,
       images: [imageUrl],
     },
     other: {
-      
-      "fc:frame": JSON.stringify({
-        version: minikitConfig.frame.version,
-        imageUrl,
-        button: {
-          title: "Launch Mini App",
-          action: {
-            type: "launch_frame",
-            name: minikitConfig.frame.name,
-            url: minikitConfig.frame.homeUrl,
-            splashImageUrl: minikitConfig.frame.splashImageUrl,
-            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
-          },
-        },
-      }),
-      "fc:miniapp": JSON.stringify({
-        version: minikitConfig.frame.version,
-        imageUrl,
-        button: {
-          title: "Launch Mini App",
-          action: {
-            type: "launch_miniapp",
-            name: minikitConfig.frame.name,
-            url: minikitConfig.frame.homeUrl,
-            splashImageUrl: minikitConfig.frame.splashImageUrl,
-            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
-          },
-        },
-      }),
+      "fc:miniapp": JSON.stringify(embed),
+      "fc:frame": JSON.stringify(embed),
     },
   };
 }
 
 export default async function SharePage({ params }: SharePageProps) {
-  const { id } = await params; 
+  const { id } = params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
+  const cfg = (minikitConfig as any).miniapp;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
-      <h1>Shared NFT</h1>
+      <h1>{cfg.name} — Shared NFT</h1>
       <p>This is the preview of your minted NFT card 👇</p>
       <img
         src={imageUrl}
