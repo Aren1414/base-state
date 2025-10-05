@@ -3,8 +3,10 @@ import { Metadata } from "next"
 export const dynamic = "force-dynamic"
 
 export async function generateMetadata({ searchParams }: any): Promise<Metadata> {
-  const image = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
+  const id = Array.isArray(searchParams?.id) ? searchParams.id[0] : searchParams?.id
+  const imageUrl = id
+    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/base-state/${id}.png`
+    : "https://base-state.vercel.app/embed.png"
 
   return {
     title: "My Minted NFT",
@@ -16,31 +18,25 @@ export async function generateMetadata({ searchParams }: any): Promise<Metadata>
     },
     other: {
       "fc:miniapp": JSON.stringify({
-        url: "https://base-state.vercel.app",
-        title: "BaseState NFT",
-        image: imageUrl,
-      }),
-      "fc:frame": JSON.stringify({
-        version: "next",
+        version: "1",
         imageUrl,
-        buttons: [
-          {
-            title: "Open in Mini App",
-            action: {
-              type: "launch_frame",
-              name: "base-state",
-              url: "https://base-state.vercel.app",
-            },
+        button: {
+          title: "🪙 View Minted Card",
+          action: {
+            type: "launch_miniapp",
+            url: `https://base-state.vercel.app`,
           },
-        ],
+        },
       }),
     },
   }
 }
 
 export default function SharePage({ searchParams }: any) {
-  const image = Array.isArray(searchParams?.image) ? searchParams.image[0] : searchParams?.image
-  const imageUrl = image || "https://base-state.vercel.app/embed.png"
+  const id = Array.isArray(searchParams?.id) ? searchParams.id[0] : searchParams?.id
+  const imageUrl = id
+    ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/base-state/${id}.png`
+    : "https://base-state.vercel.app/embed.png"
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
