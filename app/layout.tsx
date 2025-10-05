@@ -6,40 +6,64 @@ import { SafeArea } from "@coinbase/onchainkit/minikit";
 import FrameReady from "./components/FrameReady";
 import WalletCheck from "./components/WalletCheck";
 import "./globals.css";
+import React from "react";
 
+/**
+ * Generate site-level metadata and Farcaster embed (fc:miniapp / fc:frame).
+ * We support both `miniapp` (new) and `frame` (legacy) keys in minikitConfig.
+ */
 export async function generateMetadata(): Promise<Metadata> {
+  // support both shapes (miniapp preferred)
+  const cfg = (minikitConfig as any).miniapp ?? (minikitConfig as any).frame ?? {};
+
+  // ensure we produce a full https URL if possible
+  const maybeEnsureHttps = (u: string | undefined) => {
+    if (!u) return undefined;
+    return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
+  };
+
+  const imageUrl =
+    maybeEnsureHttps(cfg.ogImageUrl) ||
+    maybeEnsureHttps(cfg.heroImageUrl) ||
+    maybeEnsureHttps(cfg.splashImageUrl) ||
+    (cfg.homeUrl ? `${maybeEnsureHttps(cfg.homeUrl)}/embed.png` : undefined) ||
+    "";
+
+  const embed = {
+    version: cfg.version ?? "1",
+    imageUrl,
+    button: {
+      title: "Launch Mini App",
+      action: {
+        type: cfg.homeUrl ? "launch_miniapp" : "launch_frame",
+        name: cfg.name ?? "Mini App",
+        url: maybeEnsureHttps(cfg.homeUrl) ?? "/",
+        splashImageUrl: maybeEnsureHttps(cfg.splashImageUrl),
+        splashBackgroundColor: cfg.splashBackgroundColor ?? "#000000",
+      },
+    },
+  };
+
   return {
-    title: minikitConfig.frame.name,
-    description: minikitConfig.frame.description,
+    title: cfg.ogTitle ?? cfg.name ?? "Mini App",
+    description: cfg.ogDescription ?? cfg.description ?? "",
+    openGraph: {
+      title: cfg.ogTitle ?? cfg.name,
+      description: cfg.ogDescription ?? cfg.description,
+      images: imageUrl
+        ? [
+            {
+              url: imageUrl,
+              width: 1200,
+              height: 800,
+            },
+          ]
+        : undefined,
+    },
     other: {
-      "fc:frame": JSON.stringify({
-        version: minikitConfig.frame.version,
-        imageUrl: minikitConfig.frame.heroImageUrl,
-        button: {
-          title: "Launch Mini App",
-          action: {
-            type: "launch_frame",
-            name: minikitConfig.frame.name,
-            url: minikitConfig.frame.homeUrl,
-            splashImageUrl: minikitConfig.frame.splashImageUrl,
-            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
-          },
-        },
-      }),
-      "fc:miniapp": JSON.stringify({
-        version: minikitConfig.frame.version,
-        imageUrl: minikitConfig.frame.heroImageUrl,
-        button: {
-          title: "Launch Mini App",
-          action: {
-            type: "launch_miniapp",
-            name: minikitConfig.frame.name,
-            url: minikitConfig.frame.homeUrl,
-            splashImageUrl: minikitConfig.frame.splashImageUrl,
-            splashBackgroundColor: minikitConfig.frame.splashBackgroundColor,
-          },
-        },
-      }),
+      // fc:miniapp is the canonical embed per spec; fc:frame kept for backwards compat.
+      "fc:miniapp": JSON.stringify(embed),
+      "fc:frame": JSON.stringify(embed),
     },
   };
 }
