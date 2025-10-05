@@ -1,12 +1,11 @@
-// app/share/[id]/page.tsx
 import React from "react";
 import { minikitConfig } from "../../../minikit.config";
 
 export const dynamic = "force-dynamic";
 
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const { id } = params;
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params; 
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   const cfg = (minikitConfig as any).miniapp;
@@ -42,8 +41,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 }
 
 
-export default async function SharePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function SharePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params; 
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
 
