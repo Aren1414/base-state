@@ -1,18 +1,17 @@
-import { Metadata, ResolvingMetadata } from "next"
-import { minikitConfig } from "../../../minikit.config"
+import { Metadata } from "next";
+import { minikitConfig } from "../../../minikit.config";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-
-interface SharePageProps {
-  params: { id: string }
-}
+type SharePageProps = {
+  params: Promise<{ id: string }>;
+};
 
 export async function generateMetadata(
-  { params }: SharePageProps,
-  parent?: ResolvingMetadata
+  { params }: SharePageProps
 ): Promise<Metadata> {
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
+  const { id } = await params;
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   return {
     title: minikitConfig.frame.name,
@@ -52,11 +51,14 @@ export async function generateMetadata(
         },
       }),
     },
-  }
+  };
 }
 
-export default function SharePage({ params }: SharePageProps) {
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${params.id}.png`
+export default async function SharePage({
+  params,
+}: SharePageProps) {
+  const { id } = await params;
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
@@ -68,5 +70,5 @@ export default function SharePage({ params }: SharePageProps) {
         style={{ maxWidth: "400px", borderRadius: "12px" }}
       />
     </main>
-  )
+  );
 }
