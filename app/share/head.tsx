@@ -1,8 +1,6 @@
 export default function Head({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
   const id = Array.isArray(searchParams?.id) ? searchParams.id[0] : searchParams?.id
-  const imageUrl = id?.startsWith("http")
-    ? id
-    : id
+  const imageUrl = id
     ? `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/base-state/${id}.png`
     : "https://base-state.vercel.app/embed.png"
 
