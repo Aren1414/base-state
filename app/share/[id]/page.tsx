@@ -1,7 +1,9 @@
+// app/share/[id]/page.tsx
 import React from "react";
 import { minikitConfig } from "../../../minikit.config";
 
 export const dynamic = "force-dynamic";
+
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -39,7 +41,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-// صفحه اصلی
+
 export default async function SharePage({ params }: { params: { id: string } }) {
   const { id } = params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
