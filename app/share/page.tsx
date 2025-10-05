@@ -24,7 +24,7 @@ export async function generateMetadata({ searchParams }: any): Promise<Metadata>
           title: "🪙 View Minted Card",
           action: {
             type: "launch_miniapp",
-            url: `https://base-state.vercel.app`,
+            url: "https://base-state.vercel.app", 
           },
         },
       }),
