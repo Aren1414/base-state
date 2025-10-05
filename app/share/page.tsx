@@ -2,7 +2,11 @@ import { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
 
-export async function generateMetadata({ searchParams }): Promise<Metadata> {
+type GenerateMetadataProps = {
+  searchParams?: { [key: string]: string | string[] }
+}
+
+export async function generateMetadata({ searchParams }: GenerateMetadataProps): Promise<Metadata> {
   const rawId = searchParams?.id
   const id = Array.isArray(rawId) ? rawId[0] : rawId
   const imageUrl = id
@@ -33,7 +37,7 @@ export async function generateMetadata({ searchParams }): Promise<Metadata> {
   }
 }
 
-export default function SharePage({ searchParams }) {
+export default function SharePage({ searchParams }: GenerateMetadataProps) {
   const rawId = searchParams?.id
   const id = Array.isArray(rawId) ? rawId[0] : rawId
   const imageUrl = id
