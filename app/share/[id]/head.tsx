@@ -9,18 +9,18 @@ export default async function Head({ params }: { params: { id: string } }) {
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+  const appHome = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   const embed = {
     version: cfg.version ?? "1",
     imageUrl,
     button: {
-      title: "View Minted Card",
+      title: "Launch Mini App",
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: canonical, // <-- canonical used here
+        url: appHome, 
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -29,19 +29,18 @@ export default async function Head({ params }: { params: { id: string } }) {
 
   return (
     <>
-      
-      <link rel="canonical" href={canonical} />
-      <meta property="og:url" content={canonical} />
-      <meta name="twitter:url" content={canonical} />
+      <link rel="canonical" href={`${appHome}/share/${id}`} />
+      <meta property="og:url" content={`${appHome}/share/${id}`} />
+      <meta name="twitter:url" content={`${appHome}/share/${id}`} />
 
       <title>{cfg.name} — Shared NFT</title>
       <meta name="description" content={cfg.ogDescription ?? cfg.description} />
 
-      {/* Farcaster/Base miniapp/frame embeds (server-rendered) */}
+      {/* MiniApp Metadata */}
       <meta name="fc:miniapp" content={JSON.stringify(embed)} />
       <meta name="fc:frame" content={JSON.stringify(embed)} />
 
-      {/* Open Graph for image preview */}
+      {/* OG + Twitter */}
       <meta property="og:title" content={`${cfg.name} — Shared NFT`} />
       <meta property="og:description" content={cfg.ogDescription ?? cfg.description} />
       <meta property="og:image" content={imageUrl} />
