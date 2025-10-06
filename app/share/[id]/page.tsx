@@ -1,22 +1,20 @@
 import React from "react";
 import { minikitConfig } from "../../../minikit.config";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
-
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
 
-  // helper: ensure url starts with https://
   const ensureHttps = (u?: string) => {
     if (!u) return u;
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  // use canonical if provided (prefer canonicalLink from platform), fallback to homeUrl
   const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   const embed = {
     version: cfg.version ?? "1",
@@ -26,7 +24,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        // <-- IMPORTANT: use canonical (no /share/:id) so clients open the app home
         url: canonical,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
@@ -41,6 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: cfg.ogTitle ?? cfg.name,
       description: cfg.ogDescription ?? cfg.description,
       images: [imageUrl],
+      url: canonical, // <-- important: og:url / canonical in Metadata too
     },
     other: {
       "fc:miniapp": JSON.stringify(embed),
@@ -49,8 +47,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function SharePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function SharePage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
 
