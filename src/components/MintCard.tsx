@@ -74,17 +74,18 @@ export default function MintCard({
   }
 
   const handleShareCard = () => {
-  if (!downloadUrl) return
+    if (!downloadUrl) return
 
-  const fileName = downloadUrl.split("/").pop()?.replace(".png", "")
-  if (!fileName) return
+    const fileName = downloadUrl.split("/").pop()?.replace(".png", "")
+    if (!fileName) return
 
-  const sharePage = `${window.location.origin}/share?id=${fileName}`
-  const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-    "📸 Just minted my BaseState NFT card!"
-  )}&embeds[]=${encodeURIComponent(sharePage)}`
+    
+    const sharePage = `${window.location.origin}/share/${fileName}`
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+      "📸 Just minted my BaseState NFT card!"
+    )}&embeds[]=${encodeURIComponent(sharePage)}`
 
-  window.open(warpcastUrl, "_blank")
+    window.open(warpcastUrl, "_blank")
   }
 
   return (
@@ -109,6 +110,7 @@ export default function MintCard({
           minHeight: "200px",
         }}
       >
+        {/* کارت نمایشی */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
           <img
             src={user.pfpUrl || "/default-avatar.png"}
@@ -241,4 +243,4 @@ function buttonStyle(color: string): React.CSSProperties {
     boxShadow: "0 0 2px rgba(0,0,0,0.1)",
     minWidth: "90px",
   }
-}
+  }
