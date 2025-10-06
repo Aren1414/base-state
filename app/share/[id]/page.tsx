@@ -1,11 +1,19 @@
 import React from "react";
 import { minikitConfig } from "../../../minikit.config";
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+type SharePageProps = {
+  params: { id: string };
+};
+
+
+export async function generateMetadata(
+  { params }: SharePageProps,
+  _parent?: ResolvingMetadata
+): Promise<Metadata> {
   const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
 
@@ -14,13 +22,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  
   const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
-
-  
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
-  
   const embed = {
     version: cfg.version ?? "1",
     imageUrl,
@@ -29,7 +33,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: canonical, 
+        url: canonical,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -46,14 +50,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       url: canonical,
     },
     other: {
-      "fc:frame": JSON.stringify(embed),
       "fc:miniapp": JSON.stringify(embed),
+      "fc:frame": JSON.stringify(embed),
     },
   };
 }
 
 
-export default function SharePage({ params }: { params: { id: string } }) {
+export default function SharePage({ params }: SharePageProps) {
   const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
