@@ -1,4 +1,5 @@
-// make ROOT_URL a fully-qualified https URL so embeds are canonical
+// minikit.config.ts
+// ensure a fully-qualified https root URL
 const rawUrl = process.env.NEXT_PUBLIC_URL || process.env.VERCEL_URL || "base-state.vercel.app";
 export const ROOT_URL = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
 
@@ -18,9 +19,8 @@ export const minikitConfig = {
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#000000",
     homeUrl: ROOT_URL,
-    // <-- IMPORTANT: after you publish the mini app, replace this with the
-    // canonical universal link provided by the platform (Farcaster / Base),
-    // e.g.: "https://farcaster.xyz/miniapps/<APP_ID>/<APP_SLUG>"
+    // <-- IMPORTANT: بعد از انتشار، این مقدار را با canonical رسمی پلتفرم جایگزین کن:
+    // e.g. "https://farcaster.xyz/miniapps/<APP_ID>/<APP_SLUG>"
     canonicalLink: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
