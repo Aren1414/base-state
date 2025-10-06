@@ -1,4 +1,4 @@
-// ensure we produce a full https URL on Vercel / local envs
+// make ROOT_URL a fully-qualified https URL so embeds are canonical
 const rawUrl = process.env.NEXT_PUBLIC_URL || process.env.VERCEL_URL || "base-state.vercel.app";
 export const ROOT_URL = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
 
@@ -13,16 +13,14 @@ export const minikitConfig = {
     name: "base-state",
     subtitle: "",
     description: "",
-    // make sure these are full URLs (ROOT_URL built above)
     screenshotUrls: [`${ROOT_URL}/screenshot.png`],
     iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#000000",
     homeUrl: ROOT_URL,
-    // canonicalLink: when you publish the miniapp (hosted manifest / Base/Farcaster dashboard)
-    // replace this with the canonical miniapp URL provided by the platform, e.g.:
-    // "https://farcaster.xyz/miniapps/<APP_ID>/<APP_SLUG>"
-    // Until you have a platform canonical, it will fallback to homeUrl.
+    // <-- IMPORTANT: after you publish the mini app, replace this with the
+    // canonical universal link provided by the platform (Farcaster / Base),
+    // e.g.: "https://farcaster.xyz/miniapps/<APP_ID>/<APP_SLUG>"
     canonicalLink: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
