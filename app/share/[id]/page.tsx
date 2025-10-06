@@ -4,20 +4,20 @@ import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-
-export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
-  const { id } = await params; 
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
 
-  // helper: ensure url starts with https://
+  // helper: ensure https
   const ensureHttps = (u?: string) => {
     if (!u) return u;
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  // use canonical if provided (prefer canonicalLink from platform), fallback to homeUrl
-  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+  
+  const appHome = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
 
+  
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   
@@ -29,8 +29,7 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        
-        url: canonical,
+        url: appHome, 
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -44,7 +43,7 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
       title: cfg.ogTitle ?? cfg.name,
       description: cfg.ogDescription ?? cfg.description,
       images: [imageUrl],
-      url: canonical,
+      url: `${appHome}/share/${id}`,
     },
     other: {
       "fc:miniapp": JSON.stringify(embed),
@@ -53,10 +52,10 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
   };
 }
 
-export default async function SharePage({ params }: { params: any }) {
-  const { id } = await params;
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
+export default async function SharePage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
@@ -65,7 +64,11 @@ export default async function SharePage({ params }: { params: any }) {
       <img
         src={imageUrl}
         alt="Minted NFT"
-        style={{ maxWidth: "400px", borderRadius: "12px" }}
+        style={{
+          maxWidth: "400px",
+          borderRadius: "12px",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+        }}
       />
     </main>
   );
