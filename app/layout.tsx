@@ -8,26 +8,19 @@ import WalletCheck from "./components/WalletCheck";
 import "./globals.css";
 import React from "react";
 
-/**
- * Generate site-level metadata and Farcaster embed (fc:miniapp / fc:frame).
- * We support both `miniapp` (new) and `frame` (legacy) keys in minikitConfig.
- */
-export async function generateMetadata(): Promise<Metadata> {
-  // support both shapes (miniapp preferred)
-  const cfg = (minikitConfig as any).miniapp ?? (minikitConfig as any).frame ?? {};
+export async function generateMetadata({ params }: any): Promise<Metadata> {
+  // Skip metadata generation for share pages
+  if (params?.id) return {};
 
-  // ensure we produce a full https URL if possible
-  const maybeEnsureHttps = (u: string | undefined) => {
-    if (!u) return undefined;
-    return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
-  };
+  const cfg = (minikitConfig as any).miniapp ?? {};
+  const ensureHttps = (u?: string) =>
+    !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
 
   const imageUrl =
-    maybeEnsureHttps(cfg.ogImageUrl) ||
-    maybeEnsureHttps(cfg.heroImageUrl) ||
-    maybeEnsureHttps(cfg.splashImageUrl) ||
-    (cfg.homeUrl ? `${maybeEnsureHttps(cfg.homeUrl)}/embed.png` : undefined) ||
-    "";
+    ensureHttps(cfg.ogImageUrl) ||
+    ensureHttps(cfg.heroImageUrl) ||
+    ensureHttps(cfg.splashImageUrl) ||
+    `${ensureHttps(cfg.homeUrl)}/embed.png`;
 
   const embed = {
     version: cfg.version ?? "1",
@@ -35,33 +28,24 @@ export async function generateMetadata(): Promise<Metadata> {
     button: {
       title: "Launch Mini App",
       action: {
-        type: cfg.homeUrl ? "launch_miniapp" : "launch_frame",
-        name: cfg.name ?? "Mini App",
-        url: maybeEnsureHttps(cfg.homeUrl) ?? "/",
-        splashImageUrl: maybeEnsureHttps(cfg.splashImageUrl),
+        type: "launch_miniapp",
+        name: cfg.name,
+        url: ensureHttps(cfg.homeUrl),
+        splashImageUrl: ensureHttps(cfg.splashImageUrl),
         splashBackgroundColor: cfg.splashBackgroundColor ?? "#000000",
       },
     },
   };
 
   return {
-    title: cfg.ogTitle ?? cfg.name ?? "Mini App",
-    description: cfg.ogDescription ?? cfg.description ?? "",
+    title: cfg.ogTitle ?? cfg.name,
+    description: cfg.ogDescription ?? cfg.description,
     openGraph: {
       title: cfg.ogTitle ?? cfg.name,
       description: cfg.ogDescription ?? cfg.description,
-      images: imageUrl
-        ? [
-            {
-              url: imageUrl,
-              width: 1200,
-              height: 800,
-            },
-          ]
-        : undefined,
+      images: [imageUrl],
     },
     other: {
-      // fc:miniapp is the canonical embed per spec; fc:frame kept for backwards compat.
       "fc:miniapp": JSON.stringify(embed),
       "fc:frame": JSON.stringify(embed),
     },
