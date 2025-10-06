@@ -4,7 +4,7 @@ import { minikitConfig } from "../../../minikit.config";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id } = await params; 
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   const cfg = (minikitConfig as any).miniapp;
@@ -17,8 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        
-        url: cfg.homeUrl,
+        url: cfg.homeUrl, 
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -41,7 +40,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function SharePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id } = await params; 
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
 
