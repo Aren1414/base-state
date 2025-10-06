@@ -9,12 +9,15 @@ import "./globals.css";
 import React from "react";
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
-  // Skip metadata generation for share pages
+  // allow share page to provide its own metadata (page-level meta)
   if (params?.id) return {};
 
   const cfg = (minikitConfig as any).miniapp ?? {};
   const ensureHttps = (u?: string) =>
     !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
+
+  // prefer platform canonicalLink (if you configured it in minikit.config)
+  const canonicalCandidate = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
 
   const imageUrl =
     ensureHttps(cfg.ogImageUrl) ||
@@ -30,7 +33,8 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: ensureHttps(cfg.homeUrl),
+        // <-- USE canonicalCandidate to avoid Base appending /share/:id
+        url: canonicalCandidate ?? ensureHttps(cfg.homeUrl),
         splashImageUrl: ensureHttps(cfg.splashImageUrl),
         splashBackgroundColor: cfg.splashBackgroundColor ?? "#000000",
       },
