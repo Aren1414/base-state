@@ -73,17 +73,24 @@ export default function MintCard({
     }
   }
 
-  const handleShareCard = () => {
+const handleShareCard = () => {
   if (!downloadUrl) return;
 
+  // file name from uploaded URL (mint_xxx)
   const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card";
 
-  const appHome = window.location.origin;
+  // canonical home (mini app main URL) — this must be the first embed
+  const appHome = window.location.origin; // e.g. https://base-state.vercel.app
+
+  // preview URL that renders the user's image (kept as second embed)
   const embedPreview = `${appHome}/share/${fileName}`;
 
+  // Compose Warpcast URL:
+  // - embeds[] first: appHome  -> Base will pick this as launch target
+  // - embeds[] second: embedPreview -> Farcaster/Warpcast will show preview image
   const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-    `📸 Just minted my BaseState NFT card!\nLaunch the mini app → ${appHome}`
-  )}&embeds[]=${encodeURIComponent(embedPreview)}`;
+    "📸 Just minted my BaseState NFT card!"
+  )}&embeds[]=${encodeURIComponent(appHome)}&embeds[]=${encodeURIComponent(embedPreview)}`;
 
   window.open(warpcastUrl, "_blank");
 };
