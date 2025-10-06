@@ -6,6 +6,13 @@ export default async function Head({ params }: { params: { id: string } }) {
 
   const cfg = (minikitConfig as any).miniapp;
 
+  const ensureHttps = (u?: string) => {
+    if (!u) return u;
+    return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
+  };
+
+  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+
   const embed = {
     version: cfg.version ?? "1",
     imageUrl,
@@ -14,7 +21,8 @@ export default async function Head({ params }: { params: { id: string } }) {
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: cfg.homeUrl, 
+        // <-- canonical here too
+        url: canonical,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
