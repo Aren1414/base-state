@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       title: cfg.ogTitle ?? cfg.name,
       description: cfg.ogDescription ?? cfg.description,
       images: [imageUrl],
-      url: canonical, // <-- important: og:url / canonical in Metadata too
+      url: canonical, // important for Base App
     },
     other: {
       "fc:miniapp": JSON.stringify(embed),
@@ -47,10 +47,10 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function SharePage({ params }: { params: { id: string } }) {
+export default function SharePage({ params }: { params: { id: string } }) {
   const { id } = params;
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
