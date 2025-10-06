@@ -1,24 +1,19 @@
 import React from "react";
 import { minikitConfig } from "../../../minikit.config";
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-
-type SharePageProps = {
-  params: { id: string };
-};
-
-
-export async function generateMetadata(
-  { params }: SharePageProps,
-  _parent?: ResolvingMetadata
-): Promise<Metadata> {
-  const { id } = params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
   const cfg = (minikitConfig as any).miniapp;
 
   const ensureHttps = (u?: string) => {
-    if (!u) return undefined;
+    if (!u) return u;
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
@@ -56,11 +51,14 @@ export async function generateMetadata(
   };
 }
 
-
-export default function SharePage({ params }: SharePageProps) {
-  const { id } = params;
-  const cfg = (minikitConfig as any).miniapp;
+export default async function SharePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
+  const cfg = (minikitConfig as any).miniapp;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
