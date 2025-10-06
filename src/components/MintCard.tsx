@@ -78,13 +78,12 @@ export default function MintCard({
 
   const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card";
 
-  const appHome = window.location.origin; 
-
+  const appHome = window.location.origin;
   const embedPreview = `${appHome}/share/${fileName}`;
 
   const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-    "📸 Just minted my BaseState NFT card!"
-  )}&embeds[]=${encodeURIComponent(embedPreview)}&embeds[]=${encodeURIComponent(appHome)}`;
+    `📸 Just minted my BaseState NFT card!\nLaunch the mini app → ${appHome}`
+  )}&embeds[]=${encodeURIComponent(embedPreview)}`;
 
   window.open(warpcastUrl, "_blank");
 };
