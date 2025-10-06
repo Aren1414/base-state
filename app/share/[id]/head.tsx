@@ -14,8 +14,7 @@ export default async function Head({ params }: { params: { id: string } }) {
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        
-        url: cfg.homeUrl,
+        url: cfg.homeUrl, 
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
