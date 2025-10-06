@@ -8,19 +8,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
 
-  // helper: ensure https
   const ensureHttps = (u?: string) => {
     if (!u) return u;
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  
   const appHome = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
-
-  
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
-  
   const embed = {
     version: cfg.version ?? "1",
     imageUrl,
@@ -29,7 +24,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: appHome, 
+        url: appHome,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -52,7 +47,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function SharePage({ params }: { params: { id: string } }) {
+export default function SharePage({ params }: { params: { id: string } }) {
   const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
