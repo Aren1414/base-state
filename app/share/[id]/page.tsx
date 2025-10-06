@@ -4,10 +4,19 @@ import { minikitConfig } from "../../../minikit.config";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params; 
+  const { id } = await params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   const cfg = (minikitConfig as any).miniapp;
+
+  // helper: ensure url starts with https://
+  const ensureHttps = (u?: string) => {
+    if (!u) return u;
+    return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
+  };
+
+  // use canonical if provided (prefer canonicalLink from platform), fallback to homeUrl
+  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
 
   const embed = {
     version: cfg.version ?? "1",
@@ -17,7 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: cfg.homeUrl, 
+        // <-- IMPORTANT: use canonical (no /share/:id) so clients open the app home
+        url: canonical,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -40,7 +50,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function SharePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params; 
+  const { id } = await params;
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
 
