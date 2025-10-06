@@ -4,18 +4,23 @@ import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
+
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
 
   const ensureHttps = (u?: string) => {
-    if (!u) return u;
+    if (!u) return undefined;
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  const appHome = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+  
+  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+
+  
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
+  
   const embed = {
     version: cfg.version ?? "1",
     imageUrl,
@@ -24,7 +29,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: appHome,
+        url: canonical, 
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -38,14 +43,15 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       title: cfg.ogTitle ?? cfg.name,
       description: cfg.ogDescription ?? cfg.description,
       images: [imageUrl],
-      url: `${appHome}/share/${id}`,
+      url: canonical,
     },
     other: {
-      "fc:miniapp": JSON.stringify(embed),
       "fc:frame": JSON.stringify(embed),
+      "fc:miniapp": JSON.stringify(embed),
     },
   };
 }
+
 
 export default function SharePage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -59,11 +65,7 @@ export default function SharePage({ params }: { params: { id: string } }) {
       <img
         src={imageUrl}
         alt="Minted NFT"
-        style={{
-          maxWidth: "400px",
-          borderRadius: "12px",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
-        }}
+        style={{ maxWidth: "400px", borderRadius: "12px" }}
       />
     </main>
   );
