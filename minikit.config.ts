@@ -23,7 +23,7 @@ export const minikitConfig = {
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#000000",
     homeUrl: ROOT_URL,
-    canonicalLink: "https://base-state.vercel.app", 
+    canonicalLink: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: [],
