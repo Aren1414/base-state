@@ -15,6 +15,7 @@ export async function generateMetadata({
   const ensureHttps = (u?: string) =>
     !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
 
+  const appHome = ensureHttps(cfg.homeUrl);
   const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
@@ -24,15 +25,15 @@ export async function generateMetadata({
     button: {
       title: "Launch Mini App",
       action: {
-        type: "launch_miniapp",
+        type: "launch_frame",
         name: cfg.name,
-        url: canonical, // فقط root
+        url: appHome,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
     },
     app: {
-      canonical, 
+      canonical,
     },
   };
 
@@ -58,8 +59,8 @@ export default async function SharePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
