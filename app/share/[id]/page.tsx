@@ -17,7 +17,7 @@ export async function generateMetadata({
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+  const appHome = ensureHttps(cfg.homeUrl);
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   const embed = {
@@ -28,7 +28,7 @@ export async function generateMetadata({
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: canonical,
+        url: appHome,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -42,7 +42,7 @@ export async function generateMetadata({
       title: cfg.ogTitle ?? cfg.name,
       description: cfg.ogDescription ?? cfg.description,
       images: [imageUrl],
-      url: canonical,
+      url: appHome,  
     },
     other: {
       "fc:miniapp": JSON.stringify(embed),
@@ -57,8 +57,8 @@ export default async function SharePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
   const cfg = (minikitConfig as any).miniapp;
+  const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   return (
     <main style={{ padding: "20px", textAlign: "center" }}>
