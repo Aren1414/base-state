@@ -1,6 +1,6 @@
 import { minikitConfig } from "../../../minikit.config";
 
-export default async function Head({ params }: { params: { id: string } }) {
+export default function Head({ params }: { params: { id: string } }) {
   const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
 
@@ -9,7 +9,7 @@ export default async function Head({ params }: { params: { id: string } }) {
     return u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
   };
 
-  const appHome = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+  const appHome = ensureHttps(cfg.homeUrl);
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
   const embed = {
@@ -20,7 +20,7 @@ export default async function Head({ params }: { params: { id: string } }) {
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        url: appHome, 
+        url: appHome,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
@@ -36,11 +36,9 @@ export default async function Head({ params }: { params: { id: string } }) {
       <title>{cfg.name} — Shared NFT</title>
       <meta name="description" content={cfg.ogDescription ?? cfg.description} />
 
-      {/* MiniApp Metadata */}
       <meta name="fc:miniapp" content={JSON.stringify(embed)} />
       <meta name="fc:frame" content={JSON.stringify(embed)} />
 
-      {/* OG + Twitter */}
       <meta property="og:title" content={`${cfg.name} — Shared NFT`} />
       <meta property="og:description" content={cfg.ogDescription ?? cfg.description} />
       <meta property="og:image" content={imageUrl} />
