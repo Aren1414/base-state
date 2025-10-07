@@ -1,7 +1,11 @@
-// minikit.config.ts
-// ensure a fully-qualified https root URL
-const rawUrl = process.env.NEXT_PUBLIC_URL || process.env.VERCEL_URL || "base-state.vercel.app";
-export const ROOT_URL = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
+const rawUrl =
+  process.env.NEXT_PUBLIC_URL ||
+  process.env.VERCEL_URL ||
+  "base-state.vercel.app";
+
+export const ROOT_URL = rawUrl.startsWith("http")
+  ? rawUrl
+  : `https://${rawUrl}`;
 
 export const minikitConfig = {
   accountAssociation: {
@@ -19,9 +23,7 @@ export const minikitConfig = {
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#000000",
     homeUrl: ROOT_URL,
-    // <-- IMPORTANT: بعد از انتشار، این مقدار را با canonical رسمی پلتفرم جایگزین کن:
-    // e.g. "https://farcaster.xyz/miniapps/<APP_ID>/<APP_SLUG>"
-    canonicalLink: ROOT_URL,
+    canonicalLink: "https://base-state.vercel.app", 
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: [],
