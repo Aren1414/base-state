@@ -8,22 +8,17 @@ import WalletCheck from "./components/WalletCheck";
 import "./globals.css";
 import React from "react";
 
-export async function generateMetadata({ params }: any): Promise<Metadata> {
-  // allow share page to provide its own metadata (page-level meta)
-  if (params?.id) return {};
-
-  const cfg = (minikitConfig as any).miniapp ?? {};
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = (minikitConfig as any).miniapp;
   const ensureHttps = (u?: string) =>
     !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
 
-  // prefer platform canonicalLink (if you configured it in minikit.config)
-  const canonicalCandidate = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
-
+  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
   const imageUrl =
     ensureHttps(cfg.ogImageUrl) ||
     ensureHttps(cfg.heroImageUrl) ||
     ensureHttps(cfg.splashImageUrl) ||
-    `${ensureHttps(cfg.homeUrl)}/embed.png`;
+    `${canonical}/embed.png`;
 
   const embed = {
     version: cfg.version ?? "1",
@@ -33,11 +28,13 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
       action: {
         type: "launch_miniapp",
         name: cfg.name,
-        // <-- USE canonicalCandidate to avoid Base appending /share/:id
-        url: canonicalCandidate ?? ensureHttps(cfg.homeUrl),
+        url: canonical,
         splashImageUrl: ensureHttps(cfg.splashImageUrl),
         splashBackgroundColor: cfg.splashBackgroundColor ?? "#000000",
       },
+    },
+    app: {
+      canonical,
     },
   };
 
@@ -48,6 +45,7 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
       title: cfg.ogTitle ?? cfg.name,
       description: cfg.ogDescription ?? cfg.description,
       images: [imageUrl],
+      url: canonical,
     },
     other: {
       "fc:miniapp": JSON.stringify(embed),
@@ -57,7 +55,10 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
 }
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
-const sourceCodePro = Source_Code_Pro({ variable: "--font-source-code-pro", subsets: ["latin"] });
+const sourceCodePro = Source_Code_Pro({
+  variable: "--font-source-code-pro",
+  subsets: ["latin"],
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
