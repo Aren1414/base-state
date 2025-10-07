@@ -78,6 +78,7 @@ const handleShareCard = () => {
   const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card";
   const embedPreview = `${window.location.origin}/share/${fileName}`;
 
+  
   const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
     "📸 Just minted my BaseState NFT card!"
   )}&embeds[]=${encodeURIComponent(embedPreview)}`;
