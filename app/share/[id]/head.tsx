@@ -1,12 +1,13 @@
 import { minikitConfig } from "../../../minikit.config";
 
-export default async function Head({ params }: { params: { id: string } }) {
+export default function Head({ params }: { params: { id: string } }) {
   const { id } = params;
   const cfg = (minikitConfig as any).miniapp;
 
   const ensureHttps = (u?: string) =>
     !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
 
+  const appHome = ensureHttps(cfg.homeUrl);
   const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
   const imageUrl = `https://link.storjshare.io/raw/jwehpt5oybcnyzdpzgkvbodeireq/wallet-cards/${id}.png`;
 
@@ -16,9 +17,9 @@ export default async function Head({ params }: { params: { id: string } }) {
     button: {
       title: "Launch Mini App",
       action: {
-        type: "launch_miniapp",
+        type: "launch_frame",
         name: cfg.name,
-        url: canonical,
+        url: appHome,
         splashImageUrl: cfg.splashImageUrl,
         splashBackgroundColor: cfg.splashBackgroundColor,
       },
