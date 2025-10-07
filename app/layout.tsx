@@ -9,7 +9,7 @@ import "./globals.css";
 import React from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cfg = (minikitConfig as any).miniapp;
+  const cfg = (minikitConfig as any).miniapp ?? {};
   const ensureHttps = (u?: string) =>
     !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
 
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     button: {
       title: "Launch Mini App",
       action: {
-        type: "launch_miniapp",
+        type: "launch_frame",
         name: cfg.name,
         url: canonical,
         splashImageUrl: ensureHttps(cfg.splashImageUrl),
@@ -55,10 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
-const sourceCodePro = Source_Code_Pro({
-  variable: "--font-source-code-pro",
-  subsets: ["latin"],
-});
+const sourceCodePro = Source_Code_Pro({ variable: "--font-source-code-pro", subsets: ["latin"] });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
