@@ -130,10 +130,9 @@ export default function MintCard({
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
-    lineHeight: "1.4",
-    height: "1.4em",
-    paddingBottom: "2px",
-    transform: "translateY(0)",
+    lineHeight: "1.3",
+    display: "inline-block",
+    verticalAlign: "top",
   }}
 >
   @{user.username || "user"}
