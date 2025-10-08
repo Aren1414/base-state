@@ -107,7 +107,6 @@ export default function MintCard({
           minHeight: "200px",
         }}
       >
-        
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
           <img
             src={user.pfpUrl || "/default-avatar.png"}
@@ -123,20 +122,22 @@ export default function MintCard({
             }}
           />
           <div
-  style={{
-    maxWidth: "120px",
-    fontWeight: 700,
-    fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    lineHeight: "1.3",
-    display: "inline-block",
-    verticalAlign: "top",
-  }}
->
-  @{user.username || "user"}
-</div>
+            style={{
+              maxWidth: "120px",
+              fontWeight: 700,
+              fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              lineHeight: user.username && user.username.length > 12 ? "14px" : "16px",
+              paddingBottom: "2px",
+              display: "block",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+            }}
+          >
+            @{user.username || "user"}
+          </div>
           <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>FID: {user.fid}</div>
         </div>
 
