@@ -124,16 +124,18 @@ export default function MintCard({
           />
           <div
             style={{
-              maxWidth: "120px",
-              fontWeight: 700,
-              fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+             maxWidth: "120px",
+             fontWeight: 700,
+             fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
+             whiteSpace: "nowrap",
+             overflow: "hidden",
+             textOverflow: "ellipsis",
+             lineHeight: "1.2",
+             height: "1.2em",
             }}
-          >
-            @{user.username || "user"}
-          </div>
+           >
+             @{user.username || "user"}
+         </div>
           <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>FID: {user.fid}</div>
         </div>
 
