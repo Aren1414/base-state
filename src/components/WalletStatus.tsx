@@ -55,7 +55,7 @@ const AddressStatus = ({ stats }: { stats: AddressStats }) => {
     const s = stats.data
     return (
       <div style={containerStyle}>
-        {section('📊 Contract Snapshot', <>
+        {section('📊 BaseApp Wallet Snapshot', <>
           <div><strong>Age:</strong> <span style={{ opacity: 0.7 }}>{s.age} day</span></div>
           <div><strong>First Seen:</strong> <span style={{ opacity: 0.7 }}>{s.firstSeen}</span></div>
           <div><strong>ETH Balance:</strong> <span style={{ opacity: 0.7 }}>{s.balanceEth}</span></div>
@@ -74,7 +74,7 @@ const AddressStatus = ({ stats }: { stats: AddressStats }) => {
         {section('🎯 Tokens', <>
           <div><strong>Tokens Received:</strong> <span style={{ opacity: 0.7 }}>{s.tokensReceived}</span></div>
           <div><strong>Rare Tokens:</strong> <span style={{ opacity: 0.7 }}>{s.rareTokens}</span></div>
-          <div><strong>Post Tokens (MiniApps/Frames):</strong> <span style={{ opacity: 0.7 }}>{s.postTokens}</span></div>
+          <div><strong>Post:</strong> <span style={{ opacity: 0.7 }}>{s.postTokens}</span></div>
         </>)}
 
         {section('🧠 AA Metrics', <>
