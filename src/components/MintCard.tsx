@@ -73,17 +73,17 @@ export default function MintCard({
     }
   }
 
-const handleShareCard = () => {
-  if (!downloadUrl) return;
-  const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card";
-  const embedPreview = `${window.location.origin}/share/${fileName}`;
+  const handleShareCard = () => {
+    if (!downloadUrl) return
+    const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card"
+    const embedPreview = `${window.location.origin}/share/${fileName}`
 
-  const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-    "📸 Just minted my BaseState NFT card!"
-  )}&embeds[]=${encodeURIComponent(embedPreview)}`;
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+      "📸 Just minted my BaseState NFT card!"
+    )}&embeds[]=${encodeURIComponent(embedPreview)}`
 
-  window.open(warpcastUrl, "_blank");
-};
+    window.open(warpcastUrl, "_blank")
+  }
 
   return (
     <div style={{ marginTop: "16px", padding: "8px", boxSizing: "border-box" }}>
@@ -107,7 +107,7 @@ const handleShareCard = () => {
           minHeight: "200px",
         }}
       >
-        {/* کارت نمایشی */}
+        
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
           <img
             src={user.pfpUrl || "/default-avatar.png"}
@@ -122,13 +122,30 @@ const handleShareCard = () => {
               marginBottom: "6px",
             }}
           />
-          <div style={{ fontSize: "14px", fontWeight: 700 }}>@{user.username || "user"}</div>
+          <div
+            style={{
+              maxWidth: "120px",
+              fontWeight: 700,
+              fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            @{user.username || "user"}
+          </div>
           <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>FID: {user.fid}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
-          <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "8px" }}>
-            BaseState {type === "wallet" ? "Wallet" : "Contract"} Report
+          <div
+            style={{
+              fontSize: type === "contract" ? "13px" : "14px",
+              fontWeight: 800,
+              marginBottom: "8px",
+            }}
+          >
+            BaseState {type === "wallet" ? "Wallet" : "BaseApp Wallet Snapshot"}
           </div>
 
           <div
@@ -153,13 +170,13 @@ const handleShareCard = () => {
                 ]
               : [
                   { label: "Age", value: stats.age + " days" },
-                  { label: "ETH Balance", value: stats.balanceEth },
+                  { label: "Post", value: stats.postTokens },
                   { label: "Internal Tx Count", value: stats.internalTxCount },
                   { label: "Best Streak", value: stats.bestStreak + " days" },
                   { label: "Unique Senders", value: stats.uniqueSenders },
                   { label: "Tokens Received", value: stats.tokensReceived },
                   { label: "AA Transactions", value: stats.allAaTransactions },
-                  { label: "Post Tokens", value: stats.postTokens },
+                  { label: "Rare Tokens", value: stats.rareTokens },
                 ]
             ).map((f, i) => (
               <div key={i}>
@@ -239,5 +256,7 @@ function buttonStyle(color: string): React.CSSProperties {
     cursor: "pointer",
     boxShadow: "0 0 2px rgba(0,0,0,0.1)",
     minWidth: "90px",
+    fontWeight: 600,
+    transition: "all 0.2s ease-in-out",
   }
-  }
+}
