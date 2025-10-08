@@ -51,17 +51,7 @@ export default function Home() {
       const isMiniApp = await sdk.isInMiniApp()
       if (isMiniApp) {
         await sdk.actions.ready()
-        const addedKey = 'miniapp_added'
-        const wasAdded = typeof window !== 'undefined' && localStorage.getItem(addedKey)
-        if (!wasAdded) {
-          try {
-            await sdk.actions.addMiniApp()
-          } catch (err) {
-            // اگر کاربر رد کرد یا خطا شد، ادامه بدیم بی‌وقفه
-            console.warn('addMiniApp rejected or failed', err)
-          }
-          localStorage.setItem(addedKey, 'true')
-        }
+        await sdk.actions.addMiniApp()
         await signIn()
         if (!isFrameReady) {
           setFrameReady()
@@ -116,34 +106,36 @@ export default function Home() {
   }
 
   const handleShareText = () => {
-  if (!stats) return
+    if (!stats) return
 
-  const type = stats.type
-  const divider = '────────────────────'
-  let body = ''
+    const type = stats.type
+    const divider = '────────────────────'
+    let body = ''
 
-  if (type === 'wallet') {
-    const s = stats.data as WalletStats
-    body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
-  } else {
-    const s = stats.data as ContractStats
-    body = `📊 Contract Snapshot\n${divider}\nAge: ${s.age} day\nETH Balance: ${s.balanceEth}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
-  }
+    if (type === 'wallet') {
+      const s = stats.data as WalletStats
+      body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
+    } else {
+      const s = stats.data as ContractStats
+      body = `📊 BaseApp Wallet Snapshot\n${divider}\nAge: ${s.age} day\nPost Token: ${s.postToken}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
+    }
 
-  const castText = `Just checked my ${type} stats using the BaseState Mini App 👇\n\n${body}`
+    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'BaseApp wallet'} stats using the BaseState Mini App 👇\n\n${body}`
 
-  if (typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')) {
-    composeCast({ text: castText, embeds: [MINIAPPURL] })
-  } else {
-    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(MINIAPPURL)}`
-    window.open(warpcastUrl, '_blank')
-  }
+    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+
+    if (isBaseApp) {
+      composeCast({ text: castText, embeds: [MINI_APP_URL] })
+    } else {
+      const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(MINI_APP_URL)}`
+      window.open(warpcastUrl, '_blank')
+    }
   }
 
   const handleShareImage = () => {
     if (!stats) return
     const type = stats.type
-    const body = `Just minted my ${type === 'wallet' ? 'wallet' : isBaseApp ? 'BaseApp wallet' : 'contract'} stats as an NFT 👇`
+    const body = `Just minted my ${type} stats as an NFT 👇`
     const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(body)}&embeds[]=${encodeURIComponent(mintedImageUrl || MINI_APP_URL)}`
     window.open(warpcastUrl, '_blank')
   }
