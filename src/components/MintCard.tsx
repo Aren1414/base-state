@@ -47,40 +47,34 @@ export default function MintCard({
     const html2canvas = (await import("html2canvas")).default
 
     
-    const tempContainer = document.createElement("div")
-    tempContainer.style.position = "fixed"
-    tempContainer.style.left = "-9999px"
-    tempContainer.style.top = "0"
-    tempContainer.style.width = "624px"
-    tempContainer.style.height = "400px"
-    tempContainer.style.overflow = "hidden"
-    tempContainer.style.background = "transparent"
-    document.body.appendChild(tempContainer)
-
-    
-    const clonedCard = card.cloneNode(true) as HTMLElement
-    clonedCard.style.width = "624px"
-    clonedCard.style.height = "400px"
-    clonedCard.style.transform = "scale(1)"
-    clonedCard.style.transformOrigin = "top left"
-    clonedCard.style.margin = "0"
-    clonedCard.style.padding = "0"
-    tempContainer.appendChild(clonedCard)
-
-    
-    const canvas = await html2canvas(clonedCard, {
-      width: 624,
-      height: 400,
+    const tempCanvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
     })
 
     
-    document.body.removeChild(tempContainer)
+    const targetWidth = 1200
+    const targetHeight = 800  
 
-    
-    const uploadedLink = await uploadCanvas(canvas, setMintStatus)
+    const finalCanvas = document.createElement("canvas")
+    finalCanvas.width = targetWidth
+    finalCanvas.height = targetHeight
+    const ctx = finalCanvas.getContext("2d")
+    if (!ctx) throw new Error("No canvas context")
+
+    const scaleFactor = Math.max(
+      targetWidth / tempCanvas.width,
+      targetHeight / tempCanvas.height
+    )
+    const newW = tempCanvas.width * scaleFactor
+    const newH = tempCanvas.height * scaleFactor
+    const dx = (targetWidth - newW) / 2
+    const dy = (targetHeight - newH) / 2
+
+    ctx.drawImage(tempCanvas, dx, dy, newW, newH)
+
+    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
     setDownloadUrl(uploadedLink)
     setMintedImageUrl(uploadedLink)
 
