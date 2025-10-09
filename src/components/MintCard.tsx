@@ -33,50 +33,66 @@ export default function MintCard({
 
   const handleMint = async () => {
   if (!walletClient || !walletAddress) {
-    setMintStatus("❌ Wallet not connected")
-    return
+    setMintStatus("❌ Wallet not connected");
+    return;
   }
 
-  setMintStatus("🧪 Minting…")
-  setIsMinting(true)
+  setMintStatus("🧪 Minting…");
+  setIsMinting(true);
 
   try {
-    const card = document.getElementById("walletCard")
-    if (!card) throw new Error("Card not found in DOM")
+    const card = document.getElementById("walletCard");
+    if (!card) throw new Error("Card not found in DOM");
 
-    const html2canvas = (await import("html2canvas")).default
+    const html2canvas = (await import("html2canvas")).default;
 
     
-    const tempCanvas = await html2canvas(card, {
+    const clone = card.cloneNode(true) as HTMLElement;
+    clone.style.position = "fixed";
+    clone.style.left = "-9999px";
+    clone.style.top = "0";
+    clone.style.width = "1200px"; 
+    clone.style.height = "800px"; 
+    clone.style.transform = "none";
+    clone.style.scale = "1";
+    clone.style.opacity = "1";
+
+    document.body.appendChild(clone);
+
+    
+    await document.fonts.ready;
+    const images = Array.from(clone.querySelectorAll("img"));
+    await Promise.all(
+      images.map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if (img.complete) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          })
+      )
+    );
+
+    const canvas = await html2canvas(clone, {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
-    })
+      logging: false,
+      width: 1200,
+      height: 800,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: 1200,
+      windowHeight: 800,
+    });
 
     
-    const targetWidth = 1200
-    const targetHeight = 800  
+    document.body.removeChild(clone);
 
-    const finalCanvas = document.createElement("canvas")
-    finalCanvas.width = targetWidth
-    finalCanvas.height = targetHeight
-    const ctx = finalCanvas.getContext("2d")
-    if (!ctx) throw new Error("No canvas context")
-
-    const scaleFactor = Math.max(
-      targetWidth / tempCanvas.width,
-      targetHeight / tempCanvas.height
-    )
-    const newW = tempCanvas.width * scaleFactor
-    const newH = tempCanvas.height * scaleFactor
-    const dx = (targetWidth - newW) / 2
-    const dy = (targetHeight - newH) / 2
-
-    ctx.drawImage(tempCanvas, dx, dy, newW, newH)
-
-    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
-    setDownloadUrl(uploadedLink)
-    setMintedImageUrl(uploadedLink)
+    
+    const uploadedLink = await uploadCanvas(canvas, setMintStatus);
+    setDownloadUrl(uploadedLink);
+    setMintedImageUrl(uploadedLink);
 
     await walletClient.writeContract({
       address: CONTRACT_ADDRESS,
@@ -85,16 +101,16 @@ export default function MintCard({
       args: [uploadedLink],
       account: walletAddress,
       value: parseEther("0.0001"),
-    })
+    });
 
-    setMintStatus("✅ Mint successful!")
+    setMintStatus("✅ Mint successful!");
   } catch (err: any) {
-    const message = typeof err === "string" ? err : err?.message || "Unknown error"
-    setMintStatus(`❌ Mint failed: ${message}`)
+    const message = typeof err === "string" ? err : err?.message || "Unknown error";
+    setMintStatus(`❌ Mint failed: ${message}`);
   } finally {
-    setIsMinting(false)
+    setIsMinting(false);
   }
-  }
+}
 
   const handleShareCard = () => {
     if (!downloadUrl) return
