@@ -33,84 +33,50 @@ export default function MintCard({
 
   const handleMint = async () => {
   if (!walletClient || !walletAddress) {
-    setMintStatus("❌ Wallet not connected");
-    return;
+    setMintStatus("❌ Wallet not connected")
+    return
   }
 
-  setMintStatus("🧪 Minting…");
-  setIsMinting(true);
+  setMintStatus("🧪 Minting…")
+  setIsMinting(true)
 
   try {
-    const card = document.getElementById("walletCard");
-    if (!card) throw new Error("Card not found in DOM");
+    const card = document.getElementById("walletCard")
+    if (!card) throw new Error("Card not found in DOM")
 
-    const html2canvas = (await import("html2canvas")).default;
-
-    const clone = card.cloneNode(true) as HTMLElement;
-    clone.style.position = "fixed";
-    clone.style.left = "-9999px";
-    clone.style.top = "0";
-    clone.style.width = "1200px";
-    clone.style.height = "800px";
-    clone.style.maxWidth = "none";
-    clone.style.maxHeight = "none";
-    clone.style.transform = "none";
-    clone.style.scale = "1";
-    clone.style.opacity = "1";
-    clone.style.display = "block";
-    clone.style.boxSizing = "border-box";
-    clone.style.overflow = "hidden";
-    clone.style.background = "#000"; 
-
-    clone.querySelectorAll("*").forEach((el) => {
-      const element = el as HTMLElement;
-      element.style.maxWidth = "none";
-      element.style.maxHeight = "none";
-      element.style.boxSizing = "border-box";
-      element.style.overflow = "hidden";
-    });
-
-    document.body.appendChild(clone);
-
-    await document.fonts.ready;
-    const images = Array.from(clone.querySelectorAll("img"));
-    await Promise.all(
-      images.map(
-        (img) =>
-          new Promise<void>((resolve) => {
-            if (img.complete) return resolve();
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-          })
-      )
-    );
-
-    const rawCanvas = await html2canvas(clone, {
+    const html2canvas = (await import("html2canvas")).default
+    const tempCanvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
-      logging: false,
-      width: 1200,
-      height: 800,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: 1200,
-      windowHeight: 800,
-    });
+    })
 
-    document.body.removeChild(clone);
+    const targetWidth = 1200
+    const targetHeight = 800
 
-    const fixedCanvas = document.createElement("canvas");
-    fixedCanvas.width = rawCanvas.width;
-    fixedCanvas.height = rawCanvas.height;
-    const ctx = fixedCanvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(rawCanvas, 0, 0, rawCanvas.width, rawCanvas.height);
-    }
+    const finalCanvas = document.createElement("canvas")
+    finalCanvas.width = targetWidth
+    finalCanvas.height = targetHeight
+    const ctx = finalCanvas.getContext("2d")
+    if (!ctx) throw new Error("No canvas context")
 
-    const uploadedLink = await uploadCanvas(fixedCanvas, setMintStatus);
-    setDownloadUrl(uploadedLink);
-    setMintedImageUrl(uploadedLink);
+    const scaleFactor = Math.min(
+      targetWidth / tempCanvas.width,
+      targetHeight / tempCanvas.height
+    )
+
+    const newW = tempCanvas.width * scaleFactor
+    const newH = tempCanvas.height * scaleFactor
+    const dx = (targetWidth - newW) / 2
+    const dy = (targetHeight - newH) / 2
+
+    ctx.fillStyle = "#000" 
+    ctx.fillRect(0, 0, targetWidth, targetHeight)
+    ctx.drawImage(tempCanvas, dx, dy, newW, newH)
+
+    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
+    setDownloadUrl(uploadedLink)
+    setMintedImageUrl(uploadedLink)
 
     await walletClient.writeContract({
       address: CONTRACT_ADDRESS,
@@ -119,14 +85,14 @@ export default function MintCard({
       args: [uploadedLink],
       account: walletAddress,
       value: parseEther("0.0001"),
-    });
+    })
 
-    setMintStatus("✅ Mint successful!");
+    setMintStatus("✅ Mint successful!")
   } catch (err: any) {
-    const message = typeof err === "string" ? err : err?.message || "Unknown error";
-    setMintStatus(`❌ Mint failed: ${message}`);
+    const message = typeof err === "string" ? err : err?.message || "Unknown error"
+    setMintStatus(`❌ Mint failed: ${message}`)
   } finally {
-    setIsMinting(false);
+    setIsMinting(false)
   }
 }
 
