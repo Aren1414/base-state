@@ -45,15 +45,30 @@ export default function MintCard({
     if (!card) throw new Error("Card not found in DOM");
 
     const html2canvas = (await import("html2canvas")).default;
+
     const clone = card.cloneNode(true) as HTMLElement;
     clone.style.position = "fixed";
     clone.style.left = "-9999px";
     clone.style.top = "0";
-    clone.style.width = "1200px"; 
-    clone.style.height = "800px"; 
+    clone.style.width = "1200px";
+    clone.style.height = "800px";
+    clone.style.maxWidth = "none";
+    clone.style.maxHeight = "none";
     clone.style.transform = "none";
     clone.style.scale = "1";
     clone.style.opacity = "1";
+    clone.style.display = "block";
+    clone.style.boxSizing = "border-box";
+    clone.style.overflow = "hidden";
+    clone.style.background = "#000"; 
+
+    clone.querySelectorAll("*").forEach((el) => {
+      const element = el as HTMLElement;
+      element.style.maxWidth = "none";
+      element.style.maxHeight = "none";
+      element.style.boxSizing = "border-box";
+      element.style.overflow = "hidden";
+    });
 
     document.body.appendChild(clone);
 
@@ -90,11 +105,9 @@ export default function MintCard({
     fixedCanvas.height = rawCanvas.height;
     const ctx = fixedCanvas.getContext("2d");
     if (ctx) {
-      
       ctx.drawImage(rawCanvas, 0, 0, rawCanvas.width, rawCanvas.height);
     }
 
-    
     const uploadedLink = await uploadCanvas(fixedCanvas, setMintStatus);
     setDownloadUrl(uploadedLink);
     setMintedImageUrl(uploadedLink);
