@@ -32,45 +32,70 @@ export default function MintCard({
   const [isMinting, setIsMinting] = useState(false)
 
   const handleMint = async () => {
-    if (!walletClient || !walletAddress) {
-      setMintStatus("❌ Wallet not connected")
-      return
+  if (!walletClient || !walletAddress) {
+    setMintStatus("❌ Wallet not connected")
+    return
+  }
+
+  setMintStatus("🧪 Minting…")
+  setIsMinting(true)
+
+  try {
+    const card = document.getElementById("walletCard")
+    if (!card) throw new Error("Card not found in DOM")
+
+    const html2canvas = (await import("html2canvas")).default
+
+    
+    const tempCanvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: null,
+    })
+
+    
+    const fixedWidth = 624
+    const fixedHeight = 400
+    const finalCanvas = document.createElement("canvas")
+    finalCanvas.width = fixedWidth
+    finalCanvas.height = fixedHeight
+
+    const ctx = finalCanvas.getContext("2d")
+    if (ctx) {
+      
+      const ratio = Math.min(
+        fixedWidth / tempCanvas.width,
+        fixedHeight / tempCanvas.height
+      )
+      const newWidth = tempCanvas.width * ratio
+      const newHeight = tempCanvas.height * ratio
+      const offsetX = (fixedWidth - newWidth) / 2
+      const offsetY = (fixedHeight - newHeight) / 2
+
+      ctx.drawImage(tempCanvas, offsetX, offsetY, newWidth, newHeight)
     }
 
-    setMintStatus("🧪 Minting…")
-    setIsMinting(true)
+    
+    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
+    setDownloadUrl(uploadedLink)
+    setMintedImageUrl(uploadedLink)
 
-    try {
-      const card = document.getElementById("walletCard")
-      if (!card) throw new Error("Card not found in DOM")
+    await walletClient.writeContract({
+      address: CONTRACT_ADDRESS,
+      abi,
+      functionName: "mint",
+      args: [uploadedLink],
+      account: walletAddress,
+      value: parseEther("0.0001"),
+    })
 
-      const html2canvas = (await import("html2canvas")).default
-      const canvas = await html2canvas(card, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-      })
-
-      const uploadedLink = await uploadCanvas(canvas, setMintStatus)
-      setDownloadUrl(uploadedLink)
-      setMintedImageUrl(uploadedLink)
-
-      await walletClient.writeContract({
-        address: CONTRACT_ADDRESS,
-        abi,
-        functionName: "mint",
-        args: [uploadedLink],
-        account: walletAddress,
-        value: parseEther("0.0001"),
-      })
-
-      setMintStatus("✅ Mint successful!")
-    } catch (err: any) {
-      const message = typeof err === "string" ? err : err?.message || "Unknown error"
-      setMintStatus(`❌ Mint failed: ${message}`)
-    } finally {
-      setIsMinting(false)
-    }
+    setMintStatus("✅ Mint successful!")
+  } catch (err: any) {
+    const message = typeof err === "string" ? err : err?.message || "Unknown error"
+    setMintStatus(`❌ Mint failed: ${message}`)
+  } finally {
+    setIsMinting(false)
+  }
   }
 
   const handleShareCard = () => {
