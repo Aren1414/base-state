@@ -47,36 +47,40 @@ export default function MintCard({
     const html2canvas = (await import("html2canvas")).default
 
     
-    const tempCanvas = await html2canvas(card, {
+    const tempContainer = document.createElement("div")
+    tempContainer.style.position = "fixed"
+    tempContainer.style.left = "-9999px"
+    tempContainer.style.top = "0"
+    tempContainer.style.width = "624px"
+    tempContainer.style.height = "400px"
+    tempContainer.style.overflow = "hidden"
+    tempContainer.style.background = "transparent"
+    document.body.appendChild(tempContainer)
+
+    
+    const clonedCard = card.cloneNode(true) as HTMLElement
+    clonedCard.style.width = "624px"
+    clonedCard.style.height = "400px"
+    clonedCard.style.transform = "scale(1)"
+    clonedCard.style.transformOrigin = "top left"
+    clonedCard.style.margin = "0"
+    clonedCard.style.padding = "0"
+    tempContainer.appendChild(clonedCard)
+
+    
+    const canvas = await html2canvas(clonedCard, {
+      width: 624,
+      height: 400,
       scale: 2,
       useCORS: true,
       backgroundColor: null,
     })
 
     
-    const fixedWidth = 624
-    const fixedHeight = 400
-    const finalCanvas = document.createElement("canvas")
-    finalCanvas.width = fixedWidth
-    finalCanvas.height = fixedHeight
-
-    const ctx = finalCanvas.getContext("2d")
-    if (ctx) {
-      
-      const ratio = Math.min(
-        fixedWidth / tempCanvas.width,
-        fixedHeight / tempCanvas.height
-      )
-      const newWidth = tempCanvas.width * ratio
-      const newHeight = tempCanvas.height * ratio
-      const offsetX = (fixedWidth - newWidth) / 2
-      const offsetY = (fixedHeight - newHeight) / 2
-
-      ctx.drawImage(tempCanvas, offsetX, offsetY, newWidth, newHeight)
-    }
+    document.body.removeChild(tempContainer)
 
     
-    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
+    const uploadedLink = await uploadCanvas(canvas, setMintStatus)
     setDownloadUrl(uploadedLink)
     setMintedImageUrl(uploadedLink)
 
