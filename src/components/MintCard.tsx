@@ -45,8 +45,6 @@ export default function MintCard({
     if (!card) throw new Error("Card not found in DOM");
 
     const html2canvas = (await import("html2canvas")).default;
-
-    
     const clone = card.cloneNode(true) as HTMLElement;
     clone.style.position = "fixed";
     clone.style.left = "-9999px";
@@ -59,7 +57,6 @@ export default function MintCard({
 
     document.body.appendChild(clone);
 
-    
     await document.fonts.ready;
     const images = Array.from(clone.querySelectorAll("img"));
     await Promise.all(
@@ -73,7 +70,7 @@ export default function MintCard({
       )
     );
 
-    const canvas = await html2canvas(clone, {
+    const rawCanvas = await html2canvas(clone, {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
@@ -86,11 +83,19 @@ export default function MintCard({
       windowHeight: 800,
     });
 
-    
     document.body.removeChild(clone);
 
+    const fixedCanvas = document.createElement("canvas");
+    fixedCanvas.width = rawCanvas.width;
+    fixedCanvas.height = rawCanvas.height;
+    const ctx = fixedCanvas.getContext("2d");
+    if (ctx) {
+      
+      ctx.drawImage(rawCanvas, 0, 0, rawCanvas.width, rawCanvas.height);
+    }
+
     
-    const uploadedLink = await uploadCanvas(canvas, setMintStatus);
+    const uploadedLink = await uploadCanvas(fixedCanvas, setMintStatus);
     setDownloadUrl(uploadedLink);
     setMintedImageUrl(uploadedLink);
 
