@@ -32,115 +32,101 @@ export default function MintCard({
   const [isMinting, setIsMinting] = useState(false)
 
   const handleMint = async () => {
-  if (!walletClient || !walletAddress) {
-    setMintStatus("❌ Wallet not connected")
-    return
-  }
-
-  setMintStatus("🧪 Minting…")
-  setIsMinting(true)
-
-  try {
-    const card = document.getElementById("walletCard") as HTMLElement | null
-    if (!card) throw new Error("Card not found in DOM")
-
-    
-    const originalStyles = {
-      width: card.style.width,
-      height: card.style.height,
-      transform: card.style.transform,
-      maxWidth: card.style.maxWidth,
-      maxHeight: card.style.maxHeight,
-      boxSizing: card.style.boxSizing,
+    if (!walletClient || !walletAddress) {
+      setMintStatus("❌ Wallet not connected")
+      return
     }
 
-    
-    const fixedWidth = 380
-    const fixedHeight = 240
-    card.style.width = `${fixedWidth}px`
-    card.style.maxWidth = `${fixedWidth}px`
-    card.style.height = `${fixedHeight}px`
-    card.style.maxHeight = `${fixedHeight}px`
-    card.style.transform = "none"
-    card.style.boxSizing = "border-box"
-    card.querySelectorAll("*").forEach((el) => {
-      const e = el as HTMLElement
-      e.style.boxSizing = "border-box"
-    })
+    setMintStatus("🧪 Minting…")
+    setIsMinting(true)
 
-    
-    const html2canvas = (await import("html2canvas")).default
-    const tempCanvas = await html2canvas(card, {
-      scale: window.devicePixelRatio || 2,
-      useCORS: true,
-      backgroundColor: null,
-    })
-
-    
-    const targetWidth = 1200
-    const targetHeight = 800
-    const finalCanvas = document.createElement("canvas")
-    finalCanvas.width = targetWidth
-    finalCanvas.height = targetHeight
-    const ctx = finalCanvas.getContext("2d")
-    if (!ctx) throw new Error("No canvas context")
-
-    const scaleFactor = Math.min(
-      targetWidth / tempCanvas.width,
-      targetHeight / tempCanvas.height
-    )
-    const newW = tempCanvas.width * scaleFactor
-    const newH = tempCanvas.height * scaleFactor
-    const dx = (targetWidth - newW) / 2
-    const dy = (targetHeight - newH) / 2
-
-    ctx.fillStyle = "#000"
-    ctx.fillRect(0, 0, targetWidth, targetHeight)
-    ctx.drawImage(tempCanvas, dx, dy, newW, newH)
-
-    
-    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
-    setDownloadUrl(uploadedLink)
-    setMintedImageUrl(uploadedLink)
-
-    await walletClient.writeContract({
-      address: CONTRACT_ADDRESS,
-      abi,
-      functionName: "mint",
-      args: [uploadedLink],
-      account: walletAddress,
-      value: parseEther("0.0001"),
-    })
-
-    setMintStatus("✅ Mint successful!")
-  } catch (err: any) {
-    const message = typeof err === "string" ? err : err?.message || "Unknown error"
-    setMintStatus(`❌ Mint failed: ${message}`)
-  } finally {
-    
-    const card = document.getElementById("walletCard") as HTMLElement | null
-    if (card) {
-      card.style.width = ""
-      card.style.height = ""
-      card.style.maxWidth = ""
-      card.style.maxHeight = ""
-      card.style.boxSizing = ""
-      card.style.transform = ""
-      card.style.transformOrigin = ""
+    try {
+      const card = document.getElementById("walletCard") as HTMLElement | null
+      if (!card) throw new Error("Card not found in DOM")
 
       
-      Object.assign(card.style, {
-        width: originalStyles.width,
-        height: originalStyles.height,
-        transform: originalStyles.transform,
-        maxWidth: originalStyles.maxWidth,
-        maxHeight: originalStyles.maxHeight,
-        boxSizing: originalStyles.boxSizing,
-      })
-    }
+      const originalStyles = {
+        width: card.style.width,
+        height: card.style.height,
+        maxWidth: card.style.maxWidth,
+        maxHeight: card.style.maxHeight,
+        transform: card.style.transform,
+        transformOrigin: card.style.transformOrigin,
+      }
 
-    setIsMinting(false)
-  }
+      
+      const fixedWidth = 380
+      const fixedHeight = 240
+      Object.assign(card.style, {
+        width: `${fixedWidth}px`,
+        maxWidth: `${fixedWidth}px`,
+        height: `${fixedHeight}px`,
+        maxHeight: `${fixedHeight}px`,
+        transform: "none",
+        boxSizing: "border-box",
+      })
+      card.querySelectorAll("*").forEach((el) => {
+        ;(el as HTMLElement).style.boxSizing = "border-box"
+      })
+
+      const html2canvas = (await import("html2canvas")).default
+      const tempCanvas = await html2canvas(card, {
+        scale: window.devicePixelRatio || 2,
+        useCORS: true,
+        backgroundColor: null,
+      })
+
+      const targetWidth = 1200
+      const targetHeight = 800
+      const finalCanvas = document.createElement("canvas")
+      finalCanvas.width = targetWidth
+      finalCanvas.height = targetHeight
+      const ctx = finalCanvas.getContext("2d")
+      if (!ctx) throw new Error("No canvas context")
+
+      const scaleFactor = Math.min(
+        targetWidth / tempCanvas.width,
+        targetHeight / tempCanvas.height
+      )
+      const newW = tempCanvas.width * scaleFactor
+      const newH = tempCanvas.height * scaleFactor
+      const dx = (targetWidth - newW) / 2
+      const dy = (targetHeight - newH) / 2
+
+      ctx.fillStyle = "#000"
+      ctx.fillRect(0, 0, targetWidth, targetHeight)
+      ctx.drawImage(tempCanvas, dx, dy, newW, newH)
+
+      const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
+      setDownloadUrl(uploadedLink)
+      setMintedImageUrl(uploadedLink)
+
+      await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: "mint",
+        args: [uploadedLink],
+        account: walletAddress,
+        value: parseEther("0.0001"),
+      })
+
+      setMintStatus("✅ Mint successful!")
+    } catch (err: any) {
+      const message = typeof err === "string" ? err : err?.message || "Unknown error"
+      setMintStatus(`❌ Mint failed: ${message}`)
+    } finally {
+      const card = document.getElementById("walletCard") as HTMLElement | null
+      if (card) {
+        
+        Object.assign(card.style, {
+          width: "100vw",
+          height: "240px",
+          transform: "scale(calc(min(100vw / 380, 1)))",
+          transformOrigin: "top center",
+        })
+      }
+      setIsMinting(false)
+    }
   }
 
   const handleShareCard = () => {
@@ -176,13 +162,7 @@ export default function MintCard({
           boxSizing: "border-box",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
           <img
             src={user.pfpUrl || "/default-avatar.png"}
             alt="pfp"
@@ -200,8 +180,7 @@ export default function MintCard({
             style={{
               maxWidth: "120px",
               fontWeight: 700,
-              fontSize:
-                user.username && user.username.length > 12 ? "12px" : "14px",
+              fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -215,18 +194,10 @@ export default function MintCard({
           >
             @{user.username || "user"}
           </div>
-          <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>
-            FID: {user.fid}
-          </div>
+          <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>FID: {user.fid}</div>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            textAlign: "left",
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
           <div
             style={{
               fontSize: type === "contract" ? "13px" : "14px",
@@ -234,8 +205,7 @@ export default function MintCard({
               marginBottom: "8px",
             }}
           >
-            BaseState{" "}
-            {type === "wallet" ? "Wallet" : "BaseApp Wallet Snapshot"}
+            BaseState {type === "wallet" ? "Wallet" : "BaseApp Wallet Snapshot"}
           </div>
 
           <div
@@ -292,14 +262,7 @@ export default function MintCard({
       </div>
 
       {mintStatus && (
-        <div
-          style={{
-            fontSize: "11px",
-            color: "#ccc",
-            marginTop: "8px",
-            textAlign: "center",
-          }}
-        >
+        <div style={{ fontSize: "11px", color: "#ccc", marginTop: "8px", textAlign: "center" }}>
           {mintStatus}
         </div>
       )}
@@ -356,4 +319,4 @@ function buttonStyle(color: string): React.CSSProperties {
     fontWeight: 600,
     transition: "all 0.2s ease-in-out",
   }
-}
+  }
