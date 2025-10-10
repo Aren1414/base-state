@@ -50,7 +50,7 @@ export default function MintCard({
     card.style.maxWidth = `${fixedWidth}px`
     card.style.height = `${fixedHeight}px`
     card.style.maxHeight = `${fixedHeight}px`
-    card.style.transform = "none" 
+    card.style.transform = "none"
     card.style.boxSizing = "border-box"
     card.querySelectorAll("*").forEach((el) => {
       const e = el as HTMLElement
@@ -105,6 +105,12 @@ export default function MintCard({
     const message = typeof err === "string" ? err : err?.message || "Unknown error"
     setMintStatus(`❌ Mint failed: ${message}`)
   } finally {
+    const card = document.getElementById("walletCard")
+    if (card) {
+      card.style.transform = "scale(calc(min(100vw / 380, 1)))"
+      card.style.transformOrigin = "top center"
+    }
+
     setIsMinting(false)
   }
   }
