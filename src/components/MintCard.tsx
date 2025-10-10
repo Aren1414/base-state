@@ -122,12 +122,12 @@ export default function MintCard({
   }
 
   return (
-  <div style={{ marginTop: "16px", padding: "8px", boxSizing: "border-box", display: "flex", justifyContent: "center" }}>
+  <div style={{ marginTop: "16px", padding: "8px", boxSizing: "border-box" }}>
     <div
       id="walletCard"
       style={{
-        width: "min(100%, 380px)",
-        height: "240px",
+        width: "100vw", 
+        height: "240px", 
         overflow: "hidden",
         background: "linear-gradient(135deg, #00f0ff, #7f00ff)",
         borderRadius: "16px",
@@ -138,7 +138,6 @@ export default function MintCard({
         gridTemplateColumns: "90px 1fr",
         gap: "12px",
         position: "relative",
-        margin: "0 auto 16px auto",
         fontFamily: "'Segoe UI', sans-serif",
         boxSizing: "border-box",
       }}
