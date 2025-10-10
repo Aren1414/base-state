@@ -32,87 +32,97 @@ export default function MintCard({
   const [isMinting, setIsMinting] = useState(false)
 
   const handleMint = async () => {
-  if (!walletClient || !walletAddress) {
-    setMintStatus("❌ Wallet not connected")
-    return
-  }
-
-  setMintStatus("🧪 Minting…")
-  setIsMinting(true)
-
-  try {
-    const card = document.getElementById("walletCard")
-    if (!card) throw new Error("Card not found in DOM")
-
-    const fixedWidth = 380
-    const fixedHeight = 240
-    card.style.width = `${fixedWidth}px`
-    card.style.maxWidth = `${fixedWidth}px`
-    card.style.height = `${fixedHeight}px`
-    card.style.maxHeight = `${fixedHeight}px`
-    card.style.transform = "none"
-    card.style.boxSizing = "border-box"
-    card.querySelectorAll("*").forEach((el) => {
-      const e = el as HTMLElement
-      e.style.boxSizing = "border-box"
-    })
-
-    const html2canvas = (await import("html2canvas")).default
-    const tempCanvas = await html2canvas(card, {
-      scale: window.devicePixelRatio || 2,
-      useCORS: true,
-      backgroundColor: null,
-    })
-
-    const targetWidth = 1200
-    const targetHeight = 800
-
-    const finalCanvas = document.createElement("canvas")
-    finalCanvas.width = targetWidth
-    finalCanvas.height = targetHeight
-    const ctx = finalCanvas.getContext("2d")
-    if (!ctx) throw new Error("No canvas context")
-
-    const scaleFactor = Math.min(
-      targetWidth / tempCanvas.width,
-      targetHeight / tempCanvas.height
-    )
-
-    const newW = tempCanvas.width * scaleFactor
-    const newH = tempCanvas.height * scaleFactor
-    const dx = (targetWidth - newW) / 2
-    const dy = (targetHeight - newH) / 2
-
-    ctx.fillStyle = "#000"
-    ctx.fillRect(0, 0, targetWidth, targetHeight)
-    ctx.drawImage(tempCanvas, dx, dy, newW, newH)
-
-    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
-    setDownloadUrl(uploadedLink)
-    setMintedImageUrl(uploadedLink)
-
-    await walletClient.writeContract({
-      address: CONTRACT_ADDRESS,
-      abi,
-      functionName: "mint",
-      args: [uploadedLink],
-      account: walletAddress,
-      value: parseEther("0.0001"),
-    })
-
-    setMintStatus("✅ Mint successful!")
-  } catch (err: any) {
-    const message = typeof err === "string" ? err : err?.message || "Unknown error"
-    setMintStatus(`❌ Mint failed: ${message}`)
-  } finally {
-    const card = document.getElementById("walletCard")
-    if (card) {
-      card.style.transform = "scale(calc(min(100vw / 380, 1)))"
-      card.style.transformOrigin = "top center"
+    if (!walletClient || !walletAddress) {
+      setMintStatus("❌ Wallet not connected")
+      return
     }
 
-    setIsMinting(false)
-  }
+    setMintStatus("🧪 Minting…")
+    setIsMinting(true)
+
+    try {
+      const card = document.getElementById("walletCard")
+      if (!card) throw new Error("Card not found in DOM")
+
+      const fixedWidth = 380
+      const fixedHeight = 240
+      card.style.width = `${fixedWidth}px`
+      card.style.maxWidth = `${fixedWidth}px`
+      card.style.height = `${fixedHeight}px`
+      card.style.maxHeight = `${fixedHeight}px`
+      card.style.transform = "none"
+      card.style.boxSizing = "border-box"
+      card.querySelectorAll("*").forEach((el) => {
+        const e = el as HTMLElement
+        e.style.boxSizing = "border-box"
+      })
+
+      const html2canvas = (await import("html2canvas")).default
+      const tempCanvas = await html2canvas(card, {
+        scale: window.devicePixelRatio || 2,
+        useCORS: true,
+        backgroundColor: null,
+      })
+
+      const targetWidth = 1200
+      const targetHeight = 800
+
+      const finalCanvas = document.createElement("canvas")
+      finalCanvas.width = targetWidth
+      finalCanvas.height = targetHeight
+      const ctx = finalCanvas.getContext("2d")
+      if (!ctx) throw new Error("No canvas context")
+
+      const scaleFactor = Math.min(
+        targetWidth / tempCanvas.width,
+        targetHeight / tempCanvas.height
+      )
+
+      const newW = tempCanvas.width * scaleFactor
+      const newH = tempCanvas.height * scaleFactor
+      const dx = (targetWidth - newW) / 2
+      const dy = (targetHeight - newH) / 2
+
+      ctx.fillStyle = "#000"
+      ctx.fillRect(0, 0, targetWidth, targetHeight)
+      ctx.drawImage(tempCanvas, dx, dy, newW, newH)
+
+      const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
+      setDownloadUrl(uploadedLink)
+      setMintedImageUrl(uploadedLink)
+
+      await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: "mint",
+        args: [uploadedLink],
+        account: walletAddress,
+        value: parseEther("0.0001"),
+      })
+
+      setMintStatus("✅ Mint successful!")
+    } catch (err: any) {
+      const message =
+        typeof err === "string" ? err : err?.message || "Unknown error"
+      setMintStatus(`❌ Mint failed: ${message}`)
+    } finally {
+      
+      const card = document.getElementById("walletCard")
+      if (card) {
+        const isMiniApp =
+          typeof window !== "undefined" &&
+          /Farcaster|MiniApp|WebView/i.test(window.navigator.userAgent)
+
+        if (!isMiniApp) {
+          setTimeout(() => {
+            card.style.transform = "scale(calc(min(100vw / 380, 1)))"
+            card.style.transformOrigin = "top center"
+          }, 300)
+        }
+      }
+
+      setIsMinting(false)
+    }
   }
 
   const handleShareCard = () => {
@@ -128,27 +138,33 @@ export default function MintCard({
   }
 
   return (
-  <div style={{ marginTop: "16px", padding: "0", boxSizing: "border-box" }}>
-    <div
-      id="walletCard"
-      style={{
-        width: "100vw", 
-        height: "240px",
-        overflow: "hidden",
-        background: "linear-gradient(135deg, #00f0ff, #7f00ff)",
-        borderRadius: "16px",
-        padding: "16px",
-        color: "#fff",
-        boxShadow: "0 0 20px rgba(0,255,255,0.25)",
-        display: "grid",
-        gridTemplateColumns: "90px 1fr",
-        gap: "12px",
-        position: "relative",
-        fontFamily: "'Segoe UI', sans-serif",
-        boxSizing: "border-box",
-      }}
-    >
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+    <div style={{ marginTop: "16px", padding: "0", boxSizing: "border-box" }}>
+      <div
+        id="walletCard"
+        style={{
+          width: "100vw",
+          height: "240px",
+          overflow: "hidden",
+          background: "linear-gradient(135deg, #00f0ff, #7f00ff)",
+          borderRadius: "16px",
+          padding: "16px",
+          color: "#fff",
+          boxShadow: "0 0 20px rgba(0,255,255,0.25)",
+          display: "grid",
+          gridTemplateColumns: "90px 1fr",
+          gap: "12px",
+          position: "relative",
+          fontFamily: "'Segoe UI', sans-serif",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+          }}
+        >
           <img
             src={user.pfpUrl || "/default-avatar.png"}
             alt="pfp"
@@ -163,27 +179,36 @@ export default function MintCard({
             }}
           />
           <div
-  style={{
-    maxWidth: "120px",
-    fontWeight: 700,
-    fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    lineHeight: "32px",
-    height: "32px",
-    paddingBottom: "2px",
-    display: "block",
-    WebkitFontSmoothing: "antialiased",
-    MozOsxFontSmoothing: "grayscale",
-  }}
->
-  @{user.username || "user"}
-</div>
-          <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>FID: {user.fid}</div>
+            style={{
+              maxWidth: "120px",
+              fontWeight: 700,
+              fontSize:
+                user.username && user.username.length > 12 ? "12px" : "14px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              lineHeight: "32px",
+              height: "32px",
+              paddingBottom: "2px",
+              display: "block",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+            }}
+          >
+            @{user.username || "user"}
+          </div>
+          <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>
+            FID: {user.fid}
+          </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            textAlign: "left",
+          }}
+        >
           <div
             style={{
               fontSize: type === "contract" ? "13px" : "14px",
@@ -191,7 +216,8 @@ export default function MintCard({
               marginBottom: "8px",
             }}
           >
-            BaseState {type === "wallet" ? "Wallet" : "BaseApp Wallet Snapshot"}
+            BaseState{" "}
+            {type === "wallet" ? "Wallet" : "BaseApp Wallet Snapshot"}
           </div>
 
           <div
@@ -248,7 +274,14 @@ export default function MintCard({
       </div>
 
       {mintStatus && (
-        <div style={{ fontSize: "11px", color: "#ccc", marginTop: "8px", textAlign: "center" }}>
+        <div
+          style={{
+            fontSize: "11px",
+            color: "#ccc",
+            marginTop: "8px",
+            textAlign: "center",
+          }}
+        >
           {mintStatus}
         </div>
       )}
