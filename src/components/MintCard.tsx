@@ -50,6 +50,7 @@ export default function MintCard({
     card.style.maxWidth = `${fixedWidth}px`
     card.style.height = `${fixedHeight}px`
     card.style.maxHeight = `${fixedHeight}px`
+    card.style.transform = "none" 
     card.style.boxSizing = "border-box"
     card.querySelectorAll("*").forEach((el) => {
       const e = el as HTMLElement
@@ -126,7 +127,7 @@ export default function MintCard({
         id="walletCard"
         style={{
   width: "380px", 
-  height: "240px", 
+  height: "240px",
   overflow: "hidden",
   background: "linear-gradient(135deg, #00f0ff, #7f00ff)",
   borderRadius: "16px",
@@ -140,6 +141,10 @@ export default function MintCard({
   margin: "0 auto 16px auto",
   fontFamily: "'Segoe UI', sans-serif",
   boxSizing: "border-box",
+
+  
+  transform: "scale(calc(min(100vw / 380, 1)))",
+  transformOrigin: "top center",
 }}
       >
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
