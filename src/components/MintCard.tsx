@@ -142,10 +142,8 @@ export default function MintCard({
     fontFamily: "'Segoe UI', sans-serif",
     boxSizing: "border-box",
 
-    
     transform: "scale(calc(min(100vw / 380, 1)))",
     transformOrigin: "top center",
-    width: "380px", 
   }}
 >
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
