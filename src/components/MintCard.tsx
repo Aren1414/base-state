@@ -44,9 +44,18 @@ export default function MintCard({
     const card = document.getElementById("walletCard")
     if (!card) throw new Error("Card not found in DOM")
 
+    const fixedHeight = 240
+    card.style.height = `${fixedHeight}px`
+    card.style.maxHeight = `${fixedHeight}px`
+    card.style.boxSizing = "border-box"
+    card.querySelectorAll("*").forEach((el) => {
+      const e = el as HTMLElement
+      e.style.boxSizing = "border-box"
+    })
+
     const html2canvas = (await import("html2canvas")).default
     const tempCanvas = await html2canvas(card, {
-      scale: 2,
+      scale: window.devicePixelRatio || 2,
       useCORS: true,
       backgroundColor: null,
     })
@@ -70,7 +79,7 @@ export default function MintCard({
     const dx = (targetWidth - newW) / 2
     const dy = (targetHeight - newH) / 2
 
-    ctx.fillStyle = "#000" 
+    ctx.fillStyle = "#000"
     ctx.fillRect(0, 0, targetWidth, targetHeight)
     ctx.drawImage(tempCanvas, dx, dy, newW, newH)
 
@@ -94,7 +103,7 @@ export default function MintCard({
   } finally {
     setIsMinting(false)
   }
-}
+  }
 
   const handleShareCard = () => {
     if (!downloadUrl) return
@@ -113,22 +122,23 @@ export default function MintCard({
       <div
         id="walletCard"
         style={{
-          width: "100%",
-          maxWidth: "380px",
-          background: "linear-gradient(135deg, #00f0ff, #7f00ff)",
-          borderRadius: "16px",
-          padding: "16px",
-          color: "#fff",
-          boxShadow: "0 0 20px rgba(0,255,255,0.25)",
-          display: "grid",
-          gridTemplateColumns: "90px 1fr",
-          gap: "12px",
-          position: "relative",
-          margin: "0 auto 16px auto",
-          fontFamily: "'Segoe UI', sans-serif",
-          boxSizing: "border-box",
-          minHeight: "200px",
-        }}
+  width: "100%",
+  maxWidth: "380px",
+  height: "240px", 
+  overflow: "hidden", 
+  background: "linear-gradient(135deg, #00f0ff, #7f00ff)",
+  borderRadius: "16px",
+  padding: "16px",
+  color: "#fff",
+  boxShadow: "0 0 20px rgba(0,255,255,0.25)",
+  display: "grid",
+  gridTemplateColumns: "90px 1fr",
+  gap: "12px",
+  position: "relative",
+  margin: "0 auto 16px auto",
+  fontFamily: "'Segoe UI', sans-serif",
+  boxSizing: "border-box",
+}}
       >
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
           <img
