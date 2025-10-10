@@ -32,97 +32,115 @@ export default function MintCard({
   const [isMinting, setIsMinting] = useState(false)
 
   const handleMint = async () => {
-    if (!walletClient || !walletAddress) {
-      setMintStatus("❌ Wallet not connected")
-      return
+  if (!walletClient || !walletAddress) {
+    setMintStatus("❌ Wallet not connected")
+    return
+  }
+
+  setMintStatus("🧪 Minting…")
+  setIsMinting(true)
+
+  try {
+    const card = document.getElementById("walletCard") as HTMLElement | null
+    if (!card) throw new Error("Card not found in DOM")
+
+    
+    const originalStyles = {
+      width: card.style.width,
+      height: card.style.height,
+      transform: card.style.transform,
+      maxWidth: card.style.maxWidth,
+      maxHeight: card.style.maxHeight,
+      boxSizing: card.style.boxSizing,
     }
 
-    setMintStatus("🧪 Minting…")
-    setIsMinting(true)
+    
+    const fixedWidth = 380
+    const fixedHeight = 240
+    card.style.width = `${fixedWidth}px`
+    card.style.maxWidth = `${fixedWidth}px`
+    card.style.height = `${fixedHeight}px`
+    card.style.maxHeight = `${fixedHeight}px`
+    card.style.transform = "none"
+    card.style.boxSizing = "border-box"
+    card.querySelectorAll("*").forEach((el) => {
+      const e = el as HTMLElement
+      e.style.boxSizing = "border-box"
+    })
 
-    try {
-      const card = document.getElementById("walletCard")
-      if (!card) throw new Error("Card not found in DOM")
+    
+    const html2canvas = (await import("html2canvas")).default
+    const tempCanvas = await html2canvas(card, {
+      scale: window.devicePixelRatio || 2,
+      useCORS: true,
+      backgroundColor: null,
+    })
 
-      const fixedWidth = 380
-      const fixedHeight = 240
-      card.style.width = `${fixedWidth}px`
-      card.style.maxWidth = `${fixedWidth}px`
-      card.style.height = `${fixedHeight}px`
-      card.style.maxHeight = `${fixedHeight}px`
-      card.style.transform = "none"
-      card.style.boxSizing = "border-box"
-      card.querySelectorAll("*").forEach((el) => {
-        const e = el as HTMLElement
-        e.style.boxSizing = "border-box"
-      })
+    
+    const targetWidth = 1200
+    const targetHeight = 800
+    const finalCanvas = document.createElement("canvas")
+    finalCanvas.width = targetWidth
+    finalCanvas.height = targetHeight
+    const ctx = finalCanvas.getContext("2d")
+    if (!ctx) throw new Error("No canvas context")
 
-      const html2canvas = (await import("html2canvas")).default
-      const tempCanvas = await html2canvas(card, {
-        scale: window.devicePixelRatio || 2,
-        useCORS: true,
-        backgroundColor: null,
-      })
+    const scaleFactor = Math.min(
+      targetWidth / tempCanvas.width,
+      targetHeight / tempCanvas.height
+    )
+    const newW = tempCanvas.width * scaleFactor
+    const newH = tempCanvas.height * scaleFactor
+    const dx = (targetWidth - newW) / 2
+    const dy = (targetHeight - newH) / 2
 
-      const targetWidth = 1200
-      const targetHeight = 800
+    ctx.fillStyle = "#000"
+    ctx.fillRect(0, 0, targetWidth, targetHeight)
+    ctx.drawImage(tempCanvas, dx, dy, newW, newH)
 
-      const finalCanvas = document.createElement("canvas")
-      finalCanvas.width = targetWidth
-      finalCanvas.height = targetHeight
-      const ctx = finalCanvas.getContext("2d")
-      if (!ctx) throw new Error("No canvas context")
+    
+    const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
+    setDownloadUrl(uploadedLink)
+    setMintedImageUrl(uploadedLink)
 
-      const scaleFactor = Math.min(
-        targetWidth / tempCanvas.width,
-        targetHeight / tempCanvas.height
-      )
+    await walletClient.writeContract({
+      address: CONTRACT_ADDRESS,
+      abi,
+      functionName: "mint",
+      args: [uploadedLink],
+      account: walletAddress,
+      value: parseEther("0.0001"),
+    })
 
-      const newW = tempCanvas.width * scaleFactor
-      const newH = tempCanvas.height * scaleFactor
-      const dx = (targetWidth - newW) / 2
-      const dy = (targetHeight - newH) / 2
+    setMintStatus("✅ Mint successful!")
+  } catch (err: any) {
+    const message = typeof err === "string" ? err : err?.message || "Unknown error"
+    setMintStatus(`❌ Mint failed: ${message}`)
+  } finally {
+    
+    const card = document.getElementById("walletCard") as HTMLElement | null
+    if (card) {
+      card.style.width = ""
+      card.style.height = ""
+      card.style.maxWidth = ""
+      card.style.maxHeight = ""
+      card.style.boxSizing = ""
+      card.style.transform = ""
+      card.style.transformOrigin = ""
 
-      ctx.fillStyle = "#000"
-      ctx.fillRect(0, 0, targetWidth, targetHeight)
-      ctx.drawImage(tempCanvas, dx, dy, newW, newH)
-
-      const uploadedLink = await uploadCanvas(finalCanvas, setMintStatus)
-      setDownloadUrl(uploadedLink)
-      setMintedImageUrl(uploadedLink)
-
-      await walletClient.writeContract({
-        address: CONTRACT_ADDRESS,
-        abi,
-        functionName: "mint",
-        args: [uploadedLink],
-        account: walletAddress,
-        value: parseEther("0.0001"),
-      })
-
-      setMintStatus("✅ Mint successful!")
-    } catch (err: any) {
-      const message =
-        typeof err === "string" ? err : err?.message || "Unknown error"
-      setMintStatus(`❌ Mint failed: ${message}`)
-    } finally {
       
-      const card = document.getElementById("walletCard")
-      if (card) {
-        const isMiniApp =
-          typeof window !== "undefined" &&
-          /Farcaster|MiniApp|WebView/i.test(window.navigator.userAgent)
-
-        if (!isMiniApp) {
-          setTimeout(() => {
-            card.style.transform = "scale(calc(min(100vw / 380, 1)))"
-            card.style.transformOrigin = "top center"
-          }, 300)
-        }
-      }
-
-      setIsMinting(false)
+      Object.assign(card.style, {
+        width: originalStyles.width,
+        height: originalStyles.height,
+        transform: originalStyles.transform,
+        maxWidth: originalStyles.maxWidth,
+        maxHeight: originalStyles.maxHeight,
+        boxSizing: originalStyles.boxSizing,
+      })
     }
+
+    setIsMinting(false)
+  }
   }
 
   const handleShareCard = () => {
