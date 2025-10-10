@@ -44,7 +44,10 @@ export default function MintCard({
     const card = document.getElementById("walletCard")
     if (!card) throw new Error("Card not found in DOM")
 
+    const fixedWidth = 380
     const fixedHeight = 240
+    card.style.width = `${fixedWidth}px`
+    card.style.maxWidth = `${fixedWidth}px`
     card.style.height = `${fixedHeight}px`
     card.style.maxHeight = `${fixedHeight}px`
     card.style.boxSizing = "border-box"
@@ -122,10 +125,9 @@ export default function MintCard({
       <div
         id="walletCard"
         style={{
-  width: "100%",
-  maxWidth: "380px",
+  width: "380px", 
   height: "240px", 
-  overflow: "hidden", 
+  overflow: "hidden",
   background: "linear-gradient(135deg, #00f0ff, #7f00ff)",
   borderRadius: "16px",
   padding: "16px",
