@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { uploadCanvas } from "../lib/uploadCanvas";
-import { useAccount, useWalletClient } from "wagmi";
-import { parseEther } from "viem";
-import abi from "../lib/abi/BaseStateCard.json";
+import React, { useState } from "react"
+import { uploadCanvas } from "../lib/uploadCanvas"
+import { useAccount, useWalletClient } from "wagmi"
+import { parseEther } from "viem"
+import abi from "../lib/abi/BaseStateCard.json"
 
-const CONTRACT_ADDRESS = "0x972f0F6D9f1C25eC153729113048Cdfe6828515c";
+const CONTRACT_ADDRESS = "0x972f0F6D9f1C25eC153729113048Cdfe6828515c"
 
 interface MintCardProps {
-  stats: any;
-  type: "wallet" | "contract";
+  stats: any
+  type: "wallet" | "contract"
   user: {
-    fid: number;
-    username?: string;
-    pfpUrl?: string;
-  };
-  minted: boolean;
-  setMintedImageUrl: (url: string) => void;
+    fid: number
+    username?: string
+    pfpUrl?: string
+  }
+  minted: boolean
+  setMintedImageUrl: (url: string) => void
 }
 
 export default function MintCard({
@@ -25,43 +25,61 @@ export default function MintCard({
   minted,
   setMintedImageUrl,
 }: MintCardProps) {
-  const { address: walletAddress } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const [mintStatus, setMintStatus] = useState<string | null>(null);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [isMinting, setIsMinting] = useState(false);
-
-  
-  useEffect(() => {
-    if (minted && !downloadUrl) {
-      setDownloadUrl(localStorage.getItem("mintedImage") || null);
-    }
-  }, [minted, downloadUrl]);
+  const { address: walletAddress } = useAccount()
+  const { data: walletClient } = useWalletClient()
+  const [mintStatus, setMintStatus] = useState<string | null>(null)
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+  const [isMinting, setIsMinting] = useState(false)
 
   const handleMint = async () => {
     if (!walletClient || !walletAddress) {
-      setMintStatus("❌ Wallet not connected");
-      return;
+      setMintStatus("❌ Wallet not connected")
+      return
     }
 
-    setMintStatus("🧙 Minting…");
-    setIsMinting(true);
+    setMintStatus("🧪 Minting…")
+    setIsMinting(true)
 
     try {
-      const card = document.getElementById("walletCard");
-      if (!card) throw new Error("Card not found in DOM");
+      const card = document.getElementById("walletCard")
+      if (!card) throw new Error("Card not found in DOM")
 
-      const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(card, {
-        scale: 2,
+      
+      const html2canvas = (await import("html2canvas")).default
+      const tempCanvas = await html2canvas(card, {
+        scale: 2, 
         useCORS: true,
         backgroundColor: null,
-      });
+      })
 
-      const uploadedLink = await uploadCanvas(canvas, setMintStatus);
-      setDownloadUrl(uploadedLink);
-      setMintedImageUrl(uploadedLink);
-      localStorage.setItem("mintedImage", uploadedLink); 
+      
+      const finalWidth = 1200
+      const finalHeight = 800
+      const outputCanvas = document.createElement("canvas")
+      outputCanvas.width = finalWidth
+      outputCanvas.height = finalHeight
+      const ctx = outputCanvas.getContext("2d")
+      if (!ctx) throw new Error("No canvas context")
+
+      
+      const scale = Math.min(
+        finalWidth / tempCanvas.width,
+        finalHeight / tempCanvas.height
+      )
+      const newWidth = tempCanvas.width * scale
+      const newHeight = tempCanvas.height * scale
+      const offsetX = (finalWidth - newWidth) / 2
+      const offsetY = (finalHeight - newHeight) / 2
+
+      
+      ctx.fillStyle = "#000"
+      ctx.fillRect(0, 0, finalWidth, finalHeight)
+      ctx.drawImage(tempCanvas, offsetX, offsetY, newWidth, newHeight)
+
+      
+      const uploadedLink = await uploadCanvas(outputCanvas, setMintStatus)
+      setDownloadUrl(uploadedLink)
+      setMintedImageUrl(uploadedLink)
 
       await walletClient.writeContract({
         address: CONTRACT_ADDRESS,
@@ -70,30 +88,26 @@ export default function MintCard({
         args: [uploadedLink],
         account: walletAddress,
         value: parseEther("0.0001"),
-      });
+      })
 
-      setMintStatus("✅ Mint successful!");
+      setMintStatus("✅ Mint successful!")
     } catch (err: any) {
-      const message =
-        typeof err === "string" ? err : err?.message || "Unknown error";
-      setMintStatus(`❌ Mint failed: ${message}`);
+      const message = typeof err === "string" ? err : err?.message || "Unknown error"
+      setMintStatus(`❌ Mint failed: ${message}`)
     } finally {
-      setIsMinting(false);
+      setIsMinting(false)
     }
-  };
+  }
 
   const handleShareCard = () => {
-    if (!downloadUrl) return;
-    const fileName =
-      downloadUrl.split("/").pop()?.replace(".png", "") || "card";
-    const embedPreview = `${window.location.origin}/share/${fileName}`;
-
+    if (!downloadUrl) return
+    const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card"
+    const embedPreview = `${window.location.origin}/share/${fileName}`
     const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
       "📸 Just minted my BaseState NFT card!"
-    )}&embeds[]=${encodeURIComponent(embedPreview)}`;
-
-    window.open(warpcastUrl, "_blank");
-  };
+    )}&embeds[]=${encodeURIComponent(embedPreview)}`
+    window.open(warpcastUrl, "_blank")
+  }
 
   return (
     <div style={{ marginTop: "16px", padding: "8px", boxSizing: "border-box" }}>
@@ -113,6 +127,7 @@ export default function MintCard({
           position: "relative",
           margin: "0 auto 16px auto",
           fontFamily: "'Segoe UI', sans-serif",
+          boxSizing: "border-box",
           minHeight: "200px",
         }}
       >
@@ -144,9 +159,7 @@ export default function MintCard({
           >
             @{user.username || "user"}
           </div>
-          <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>
-            FID: {user.fid}
-          </div>
+          <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>FID: {user.fid}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
@@ -214,14 +227,7 @@ export default function MintCard({
       </div>
 
       {mintStatus && (
-        <div
-          style={{
-            fontSize: "11px",
-            color: "#ccc",
-            marginTop: "8px",
-            textAlign: "center",
-          }}
-        >
+        <div style={{ fontSize: "11px", color: "#ccc", marginTop: "8px", textAlign: "center" }}>
           {mintStatus}
         </div>
       )}
@@ -241,7 +247,7 @@ export default function MintCard({
           style={buttonStyle("#00ff7f")}
           disabled={!walletClient || !walletAddress || isMinting}
         >
-          🪄 Mint as NFT
+          🪙 Mint as NFT
         </button>
 
         <button
@@ -261,7 +267,7 @@ export default function MintCard({
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 function buttonStyle(color: string): React.CSSProperties {
@@ -273,8 +279,9 @@ function buttonStyle(color: string): React.CSSProperties {
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
+    boxShadow: "0 0 2px rgba(0,0,0,0.1)",
     minWidth: "90px",
     fontWeight: 600,
     transition: "all 0.2s ease-in-out",
-  };
-}
+  }
+  }
