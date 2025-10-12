@@ -18,7 +18,6 @@ interface MintCardProps {
   setMintedImageUrl: (url: string) => void
 }
 
-
 declare global {
   interface Window {
     farcaster?: {
@@ -104,7 +103,6 @@ export default function MintCard({
     }
   }
 
-  
   const handleShareCard = async () => {
     if (!downloadUrl) return
     const text = "📸 Just minted my BaseState NFT card!"
@@ -118,14 +116,14 @@ export default function MintCard({
           text,
           embeds: [embedPreview],
         })
-        return
+        return 
       }
 
       
       const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
         text
       )}&embeds[]=${encodeURIComponent(embedPreview)}`
-      window.open(warpcastUrl, "_blank")
+      window.location.href = warpcastUrl 
     } catch (err) {
       console.error("Error sharing:", err)
     }
@@ -153,13 +151,7 @@ export default function MintCard({
           minHeight: "200px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
           <img
             src={user.pfpUrl || "/default-avatar.png"}
             alt="pfp"
@@ -177,8 +169,7 @@ export default function MintCard({
             style={{
               maxWidth: "120px",
               fontWeight: 700,
-              fontSize:
-                user.username && user.username.length > 12 ? "12px" : "14px",
+              fontSize: user.username && user.username.length > 12 ? "12px" : "14px",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -188,20 +179,12 @@ export default function MintCard({
           >
             @{user.username || "user"}
           </div>
-          <div
-            style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}
-          >
+          <div style={{ fontSize: "11px", color: "#ccc", marginTop: "2px" }}>
             FID: {user.fid}
           </div>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            textAlign: "left",
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
           <div
             style={{
               fontSize: type === "contract" ? "13px" : "14px",
@@ -235,20 +218,11 @@ export default function MintCard({
               : [
                   { label: "Age", value: stats.age + " days" },
                   { label: "Post", value: stats.postTokens },
-                  {
-                    label: "Internal Tx Count",
-                    value: stats.internalTxCount,
-                  },
+                  { label: "Internal Tx Count", value: stats.internalTxCount },
                   { label: "Best Streak", value: stats.bestStreak + " days" },
                   { label: "Unique Senders", value: stats.uniqueSenders },
-                  {
-                    label: "Tokens Received",
-                    value: stats.tokensReceived,
-                  },
-                  {
-                    label: "AA Transactions",
-                    value: stats.allAaTransactions,
-                  },
+                  { label: "Tokens Received", value: stats.tokensReceived },
+                  { label: "AA Transactions", value: stats.allAaTransactions },
                   { label: "Rare Tokens", value: stats.rareTokens },
                 ]
             ).map((f, i) => (
@@ -275,14 +249,7 @@ export default function MintCard({
       </div>
 
       {mintStatus && (
-        <div
-          style={{
-            fontSize: "11px",
-            color: "#ccc",
-            marginTop: "8px",
-            textAlign: "center",
-          }}
-        >
+        <div style={{ fontSize: "11px", color: "#ccc", marginTop: "8px", textAlign: "center" }}>
           {mintStatus}
         </div>
       )}
