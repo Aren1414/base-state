@@ -3,6 +3,8 @@ import { uploadCanvas } from "../lib/uploadCanvas"
 import { useAccount, useWalletClient } from "wagmi"
 import { parseEther } from "viem"
 import abi from "../lib/abi/BaseStateCard.json"
+import { useComposeCast } from "@coinbase/onchainkit/minikit"
+import { sdk } from "@farcaster/miniapp-sdk"
 
 const CONTRACT_ADDRESS = "0x972f0F6D9f1C25eC153729113048Cdfe6828515c"
 
@@ -18,14 +20,6 @@ interface MintCardProps {
   setMintedImageUrl: (url: string) => void
 }
 
-declare global {
-  interface Window {
-    farcaster?: {
-      openCompose?: (options: { text?: string; embeds?: string[] }) => Promise<void>
-    }
-  }
-}
-
 export default function MintCard({
   stats,
   type,
@@ -35,6 +29,7 @@ export default function MintCard({
 }: MintCardProps) {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
+  const { composeCast } = useComposeCast()
   const [mintStatus, setMintStatus] = useState<string | null>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [isMinting, setIsMinting] = useState(false)
@@ -104,24 +99,28 @@ export default function MintCard({
   }
 
   const handleShareCard = async () => {
-  if (!downloadUrl) return
-  const text = "📸 Just minted my BaseState NFT card!"
-  const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card"
-  const embedPreview = `${window.location.origin}/share/${fileName}`
+    if (!downloadUrl) return
+    const text = "📸 Just minted my BaseState NFT card!"
+    const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card"
+    const embedPreview = `${window.location.origin}/share/${fileName}`
 
-  try {
-    if (window.farcaster?.openCompose) {
-      await window.farcaster.openCompose({
-        text,
-        embeds: [embedPreview],
-      })
-    } else {
-      alert("برای اشتراک‌گذاری باید اپ رسمی Farcaster را باز کنید. این قابلیت در مرورگر فعال نیست.")
+    try {
+      const isMiniApp = await sdk.isInMiniApp()
+
+      if (isMiniApp) {
+        await composeCast({
+          text,
+          embeds: [embedPreview],
+        })
+      } else {
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+          text
+        )}&embeds[]=${encodeURIComponent(embedPreview)}`
+        window.open(warpcastUrl, "_blank")
+      }
+    } catch (err) {
+      console.error("Share failed:", err)
     }
-  } catch (err) {
-    console.error("Error sharing via Farcaster:", err)
-    alert("خطا در اشتراک‌گذاری. لطفاً اپ Farcaster را بررسی کنید.")
-  }
   }
 
   return (
@@ -244,46 +243,48 @@ export default function MintCard({
       </div>
 
       {mintStatus && (
-        <div style={{ fontSize: "11px", color: "#ccc", marginTop: "8px", textAlign: "center" }}>
-          {mintStatus}
-        </div>
-      )}
+  <div style={{ fontSize: "11px", color: "#ccc", marginTop: "8px", textAlign: "center" }}>
+    {mintStatus}
+  </div>
+)}
 
-      <div
-        style={{
-          textAlign: "center",
-          display: "flex",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          gap: "8px",
-          marginTop: "10px",
-        }}
-      >
-        <button
-          onClick={handleMint}
-          style={buttonStyle("#00ff7f")}
-          disabled={!walletClient || !walletAddress || isMinting}
-        >
-          🪙 Mint as NFT
-        </button>
+<div
+  style={{
+    textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: "8px",
+    marginTop: "10px",
+  }}
+>
+  <button
+    onClick={handleMint}
+    style={buttonStyle("#00ff7f")}
+    disabled={!walletClient || !walletAddress || isMinting}
+  >
+    🪙 Mint as NFT
+  </button>
 
-        <button
-          onClick={() => downloadUrl && window.open(downloadUrl, "_blank")}
-          style={buttonStyle("#7f00ff")}
-          disabled={!downloadUrl}
-        >
-          💾 Download Card
-        </button>
+  <button
+    onClick={() => downloadUrl && window.open(downloadUrl, "_blank")}
+    style={buttonStyle("#7f00ff")}
+    disabled={!downloadUrl}
+  >
+    💾 Download Card
+  </button>
 
-        <button
-          onClick={handleShareCard}
-          style={buttonStyle("#00f0ff")}
-          disabled={!downloadUrl}
-        >
-          📸 Share Minted Card
-        </button>
-      </div>
-    </div>
+  <button
+    onClick={handleShareCard}
+    style={buttonStyle("#00f0ff")}
+    disabled={!downloadUrl}
+  >
+    📸 Share Minted Card
+  </button>
+</div>
+</div>
+          
+                
   )
 }
 
