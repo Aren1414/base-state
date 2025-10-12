@@ -47,19 +47,31 @@ export default function Home() {
   }, [chainId, switchChain])
 
   useEffect(() => {
-    const initMiniApp = async () => {
-      const isMiniApp = await sdk.isInMiniApp()
-      if (isMiniApp) {
-        await sdk.actions.ready()
+  const initMiniApp = async () => {
+    const isMiniApp = await sdk.isInMiniApp()
+    if (!isMiniApp) return
+
+    await sdk.actions.ready()
+
+    const context = await sdk.context
+    const hasAdded = context?.client?.added
+
+    if (!hasAdded) {
+      try {
         await sdk.actions.addMiniApp()
-        await signIn()
-        if (!isFrameReady) {
-          setFrameReady()
-        }
+      } catch (err) {
+        console.warn("User rejected addMiniApp:", err)
       }
     }
-    initMiniApp()
-  }, [isFrameReady, setFrameReady, signIn])
+
+    await signIn()
+    if (!isFrameReady) {
+      setFrameReady()
+    }
+  }
+
+  initMiniApp()
+}, [isFrameReady, setFrameReady, signIn])
 
   const user = context?.user
   const fid = user?.fid
@@ -236,8 +248,8 @@ export default function Home() {
           </>
         ) : (
           <p className={styles.statusMessage}>
-            Fetching wallet stats, please wait…
-          </p>
+  Fetching wallet stats, please wait… <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
+</p>
         )}
       </div>
     </div>
