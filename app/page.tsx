@@ -58,7 +58,8 @@ export default function Home() {
 
     if (!hasAdded) {
       try {
-        await sdk.actions.addMiniApp()
+        const result = await sdk.actions.addMiniApp()
+        console.log("AddMiniApp result:", result)
       } catch (err) {
         console.warn("User rejected addMiniApp:", err)
       }
