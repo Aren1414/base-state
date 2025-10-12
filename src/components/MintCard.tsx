@@ -104,29 +104,23 @@ export default function MintCard({
   }
 
   const handleShareCard = async () => {
-    if (!downloadUrl) return
-    const text = "📸 Just minted my BaseState NFT card!"
-    const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card"
-    const embedPreview = `${window.location.origin}/share/${fileName}`
+  if (!downloadUrl) return
+  const text = "📸 Just minted my BaseState NFT card!"
+  const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card"
+  const embedPreview = `${window.location.origin}/share/${fileName}`
 
-    try {
-      
-      if (window.farcaster?.openCompose) {
-        await window.farcaster.openCompose({
-          text,
-          embeds: [embedPreview],
-        })
-        return 
-      }
-
-      
-      const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-        text
-      )}&embeds[]=${encodeURIComponent(embedPreview)}`
-      window.location.href = warpcastUrl 
-    } catch (err) {
-      console.error("Error sharing:", err)
+  try {
+    if (window.farcaster?.openCompose) {
+      await window.farcaster.openCompose({
+        text,
+        embeds: [embedPreview],
+      })
+    } else {
+      console.warn("Farcaster openCompose is not available in this environment.")
     }
+  } catch (err) {
+    console.error("Error sharing via Farcaster:", err)
+  }
   }
 
   return (
