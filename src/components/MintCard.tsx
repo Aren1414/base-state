@@ -116,10 +116,11 @@ export default function MintCard({
         embeds: [embedPreview],
       })
     } else {
-      console.warn("Farcaster openCompose is not available in this environment.")
+      alert("برای اشتراک‌گذاری باید اپ رسمی Farcaster را باز کنید. این قابلیت در مرورگر فعال نیست.")
     }
   } catch (err) {
     console.error("Error sharing via Farcaster:", err)
+    alert("خطا در اشتراک‌گذاری. لطفاً اپ Farcaster را بررسی کنید.")
   }
   }
 
