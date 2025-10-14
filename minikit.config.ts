@@ -7,8 +7,6 @@ export const ROOT_URL = rawUrl.startsWith("http")
   ? rawUrl
   : `https://${rawUrl}`;
 
-const IMAGE_VERSION = "v=3";
-
 export const minikitConfig = {
   accountAssociation: {
     header: "",
@@ -20,19 +18,19 @@ export const minikitConfig = {
     name: "base-state",
     subtitle: "",
     description: "",
-    screenshotUrls: [`${ROOT_URL}/screenshot.png?${IMAGE_VERSION}`],
-    iconUrl: `${ROOT_URL}/icon.png?${IMAGE_VERSION}`,
-    splashImageUrl: `${ROOT_URL}/splash.png?${IMAGE_VERSION}`,
+    screenshotUrls: [`${ROOT_URL}/screenshot.png`],
+    iconUrl: `${ROOT_URL}/icon.png`,
+    splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#0a0f2c",
     homeUrl: ROOT_URL,
     canonicalLink: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: [],
-    heroImageUrl: `${ROOT_URL}/hero.png?${IMAGE_VERSION}`,
+    heroImageUrl: `${ROOT_URL}/hero.png`,
     tagline: "",
     ogTitle: "Base State Card",
     ogDescription: "Mint your personalized Base State NFT",
-    ogImageUrl: `${ROOT_URL}/hero.png?${IMAGE_VERSION}`,
+    ogImageUrl: `${ROOT_URL}/hero.png`,
   },
 } as const;
