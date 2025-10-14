@@ -8,7 +8,7 @@ export const ROOT_URL = rawUrl.startsWith("http")
   : `https://${rawUrl}`;
 
 // نسخه کش تصاویر — فقط وقتی تصویر جدید آپلود کردی اینو تغییر بده
-const IMAGE_VERSION = "v=4";
+const IMAGE_VERSION = "v=5";
 
 export const minikitConfig = {
   accountAssociation: {
