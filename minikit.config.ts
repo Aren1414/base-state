@@ -15,7 +15,7 @@ export const minikitConfig = {
   },
   miniapp: {
     version: "1",
-    name: "base-state",
+    name: "BaseState",
     subtitle: "",
     description: "",
     screenshotUrls: [`${ROOT_URL}/screenshot.png`],
