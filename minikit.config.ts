@@ -7,7 +7,7 @@ export const ROOT_URL = rawUrl.startsWith("http")
   ? rawUrl
   : `https://${rawUrl}`;
 
-const IMAGE_VERSION = "v=2";
+const IMAGE_VERSION = "v=3";
 
 export const minikitConfig = {
   accountAssociation: {
