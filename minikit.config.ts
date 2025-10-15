@@ -21,7 +21,7 @@ export const minikitConfig = {
     subtitle: "Base Wallet Insights",
     description: "Track, mint, and share your Base identity NFT.",
     screenshotUrls: [`${ROOT_URL}/screenshot.png?v=3`],
-    iconUrl: `${ROOT_URL}/icon.png?v=2`,
+    iconUrl: `${ROOT_URL}/icon.png?v=3`,
     splashImageUrl: `${ROOT_URL}/splash.png?v=3`,
     splashBackgroundColor: "#0a0f2c",
     homeUrl: ROOT_URL,
