@@ -3,6 +3,10 @@ const rawUrl =
   process.env.VERCEL_URL ||
   "base-state.vercel.app";
 
+
+export const CANONICAL_DOMAIN = rawUrl.replace(/^https?:\/\//, "");
+
+
 export const ROOT_URL = rawUrl.startsWith("http")
   ? rawUrl
   : `https://${rawUrl}`;
@@ -23,7 +27,7 @@ export const minikitConfig = {
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#0a0f2c",
     homeUrl: ROOT_URL,
-    canonicalDomain: ROOT_URL,
+    canonicalDomain: CANONICAL_DOMAIN, 
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: ["utility"],
