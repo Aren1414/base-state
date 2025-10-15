@@ -9,11 +9,11 @@ import "./globals.css";
 import React from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cfg = (minikitConfig as any).miniapp ?? {};
+  const cfg = minikitConfig.miniapp;
   const ensureHttps = (u?: string) =>
     !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
 
-  const canonical = ensureHttps(cfg.canonicalLink ?? cfg.homeUrl);
+  const canonical = ensureHttps(cfg.homeUrl);
   const imageUrl =
     ensureHttps(cfg.ogImageUrl) ||
     ensureHttps(cfg.heroImageUrl) ||
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     `${canonical}/embed.png`;
 
   const embed = {
-    version: cfg.version ?? "1",
+    version: cfg.version,
     imageUrl,
     button: {
       title: "Launch Mini App",
@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
         name: cfg.name,
         url: canonical,
         splashImageUrl: ensureHttps(cfg.splashImageUrl),
-        splashBackgroundColor: cfg.splashBackgroundColor ?? "#000000",
+        splashBackgroundColor: cfg.splashBackgroundColor,
       },
     },
     app: {
@@ -39,11 +39,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 
   return {
-    title: cfg.ogTitle ?? cfg.name,
-    description: cfg.ogDescription ?? cfg.description,
+    title: cfg.ogTitle,
+    description: cfg.ogDescription,
     openGraph: {
-      title: cfg.ogTitle ?? cfg.name,
-      description: cfg.ogDescription ?? cfg.description,
+      title: cfg.ogTitle,
+      description: cfg.ogDescription,
       images: [imageUrl],
       url: canonical,
     },
