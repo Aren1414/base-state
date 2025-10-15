@@ -47,44 +47,52 @@ export default function Home() {
     }
   }, [chainId, switchChain])
 
-  // Initialize Farcaster session and sign-in
   useEffect(() => {
-    const initMiniApp = async () => {
-      const isMiniApp = await sdk.isInMiniApp()
-      if (!isMiniApp) return
+  const initMiniApp = async () => {
+    const isMiniApp = await sdk.isInMiniApp()
+    if (!isMiniApp) return
 
-      try {
-        // Wait until actions are ready
-        await sdk.actions.ready()
+    try {
+      
+      await sdk.actions.ready()
 
-        // Fetch context
-        const ctx = await sdk.context
-        const hasAdded = ctx?.client?.added
+      const ctx = await sdk.context
+      const hasAdded = ctx?.client?.added
 
-        // Add mini app if not added
-        if (!hasAdded) {
+      if (!hasAdded) {
+        try {
+          await sdk.actions.addMiniApp()
+        } catch (err) {
+          console.warn("User rejected addMiniApp:", err)
+        }
+      }
+
+      const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+
+      if (isBaseApp) {
+        
+        const authRegistered = ctx?.client?.authRegistered
+        if (!authRegistered) {
           try {
-            const result = await sdk.actions.addMiniApp()
-            console.log("AddMiniApp result:", result)
+            await sdk.actions.registerAuthAddress()
+            console.log("Base App auth registered")
           } catch (err) {
-            console.warn("User rejected addMiniApp:", err)
+            console.warn("User skipped Base App auth:", err)
           }
         }
-
-        // Sign-in the user
-        await signIn()
-
-        // Set frame ready
-        if (!isFrameReady) {
-          setFrameReady()
-        }
-      } catch (err) {
-        console.error("MiniApp initialization failed:", err)
       }
-    }
 
-    initMiniApp()
-  }, [isFrameReady, setFrameReady, signIn])
+      
+      await signIn()
+
+      if (!isFrameReady) setFrameReady()
+    } catch (err) {
+      console.error("MiniApp initialization failed:", err)
+    }
+  }
+
+  initMiniApp()
+}, [isFrameReady, setFrameReady, signIn])
 
   const user = context?.user
   const fid = user?.fid
