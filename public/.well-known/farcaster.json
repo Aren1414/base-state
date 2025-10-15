@@ -26,10 +26,5 @@
     "splashImageUrl": "https://base-state.vercel.app/splash.png",
     "primaryCategory": "utility",
     "splashBackgroundColor": "#0a0f2c"
-  },
-  "baseBuilder": {
-    "allowedAddresses": [
-      "0x10959793B782BC0414f57F4Ecc92371641B1b4a1"
-    ]
   }
 }
