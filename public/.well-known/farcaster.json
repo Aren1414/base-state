@@ -1,32 +1,33 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDcyNWJBQjMyMTFiNTg1NDk2OTBkNzNiYjc1OWI1QjBkRmQzZWVBOTYifQ",
+    "payload": "eyJkb21haW4iOiJiYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
+    "signature": "i6ZhmnIIkucensAFu5OQLmjHkaG9keiCtjafY7vfggJIZ4q75nNAlWJo3fB3FxboI+hqHkoDa+Q6kkextlT3vxs="
+  },
   "miniapp": {
-    "name": "BaseState",
     "version": "1",
-    "iconUrl": "https://base-state.vercel.app/icon.png",
-    "homeUrl": "https://base-state.vercel.app",
-    "imageUrl": "https://base-state.vercel.app/image.png",
-    "splashImageUrl": "https://base-state.vercel.app/splash.png",
-    "splashBackgroundColor": "#0a0f2c",
-    "webhookUrl": "https://base-state.vercel.app/api/webhook",
+    "name": "BaseState",
     "subtitle": "Base Wallet Insights",
     "description": "Track, mint, and share your Base identity NFT.",
     "screenshotUrls": [
       "https://base-state.vercel.app/screenshot.png"
     ],
+    "iconUrl": "https://base-state.vercel.app/icon.png",
+    "splashImageUrl": "https://base-state.vercel.app/splash.png",
+    "splashBackgroundColor": "#0a0f2c",
+    "homeUrl": "https://base-state.vercel.app",
+    "canonicalDomain": "base-state.vercel.app",
+    "webhookUrl": "https://base-state.vercel.app/api/webhook",
     "primaryCategory": "utility",
-    "tags": [
-      "utility"
-    ],
+    "tags": ["utility"],
     "heroImageUrl": "https://base-state.vercel.app/hero.png",
     "tagline": "Mint your Base identity card",
     "ogTitle": "Base State Card",
     "ogDescription": "Mint your personalized Base State NFT",
-    "noindex": false
-  },
-  "accountAssociation": {
-    "header": "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDcyNWJBQjMyMTFiNTg1NDk2OTBkNzNiYjc1OWI1QjBkRmQzZWVBOTYifQ",
-    "payload": "eyJkb21haW4iOiJiYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
-    "signature": "i6ZhmnIIkucensAFu5OQLmjHkaG9keiCtjafY7vfggJIZ4q75nNAlWJo3fB3FxboI+hqHkoDa+Q6kkextlT3vxs="
+    "ogImageUrl": "https://base-state.vercel.app/hero.png",
+    "noindex": false,
+    "requiredChains": ["eip155:8453"],
+    "requiredCapabilities": ["actions.ready", "actions.signIn"]
   },
   "baseBuilder": {
     "ownerAddress": "0xB46043D161bDE18Ef6974217a686f381B1E91138"
