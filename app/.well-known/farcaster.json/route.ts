@@ -7,6 +7,10 @@ export async function GET() {
 
   return Response.json({
     ...manifest,
+    miniapp: {
+      ...manifest.miniapp,
+      noindex: false   
+    },
     baseBuilder: minikitConfig.baseBuilder
   });
 }
