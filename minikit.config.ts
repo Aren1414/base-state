@@ -16,7 +16,7 @@ export const minikitConfig = {
     signature: "i6ZhmnIIkucensAFu5OQLmjHkaG9keiCtjafY7vfggJIZ4q75nNAlWJo3fB3FxboI+hqHkoDa+Q6kkextlT3vxs="
   },
   miniapp: {
-    version: "3",
+    version: "1",
     name: "BaseState",
     subtitle: "Base Wallet Insights",
     description: "Track, mint, and share your Base identity NFT.",
