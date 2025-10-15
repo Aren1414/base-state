@@ -291,37 +291,37 @@ AA Transactions: ${stats.allAaTransactions}`
         }}
       >
         <button
-          onClick={handleMint}
-          style={buttonStyle("#00ff7f")}
-          disabled={!walletClient || !walletAddress || isMinting}
-        >
-          🪙 Mint & Share
-        </button>
+  onClick={handleMint}
+  style={buttonStyle("#007aff", true)} 
+  disabled={!walletClient || !walletAddress || isMinting}
+>
+  🪙 Mint & Share
+</button>
 
-        {canShare && downloadUrl && (
-          <button
-            onClick={handleShareCard}
-            style={buttonStyle("#00f0ff")}
-          >
-            📸 Share Minted Card
-          </button>
-        )}
-      </div>
-    </div>
-  )
+{canShare && downloadUrl && (
+  <button
+    onClick={handleShareCard}
+    style={buttonStyle("#00f0ff")} 
+  >
+    📸 Share Minted Card
+  </button>
+)}
+</div>
+</div>
+)
 }
 
-function buttonStyle(color: string): React.CSSProperties {
+function buttonStyle(color: string, isPrimary = false): React.CSSProperties {
   return {
-    padding: "5px 12px",
-    fontSize: "11px",
+    padding: isPrimary ? "7px 16px" : "5px 12px",
+    fontSize: isPrimary ? "12px" : "11px",
     background: "#fff",
     color,
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
     boxShadow: "0 0 2px rgba(0,0,0,0.1)",
-    minWidth: "90px",
+    minWidth: isPrimary ? "100px" : "90px",
     fontWeight: 600,
     transition: "all 0.2s ease-in-out",
   }
