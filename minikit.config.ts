@@ -9,15 +9,15 @@ export const ROOT_URL = rawUrl.startsWith("http")
 
 export const minikitConfig = {
   accountAssociation: {
-    header: "",
-    payload: "",
-    signature: "",
+    header: "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDcyNWJBQjMyMTFiNTg1NDk2OTBkNzNiYjc1OWI1QjBkRmQzZWVBOTYifQ",
+    payload: "eyJkb21haW4iOiJiYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
+    signature: "i6ZhmnIIkucensAFu5OQLmjHkaG9keiCtjafY7vfggJIZ4q75nNAlWJo3fB3FxboI+hqHkoDa+Q6kkextlT3vxs="
   },
   miniapp: {
     version: "1",
     name: "BaseState",
-    subtitle: "",
-    description: "",
+    subtitle: "Base Wallet Insights",
+    description: "Track, mint, and share your Base identity NFT.",
     screenshotUrls: [`${ROOT_URL}/screenshot.png`],
     iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
@@ -26,11 +26,14 @@ export const minikitConfig = {
     canonicalLink: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
-    tags: [],
+    tags: ["utility"],
     heroImageUrl: `${ROOT_URL}/hero.png`,
-    tagline: "",
+    tagline: "Mint your Base identity card",
     ogTitle: "Base State Card",
     ogDescription: "Mint your personalized Base State NFT",
     ogImageUrl: `${ROOT_URL}/hero.png`,
   },
+  baseBuilder: {
+    ownerAddress: "0xB46043D161bDE18Ef6974217a686f381B1E91138"
+  }
 } as const;
