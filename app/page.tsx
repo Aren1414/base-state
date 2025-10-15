@@ -53,12 +53,10 @@ export default function Home() {
     if (!isMiniApp) return
 
     try {
-      
       await sdk.actions.ready()
 
       const ctx = await sdk.context
       const hasAdded = ctx?.client?.added
-
       if (!hasAdded) {
         try {
           await sdk.actions.addMiniApp()
@@ -68,23 +66,16 @@ export default function Home() {
       }
 
       const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
-
       if (isBaseApp) {
-        
-        const authRegistered = ctx?.client?.authRegistered
-        if (!authRegistered) {
-          try {
-            await sdk.actions.registerAuthAddress()
-            console.log("Base App auth registered")
-          } catch (err) {
-            console.warn("User skipped Base App auth:", err)
-          }
+        try {
+          await sdk.actions.registerAuthAddress()
+          console.log("Base App auth registered")
+        } catch (err) {
+          console.warn("User skipped Base App auth:", err)
         }
       }
 
-      
       await signIn()
-
       if (!isFrameReady) setFrameReady()
     } catch (err) {
       console.error("MiniApp initialization failed:", err)
