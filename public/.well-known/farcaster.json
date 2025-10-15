@@ -20,7 +20,8 @@
     "heroImageUrl": "https://base-state.vercel.app/hero.png",
     "tagline": "Mint your Base identity card",
     "ogTitle": "Base State Card",
-    "ogDescription": "Mint your personalized Base State NFT"
+    "ogDescription": "Mint your personalized Base State NFT",
+    "noindex": false
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDcyNWJBQjMyMTFiNTg1NDk2OTBkNzNiYjc1OWI1QjBkRmQzZWVBOTYifQ",
