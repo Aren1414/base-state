@@ -23,7 +23,7 @@ export const minikitConfig = {
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#0a0f2c",
     homeUrl: ROOT_URL,
-    canonicalLink: ROOT_URL,
+    canonicalDomain: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: ["utility"],
@@ -32,6 +32,9 @@ export const minikitConfig = {
     ogTitle: "Base State Card",
     ogDescription: "Mint your personalized Base State NFT",
     ogImageUrl: `${ROOT_URL}/hero.png`,
+    noindex: false,
+    requiredChains: ["eip155:8453"],
+    requiredCapabilities: ["actions.ready", "actions.signIn"]
   },
   baseBuilder: {
     ownerAddress: "0xB46043D161bDE18Ef6974217a686f381B1E91138"
