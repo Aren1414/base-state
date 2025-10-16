@@ -49,16 +49,14 @@ export default function Home() {
 
   useEffect(() => {
   const initMiniApp = async () => {
-    const isMiniApp = await sdk.isInMiniApp()
-    if (!isMiniApp) return
-
     try {
-      
+      const isMiniApp = await sdk.isInMiniApp()
+      if (!isMiniApp) return
+
       await sdk.actions.ready()
 
       const ctx = await sdk.context
-      const hasAdded = ctx?.client?.added
-      if (!hasAdded) {
+      if (!ctx?.client?.added) {
         try {
           await sdk.actions.addMiniApp()
           console.log("Mini App added to client")
@@ -68,7 +66,7 @@ export default function Home() {
       }
 
       await signIn()
-
+      
       if (!isFrameReady) setFrameReady()
     } catch (err) {
       console.error("MiniApp initialization failed:", err)
@@ -77,7 +75,7 @@ export default function Home() {
 
   initMiniApp()
 }, [isFrameReady, setFrameReady, signIn])
-
+  
   const user = context?.user
   const fid = user?.fid
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
