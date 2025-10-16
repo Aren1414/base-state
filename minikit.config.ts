@@ -10,11 +10,12 @@ export const ROOT_URL = rawUrl.startsWith("http")
   : `https://${rawUrl}`;
 
 export const minikitConfig = {
-  accountAssociation: {
-    header: "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDcyNWJBQjMyMTFiNTg1NDk2OTBkNzNiYjc1OWI1QjBkRmQzZWVBOTYifQ",
-    payload: "eyJkb21haW4iOiJiYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
-    signature: "i6ZhmnIIkucensAFu5OQLmjHkaG9keiCtjafY7vfggJIZ4q75nNAlWJo3fB3FxboI+hqHkoDa+Q6kkextlT3vxs="
-  },
+  
+  accountAssociation": {
+    "header": "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEQwNjlDM2UwRTIzZjQ0M2Q1QTMwNEUzM0Y0OGNGQkQ4MmQwMEI3MkEifQ",
+    "payload": "eyJkb21haW4iOiJCYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
+    "signature": "fdM8sWRjavMRmLBSFGFgU6Ordcf+ULckfSGXfju289R8Z2n/VqFGRvlfZBLKOnGFkV4UD0i4Fabhz6u25u1vQxs="
+  }
   miniapp: {
     version: "1",
     name: "BaseState",
