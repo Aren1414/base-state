@@ -11,10 +11,11 @@ export const ROOT_URL = rawUrl.startsWith("http")
 
 export const minikitConfig = {
   
-  accountAssociation: {
+  
+   accountAssociation: {
     "header": "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEQwNjlDM2UwRTIzZjQ0M2Q1QTMwNEUzM0Y0OGNGQkQ4MmQwMEI3MkEifQ",
-    "payload": "eyJkb21haW4iOiJCYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
-    "signature": "fdM8sWRjavMRmLBSFGFgU6Ordcf+ULckfSGXfju289R8Z2n/VqFGRvlfZBLKOnGFkV4UD0i4Fabhz6u25u1vQxs="
+    "payload": "eyJkb21haW4iOiJiYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
+    "signature": "N9zroQv5HP4mQ8E+kHjrsePzswP27i3Fws2cY+Z/FZhAzi3IbeD7cxziT6ldMpHUSzqJIS4iAsl9uk5fSRXyZxw="
   },
   miniapp: {
     version: "1",
