@@ -53,11 +53,13 @@ export default function Home() {
     if (!isMiniApp) return
 
     try {
+      
       await sdk.actions.ready()
 
       const ctx = await sdk.context
+
       
-      if (ctx?.client && !ctx.client.added && !ctx.client.isBaseApp) {
+      if (ctx?.client && !ctx.client.added) {
         try {
           await sdk.actions.addMiniApp()
         } catch (err) {
@@ -65,7 +67,8 @@ export default function Home() {
         }
       }
 
-      if (!ctx?.client?.isBaseApp) {
+    
+      if (ctx?.client && !ctx.client.added) {
         await signIn()
       }
 
