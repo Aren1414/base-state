@@ -49,36 +49,37 @@ export default function Home() {
 
   useEffect(() => {
   const initMiniApp = async () => {
-    const isMiniApp = await sdk.isInMiniApp()
-    if (!isMiniApp) return
+    const isMiniApp = await sdk.isInMiniApp();
+    if (!isMiniApp) return;
 
     try {
       
-      await sdk.actions.ready()
+      await sdk.actions.ready();
 
-      const ctx = await sdk.context
+      const ctx = await sdk.context;
 
       
       if (ctx?.client && !ctx.client.added) {
         try {
-          await sdk.actions.addMiniApp()
+          await sdk.actions.addMiniApp();
         } catch (err) {
-          console.warn("User rejected addMiniApp:", err)
+          console.warn("User rejected addMiniApp:", err);
         }
       }
 
-    
-      if (ctx?.client && !ctx.client.added) {
-        await signIn()
+      
+      if (ctx.location?.type !== 'launcher') {
+        
+        await signIn();
       }
 
-      if (!isFrameReady) setFrameReady()
+      if (!isFrameReady) setFrameReady();
     } catch (err) {
-      console.error("MiniApp initialization failed:", err)
+      console.error("MiniApp initialization failed:", err);
     }
-  }
+  };
 
-  initMiniApp()
+  initMiniApp();
 }, [isFrameReady, setFrameReady, signIn])
   
   const user = context?.user
