@@ -49,24 +49,26 @@ export default function Home() {
 
   useEffect(() => {
   const initMiniApp = async () => {
-    try {
-      const isMiniApp = await sdk.isInMiniApp()
-      if (!isMiniApp) return
+    const isMiniApp = await sdk.isInMiniApp()
+    if (!isMiniApp) return
 
+    try {
       await sdk.actions.ready()
 
       const ctx = await sdk.context
-      if (!ctx?.client?.added) {
+      
+      if (ctx?.client && !ctx.client.added && !ctx.client.isBaseApp) {
         try {
           await sdk.actions.addMiniApp()
-          console.log("Mini App added to client")
         } catch (err) {
           console.warn("User rejected addMiniApp:", err)
         }
       }
 
-      await signIn()
-      
+      if (!ctx?.client?.isBaseApp) {
+        await signIn()
+      }
+
       if (!isFrameReady) setFrameReady()
     } catch (err) {
       console.error("MiniApp initialization failed:", err)
