@@ -126,9 +126,9 @@ Tokens Received: ${stats.tokensReceived}
 AA Transactions: ${stats.allAaTransactions}`
     }
 
-    const text = `📊 ${
-      type === "wallet" ? "Wallet Snapshot" : "BaseApp Wallet Snapshot"
-    }\n${divider}\n${body}\n\nCheck out my BaseState NFT card!`
+    const text = `Check out my BaseState NFT card!\n\n📊 ${
+  type === "wallet" ? "Wallet Snapshot" : "BaseApp Wallet Snapshot"
+}\n${divider}\n${body}`
 
     const fileName = downloadUrl.split("/").pop()?.replace(".png", "") || "card"
     const embedPreview = `${window.location.origin}/share/${fileName}`
