@@ -25,7 +25,8 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [fid, setFid] = useState<string | null>(null)
+  
+  const [fid, setFid] = useState<number | null>(null)
   const [displayName, setDisplayName] = useState('Guest')
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
@@ -33,38 +34,34 @@ export default function Home() {
   const [txFailed, setTxFailed] = useState(false)
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
 
-  // Switch chain if not in Base
   useEffect(() => {
     if (chainId !== base.id && switchChain) {
       switchChain({ chainId: base.id })
     }
   }, [chainId, switchChain])
 
-  // Initialize Farcaster session in browser
   useEffect(() => {
-  const initFarcaster = async () => {
-    try {
-      const isMiniApp = await sdk.isInMiniApp()
-      
-      if (isMiniApp) {
-        await sdk.actions.ready()
-        const ctx = await sdk.context
-        if (ctx?.user?.fid) {
-          setFid(ctx.user.fid.toString()) 
-          setDisplayName(ctx.user.displayName || ctx.user.fid.toString())
+    const initFarcaster = async () => {
+      try {
+        const isMiniApp = await sdk.isInMiniApp()
+        if (isMiniApp) {
+          await sdk.actions.ready()
+          const ctx = await sdk.context
+          if (ctx?.user?.fid) {
+            setFid(ctx.user.fid) 
+            setDisplayName(ctx.user.displayName || ctx.user.fid.toString())
+          }
         }
+      } catch (err) {
+        console.error('Farcaster initialization failed:', err)
       }
-    } catch (err) {
-      console.error('Farcaster initialization failed:', err)
     }
-  }
 
-  initFarcaster()
-}, [])
+    initFarcaster()
+  }, [])
 
-  const ready = !!fid && !!walletAddress && chainId === base.id
+  const ready = fid !== null && !!walletAddress && chainId === base.id
 
-  // Handle transaction submission
   const handleClick = async () => {
     setLoading(true)
     setTxFailed(false)
@@ -104,7 +101,6 @@ export default function Home() {
     }
   }
 
-  // Share wallet stats
   const handleShareText = async () => {
     if (!stats) return
     const type = stats.type
@@ -125,7 +121,7 @@ export default function Home() {
     window.open(warpcastUrl, '_blank')
   }
 
-  if (!fid) {
+  if (fid === null) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
@@ -181,7 +177,7 @@ export default function Home() {
               <MintCard
                 stats={stats.data}
                 type={stats.type}
-                user={{ fid, username: displayName, pfpUrl: '' }}
+                user={{ fid, username: displayName, pfpUrl: '' }} 
                 minted={!!mintedImageUrl}
                 setMintedImageUrl={setMintedImageUrl}
               />
