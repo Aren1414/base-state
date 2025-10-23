@@ -44,16 +44,14 @@ export default function Home() {
   useEffect(() => {
   const initFarcaster = async () => {
     try {
-      // Try to detect if in Mini App
       const isMiniApp = await sdk.isInMiniApp()
       
       if (isMiniApp) {
-        // Existing Mini App logic
         await sdk.actions.ready()
         const ctx = await sdk.context
         if (ctx?.user?.fid) {
-          setFid(ctx.user.fid.toString())
-          setDisplayName(ctx.user.displayName || ctx.user.fid.toString())
+          setFid(ctx.user.fid) 
+          setDisplayName(ctx.user.displayName || ctx.user.fid.toString()) 
         }
       }
     } catch (err) {
