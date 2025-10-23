@@ -42,35 +42,27 @@ export default function Home() {
 
   // Initialize Farcaster session in browser
   useEffect(() => {
-    const initFarcaster = async () => {
-      try {
-        // Try to detect if in Mini App
-        const isMiniApp = await sdk.isInMiniApp()
-        
-        if (isMiniApp) {
-          // Existing Mini App logic
-          await sdk.actions.ready()
-          const ctx = await sdk.context
-          if (ctx?.user?.fid) {
-            setFid(ctx.user.fid)
-            setDisplayName(ctx.user.displayName || ctx.user.fid)
-          }
-        } else {
-          // Browser fallback: Sign-In With Farcaster
-          // This will open QR login if user is not signed in
-          const authResult = await sdk.browserAuth({ redirectUri: window.location.href })
-          if (authResult?.user?.fid) {
-            setFid(authResult.user.fid)
-            setDisplayName(authResult.user.displayName || authResult.user.fid)
-          }
+  const initFarcaster = async () => {
+    try {
+      // Try to detect if in Mini App
+      const isMiniApp = await sdk.isInMiniApp()
+      
+      if (isMiniApp) {
+        // Existing Mini App logic
+        await sdk.actions.ready()
+        const ctx = await sdk.context
+        if (ctx?.user?.fid) {
+          setFid(ctx.user.fid.toString())
+          setDisplayName(ctx.user.displayName || ctx.user.fid.toString())
         }
-      } catch (err) {
-        console.error('Farcaster initialization failed:', err)
       }
+    } catch (err) {
+      console.error('Farcaster initialization failed:', err)
     }
+  }
 
-    initFarcaster()
-  }, [])
+  initFarcaster()
+}, [])
 
   const ready = !!fid && !!walletAddress && chainId === base.id
 
