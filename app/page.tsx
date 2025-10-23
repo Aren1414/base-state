@@ -50,8 +50,8 @@ export default function Home() {
         await sdk.actions.ready()
         const ctx = await sdk.context
         if (ctx?.user?.fid) {
-          setFid(ctx.user.fid) 
-          setDisplayName(ctx.user.displayName || ctx.user.fid.toString()) 
+          setFid(ctx.user.fid.toString()) 
+          setDisplayName(ctx.user.displayName || ctx.user.fid.toString())
         }
       }
     } catch (err) {
