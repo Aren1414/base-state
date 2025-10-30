@@ -10,32 +10,30 @@ export const ROOT_URL = rawUrl.startsWith("http")
   : `https://${rawUrl}`;
 
 export const minikitConfig = {
-  
-  
-   accountAssociation: {
-    "header": "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEQwNjlDM2UwRTIzZjQ0M2Q1QTMwNEUzM0Y0OGNGQkQ4MmQwMEI3MkEifQ",
-    "payload": "eyJkb21haW4iOiJiYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
-    "signature": "N9zroQv5HP4mQ8E+kHjrsePzswP27i3Fws2cY+Z/FZhAzi3IbeD7cxziT6ldMpHUSzqJIS4iAsl9uk5fSRXyZxw="
+  accountAssociation: {
+    header: "eyJmaWQiOjM4NDQyOCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEQwNjlDM2UwRTIzZjQ0M2Q1QTMwNEUzM0Y0OGNGQkQ4MmQwMEI3MkEifQ",
+    payload: "eyJkb21haW4iOiJiYXNlLXN0YXRlLnZlcmNlbC5hcHAifQ",
+    signature: "N9zroQv5HP4mQ8E+kHjrsePzswP27i3Fws2cY+Z/FZhAzi3IbeD7cxziT6ldMpHUSzqJIS4iAsl9uk5fSRXyZxw="
   },
   miniapp: {
     version: "1",
     name: "BaseState",
     subtitle: "Base Wallet Insights",
     description: "Track, mint, and share your Base identity NFT.",
-    screenshotUrls: [`${ROOT_URL}/screenshot.png?v=8`],
-    iconUrl: `${ROOT_URL}/icon.png?v=8`,
-    splashImageUrl: `${ROOT_URL}/splash.png?v=8`,
+    screenshotUrls: [`${ROOT_URL}/screenshot.png`],
+    iconUrl: `${ROOT_URL}/icon.png`,
+    splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#0a0f2c",
     homeUrl: ROOT_URL,
     canonicalDomain: CANONICAL_DOMAIN,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: ["utility"],
-    heroImageUrl: `${ROOT_URL}/hero.png?v=8`,
+    heroImageUrl: `${ROOT_URL}/hero.png`,
     tagline: "Mint your Base identity card",
     ogTitle: "Base State Card",
     ogDescription: "Mint your personalized Base State NFT",
-    ogImageUrl: `${ROOT_URL}/hero.png?v=8`,
+    ogImageUrl: `${ROOT_URL}/hero.png`,
     noindex: false,
     requiredChains: ["eip155:8453"],
     requiredCapabilities: ["actions.ready", "actions.signIn"]
