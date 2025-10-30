@@ -10,21 +10,21 @@
     "subtitle": "Base Wallet Insights",
     "description": "Track, mint, and share your Base identity NFT.",
     "screenshotUrls": [
-      "https://base-state.vercel.app/screenshot.png?v=8"
+      "https://base-state.vercel.app/screenshot.png"
     ],
-    "iconUrl": "https://base-state.vercel.app/icon.png?v=8",
-    "splashImageUrl": "https://base-state.vercel.app/splash.png?v=8",
+    "iconUrl": "https://base-state.vercel.app/icon.png",
+    "splashImageUrl": "https://base-state.vercel.app/splash.png",
     "splashBackgroundColor": "#0a0f2c",
     "homeUrl": "https://base-state.vercel.app",
     "canonicalDomain": "base-state.vercel.app",
     "webhookUrl": "https://base-state.vercel.app/api/webhook",
     "primaryCategory": "utility",
     "tags": ["utility"],
-    "heroImageUrl": "https://base-state.vercel.app/hero.png?v=8",
+    "heroImageUrl": "https://base-state.vercel.app/hero.png",
     "tagline": "Mint your Base identity card",
     "ogTitle": "Base State Card",
     "ogDescription": "Mint your personalized Base State NFT",
-    "ogImageUrl": "https://base-state.vercel.app/hero.png?v=8",
+    "ogImageUrl": "https://base-state.vercel.app/hero.png",
     "noindex": false,
     "requiredChains": ["eip155:8453"],
     "requiredCapabilities": ["actions.ready", "actions.signIn"]
