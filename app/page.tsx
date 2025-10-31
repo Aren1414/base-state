@@ -42,33 +42,52 @@ export default function Home() {
 
 useEffect(() => {
   const initApp = async () => {
-    const isFarcasterMiniApp = await sdk.isInMiniApp();
-
-    if (isFarcasterMiniApp) {
-      try {
-        await sdk.actions.ready();
-        const ctx = await sdk.context;
-
-        if (ctx?.client && !ctx.client.added) {
-          try {
-            await sdk.actions.addMiniApp();
-          } catch (err) {
-            console.warn("User rejected addMiniApp:", err);
-          }
-        }
-
-        if (ctx.location?.type !== "launcher") {
-          await signIn();
-        }
-      } catch (err) {
-        console.error("Farcaster MiniApp initialization failed:", err);
+    try {
+      const isFarcasterMiniApp = await sdk.isInMiniApp();
+      if (!isFarcasterMiniApp) {
+        // Not a Farcaster mini app (regular web or Base-hosted page) — still mark frame ready for MiniKit
+        if (!isFrameReady) setFrameReady();
+        return;
       }
-    }
 
-    if (!isFrameReady) setFrameReady();
+      // We're in a Mini App environment — fetch context
+      const ctx = await sdk.context;
+
+      // Detect Base app by clientFid (Base app's clientFid = 309857 per docs)
+      const isBaseApp = String(ctx?.client?.clientFid) === '309857';
+
+      // Only run Farcaster addMiniApp flow when NOT inside Base app
+      if (!isBaseApp) {
+        try {
+          await sdk.actions.ready();
+
+          if (ctx?.client && !ctx.client.added) {
+            try {
+              await sdk.actions.addMiniApp();
+            } catch (err) {
+              console.warn('User rejected addMiniApp:', err);
+            }
+          }
+
+          if (ctx.location?.type !== 'launcher') {
+            // signin only for non-launcher launches
+            await signIn();
+          }
+        } catch (err) {
+          console.error('Farcaster MiniApp initialization failed:', err);
+        }
+      }
+
+      // Always set frame ready for Base MiniKit flow (if not already)
+      if (!isFrameReady) setFrameReady();
+    } catch (err) {
+      console.error('initApp error:', err);
+      if (!isFrameReady) setFrameReady();
+    }
   };
 
   initApp();
+  // deps: keep signIn and frame flags so setFrameReady/signIn are stable
 }, [isFrameReady, setFrameReady, signIn]);
 
 useEffect(() => {
