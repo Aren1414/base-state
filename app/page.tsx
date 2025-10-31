@@ -49,8 +49,7 @@ useEffect(() => {
         await sdk.actions.ready();
         const ctx = await sdk.context;
 
-        const isAdded = await sdk.miniapp.isAdded();
-        if (!isAdded) {
+        if (ctx?.client && !ctx.client.added) {
           try {
             await sdk.actions.addMiniApp();
           } catch (err) {
