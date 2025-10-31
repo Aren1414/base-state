@@ -39,15 +39,8 @@ export default function Home() {
   const [txFailed, setTxFailed] = useState(false)
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
 
-  // Switch chain if not in Base
-  useEffect(() => {
-    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
-    if (!isBaseApp && chainId !== base.id && switchChain) {
-      switchChain({ chainId: base.id })
-    }
-  }, [chainId, switchChain])
 
-  useEffect(() => {
+useEffect(() => {
   const initMiniApp = async () => {
     const isMiniApp = await sdk.isInMiniApp();
     if (!isMiniApp) return;
@@ -76,7 +69,15 @@ export default function Home() {
   };
 
   initMiniApp();
-}, []); 
+}, []);
+
+
+useEffect(() => {
+  const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+  if (!isBaseApp && chainId !== base.id && switchChain) {
+    switchChain({ chainId: base.id })
+  }
+}, [chainId, switchChain]);
   
   const user = context?.user
   const fid = user?.fid
