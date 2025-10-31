@@ -42,14 +42,15 @@ export default function Home() {
 
 useEffect(() => {
   const initApp = async () => {
-    
     const isFarcasterMiniApp = await sdk.isInMiniApp();
+
     if (isFarcasterMiniApp) {
       try {
-        await sdk.actions.ready(); 
+        await sdk.actions.ready();
         const ctx = await sdk.context;
 
-        if (ctx?.client && !ctx.client.added) {
+        const isAdded = await sdk.miniapp.isAdded();
+        if (!isAdded) {
           try {
             await sdk.actions.addMiniApp();
           } catch (err) {
@@ -57,8 +58,7 @@ useEffect(() => {
           }
         }
 
-        
-        if (ctx.location?.type !== 'launcher') {
+        if (ctx.location?.type !== "launcher") {
           await signIn();
         }
       } catch (err) {
@@ -66,7 +66,6 @@ useEffect(() => {
       }
     }
 
-    
     if (!isFrameReady) setFrameReady();
   };
 
