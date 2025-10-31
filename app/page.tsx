@@ -53,12 +53,10 @@ export default function Home() {
     if (!isMiniApp) return;
 
     try {
-      
-      await sdk.actions.ready();
+      await sdk.actions.ready(); 
 
       const ctx = await sdk.context;
 
-      
       if (ctx?.client && !ctx.client.added) {
         try {
           await sdk.actions.addMiniApp();
@@ -67,9 +65,7 @@ export default function Home() {
         }
       }
 
-      
       if (ctx.location?.type !== 'launcher') {
-        
         await signIn();
       }
 
@@ -80,7 +76,7 @@ export default function Home() {
   };
 
   initMiniApp();
-}, [isFrameReady, setFrameReady, signIn])
+}, []); 
   
   const user = context?.user
   const fid = user?.fid
