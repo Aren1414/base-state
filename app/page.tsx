@@ -145,18 +145,20 @@ useEffect(() => {
     } stats using the BaseState Mini App 👇\n\n${body}`
 
     try {
-      const isMiniApp = await sdk.isInMiniApp()
+  const isMiniApp = await sdk.isInMiniApp()
 
-      if (isMiniApp) {
-        await composeCast({ text: castText, embeds: [MINI_APP_URL] })
-      } else {
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-          castText
-        )}&embeds[]=${encodeURIComponent(MINI_APP_URL)}`
-        window.open(warpcastUrl, '_blank')
-      }
-    } catch (err) {
-      console.error('Share failed:', err)
+  const embedImageUrl = 'https://base-state.vercel.app/hero.png'
+
+  if (isMiniApp) {
+    await composeCast({ text: castText, embeds: [embedImageUrl] })
+  } else {
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+      castText
+    )}&embeds[]=${encodeURIComponent(embedImageUrl)}`
+    window.open(warpcastUrl, '_blank')
+  }
+} catch (err) {
+  console.error('Share failed:', err)
     }
   }
 
