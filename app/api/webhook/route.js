@@ -1,27 +1,30 @@
-import { parseWebhookEvent, verifyAppKeyWithNeynar } from "@farcaster/miniapp-node";
+import {
+  parseWebhookEvent,
+  verifyAppKeyWithNeynar,
+} from "@farcaster/miniapp-node";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request) {
-  const body = await request.json();
+export async function POST(request: NextRequest) {
+  const requestJson = await request.json();
+
   let data;
-
   try {
-    data = await parseWebhookEvent(body, verifyAppKeyWithNeynar);
-  } catch (err) {
-    console.error("❌ Webhook verify failed:", err);
-    return new Response("invalid", { status: 400 });
+    
+    data = await parseWebhookEvent(requestJson, verifyAppKeyWithNeynar);
+  } catch (e) {
+    console.error("❌ Webhook verification failed:", e);
+    return NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
   }
 
-  const { event, fid, appFid } = data;
+  const { fid, appFid, event } = data;
 
   
-  const response = new Response("ok", { status: 200 });
-
-  
+  const response = NextResponse.json({ ok: true });
   (async () => {
     try {
       switch (event.event) {
         case "miniapp_added":
-          console.log("✅ MiniApp added:", { fid, appFid, event });
+          console.log("✅ MiniApp added:", { fid, appFid });
           break;
 
         case "miniapp_removed":
@@ -33,14 +36,14 @@ export async function POST(request) {
           break;
 
         case "notifications_disabled":
-          console.log("🔕 Notifications disabled for:", { fid, appFid });
+          console.log("🔕 Notifications disabled:", { fid, appFid });
           break;
 
         default:
           console.log("ℹ️ Unhandled event:", event.event);
       }
     } catch (err) {
-      console.error("⚠️ Async webhook handler failed:", err);
+      console.error("⚠️ Webhook handler error:", err);
     }
   })();
 
