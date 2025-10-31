@@ -144,22 +144,22 @@ useEffect(() => {
       type === 'wallet' ? 'wallet' : 'BaseApp wallet'
     } stats using the BaseState Mini App 👇\n\n${body}`
 
-    try {
+    const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
+
+try {
   const isMiniApp = await sdk.isInMiniApp()
 
-  const embedImageUrl = 'https://base-state.vercel.app/hero.png'
-
   if (isMiniApp) {
-    await composeCast({ text: castText, embeds: [embedImageUrl] })
+    await composeCast({ text: castText, embeds: [embedUrl] })
   } else {
     const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
       castText
-    )}&embeds[]=${encodeURIComponent(embedImageUrl)}`
+    )}&embeds[]=${encodeURIComponent(embedUrl)}`
     window.open(warpcastUrl, '_blank')
   }
 } catch (err) {
   console.error('Share failed:', err)
-    }
+}
   }
 
   // Download wallet card
