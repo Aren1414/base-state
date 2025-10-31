@@ -41,36 +41,37 @@ export default function Home() {
 
 
 useEffect(() => {
-  const initMiniApp = async () => {
-    const isMiniApp = await sdk.isInMiniApp();
-    if (!isMiniApp) return;
+  const initApp = async () => {
+    
+    const isFarcasterMiniApp = await sdk.isInMiniApp();
+    if (isFarcasterMiniApp) {
+      try {
+        await sdk.actions.ready(); 
+        const ctx = await sdk.context;
 
-    try {
-      await sdk.actions.ready(); 
-
-      const ctx = await sdk.context;
-
-      if (ctx?.client && !ctx.client.added) {
-        try {
-          await sdk.actions.addMiniApp();
-        } catch (err) {
-          console.warn("User rejected addMiniApp:", err);
+        if (ctx?.client && !ctx.client.added) {
+          try {
+            await sdk.actions.addMiniApp();
+          } catch (err) {
+            console.warn("User rejected addMiniApp:", err);
+          }
         }
-      }
 
-      if (ctx.location?.type !== 'launcher') {
-        await signIn();
+        
+        if (ctx.location?.type !== 'launcher') {
+          await signIn();
+        }
+      } catch (err) {
+        console.error("Farcaster MiniApp initialization failed:", err);
       }
-
-      if (!isFrameReady) setFrameReady();
-    } catch (err) {
-      console.error("MiniApp initialization failed:", err);
     }
+
+    
+    if (!isFrameReady) setFrameReady();
   };
 
-  initMiniApp();
-}, []);
-
+  initApp();
+}, [isFrameReady, setFrameReady, signIn]);
 
 useEffect(() => {
   const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
