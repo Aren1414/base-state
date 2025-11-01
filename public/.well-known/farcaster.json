@@ -20,11 +20,11 @@
     "webhookUrl": "https://base-state.vercel.app/api/webhook",
     "primaryCategory": "utility",
     "tags": ["utility"],
-    "heroImageUrl": "https://base-state.vercel.app/hero.png",
+    "heroImageUrl": "https://base-state.vercel.app/heroo.png",
     "tagline": "Mint your Base identity card",
     "ogTitle": "Base State Card",
     "ogDescription": "Mint your personalized Base State NFT",
-    "ogImageUrl": "https://base-state.vercel.app/hero.png",
+    "ogImageUrl": "https://base-state.vercel.app/heroo.png",
     "noindex": false,
     "requiredChains": ["eip155:8453"],
     "requiredCapabilities": ["actions.ready", "actions.signIn"]
