@@ -29,11 +29,11 @@ export const minikitConfig = {
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "utility",
     tags: ["utility"],
-    heroImageUrl: `${ROOT_URL}/hero.png`,
+    heroImageUrl: `${ROOT_URL}/heroo.png`,
     tagline: "Mint your Base identity card",
     ogTitle: "Base State Card",
     ogDescription: "Mint your personalized Base State NFT",
-    ogImageUrl: `${ROOT_URL}/hero.png`,
+    ogImageUrl: `${ROOT_URL}/heroo.png`,
     noindex: false,
     requiredChains: ["eip155:8453"],
     requiredCapabilities: ["actions.ready", "actions.signIn"]
