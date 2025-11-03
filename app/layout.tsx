@@ -47,6 +47,12 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [imageUrl],
       url: canonical,
     },
+    
+    icons: {
+      icon: "/favicon.ico?v=2",
+      shortcut: "/favicon.ico?v=2",
+      apple: "/favicon.ico?v=2",
+    },
     other: {
       "fc:miniapp": JSON.stringify(embed),
       "fc:frame": JSON.stringify(embed),
