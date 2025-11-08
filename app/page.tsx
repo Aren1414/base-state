@@ -116,13 +116,13 @@ useEffect(() => {
       args: [],
     })
 
-    let txHash
+    let txHash: string | undefined
     
     if (walletClient) {
       txHash = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
     } 
     else if (typeof window !== 'undefined' && window.ethereum) {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[]
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
       const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
       txHash = await fallbackSigner.sendTransaction({ account: accounts[0], to: CONTRACT_ADDRESS, data })
@@ -134,6 +134,7 @@ useEffect(() => {
     console.log('Transaction sent:', txHash)
     setTxConfirmed(true) 
 
+    
     const waitForReady = () => new Promise<void>((resolve) => {
       const interval = setInterval(() => {
         if (walletAddress && isFrameReady && chainId === base.id) {
@@ -144,12 +145,17 @@ useEffect(() => {
     })
     await waitForReady()
 
+    
+    if (!walletAddress) {
+      throw new Error('Wallet address is missing')
+    }
+
     const apiKey = process.env.BASE_API_KEY || ''
     const result = await fetchWalletStats(walletAddress, apiKey)
     setStats(result)
 
   } catch (err) {
-    console.error('Transaction failed:', err)
+    console.error('Transaction or fetch failed:', err)
     setTxFailed(true)
   } finally {
     setLoading(false)
