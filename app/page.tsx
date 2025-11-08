@@ -120,18 +120,14 @@ useEffect(() => {
 
     if (walletClient) {
       txHash = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
-    } 
-    else if (typeof window !== 'undefined' && window.ethereum) {
+    } else if (typeof window !== 'undefined' && window.ethereum) {
       const accounts = (await window.ethereum.request({ method: 'eth_accounts' })) as string[]
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
 
-      
       const account = accounts[0] as `0x${string}`
-
       const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
       txHash = await fallbackSigner.sendTransaction({ account, to: CONTRACT_ADDRESS, data })
-    } 
-    else {
+    } else {
       throw new Error('No signer available')
     }
 
@@ -139,26 +135,27 @@ useEffect(() => {
     setTxConfirmed(true)
 
     
-    const waitForReady = () =>
-      new Promise<void>((resolve) => {
-        const interval = setInterval(() => {
-          if (walletAddress && isFrameReady && chainId === base.id) {
-            clearInterval(interval)
-            resolve()
-          }
-        }, 100)
-      })
-    await waitForReady()
+    const isFarcasterMiniApp = await sdk.isInMiniApp()
+    await new Promise<void>((resolve) => {
+      const start = Date.now()
+      const interval = setInterval(() => {
+        const timeout = Date.now() - start > 10000 
+        if (
+          (isFarcasterMiniApp && walletAddress && chainId === base.id) ||
+          (!isFarcasterMiniApp && walletAddress && chainId === base.id && isFrameReady) ||
+          timeout
+        ) {
+          clearInterval(interval)
+          resolve()
+        }
+      }, 100)
+    })
 
-    
-    if (!walletAddress) {
-      throw new Error('Wallet address is missing')
-    }
+    if (!walletAddress) throw new Error('Wallet address is missing')
 
     const apiKey = process.env.BASE_API_KEY || ''
     const result = await fetchWalletStats(walletAddress, apiKey)
     setStats(result)
-
   } catch (err) {
     console.error('Transaction or fetch failed:', err)
     setTxFailed(true)
