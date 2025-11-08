@@ -103,10 +103,9 @@ useEffect(() => {
   const ready = fid && walletAddress && chainId === base.id
 
   // Handle transaction submission
-  const handleClick = async () => {
+const handleClick = async () => {
   setLoading(true)
   setTxFailed(false)
-
   try {
     const data = encodeFunctionData({
       abi: [
@@ -116,48 +115,27 @@ useEffect(() => {
       args: [],
     })
 
-    let txHash: string | undefined
-
+    let tx
     if (walletClient) {
-      txHash = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
+      tx = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
     } else if (typeof window !== 'undefined' && window.ethereum) {
-      const accounts = (await window.ethereum.request({ method: 'eth_accounts' })) as string[]
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' })
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
-
-      const account = accounts[0] as `0x${string}`
       const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
-      txHash = await fallbackSigner.sendTransaction({ account, to: CONTRACT_ADDRESS, data })
+      tx = await fallbackSigner.sendTransaction({ account: accounts[0], to: CONTRACT_ADDRESS, data })
     } else {
       throw new Error('No signer available')
     }
 
-    console.log('Transaction sent:', txHash)
+    console.log('Transaction sent:', tx)
     setTxConfirmed(true)
 
-    
-    const isFarcasterMiniApp = await sdk.isInMiniApp()
-    await new Promise<void>((resolve) => {
-      const start = Date.now()
-      const interval = setInterval(() => {
-        const timeout = Date.now() - start > 10000 
-        if (
-          (isFarcasterMiniApp && walletAddress && chainId === base.id) ||
-          (!isFarcasterMiniApp && walletAddress && chainId === base.id && isFrameReady) ||
-          timeout
-        ) {
-          clearInterval(interval)
-          resolve()
-        }
-      }, 100)
-    })
-
-    if (!walletAddress) throw new Error('Wallet address is missing')
-
     const apiKey = process.env.BASE_API_KEY || ''
+    if (!walletAddress) throw new Error('Wallet address is missing')
     const result = await fetchWalletStats(walletAddress, apiKey)
     setStats(result)
   } catch (err) {
-    console.error('Transaction or fetch failed:', err)
+    console.error('Transaction failed:', err)
     setTxFailed(true)
   } finally {
     setLoading(false)
