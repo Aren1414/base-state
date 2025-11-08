@@ -121,7 +121,6 @@ useEffect(() => {
     if (walletClient) {
       txHash = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
     } 
-    
     else if (typeof window !== 'undefined' && window.ethereum) {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' })
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
@@ -135,8 +134,17 @@ useEffect(() => {
     console.log('Transaction sent:', txHash)
     setTxConfirmed(true) 
 
+    const waitForReady = () => new Promise<void>((resolve) => {
+      const interval = setInterval(() => {
+        if (walletAddress && isFrameReady && chainId === base.id) {
+          clearInterval(interval)
+          resolve()
+        }
+      }, 100)
+    })
+    await waitForReady()
+
     const apiKey = process.env.BASE_API_KEY || ''
-    if (!walletAddress) throw new Error('Wallet address is missing')
     const result = await fetchWalletStats(walletAddress, apiKey)
     setStats(result)
 
