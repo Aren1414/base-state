@@ -104,42 +104,48 @@ useEffect(() => {
 
   // Handle transaction submission
   const handleClick = async () => {
-    setLoading(true)
-    setTxFailed(false)
-    try {
-      const data = encodeFunctionData({
-        abi: [
-          { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-        ],
-        functionName: 'ping',
-        args: [],
-      })
+  setLoading(true)
+  setTxFailed(false)
 
-      let tx
-      if (walletClient) {
-        tx = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
-      } else if (typeof window !== 'undefined' && window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-        if (!accounts || accounts.length === 0) throw new Error('No accounts found')
-        const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
-        tx = await fallbackSigner.sendTransaction({ account: accounts[0], to: CONTRACT_ADDRESS, data })
-      } else {
-        throw new Error('No signer available')
-      }
+  try {
+    const data = encodeFunctionData({
+      abi: [
+        { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
+      ],
+      functionName: 'ping',
+      args: [],
+    })
 
-      console.log('Transaction sent:', tx)
-      setTxConfirmed(true)
-
-      const apiKey = process.env.BASE_API_KEY || ''
-      if (!walletAddress) throw new Error('Wallet address is missing')
-      const result = await fetchWalletStats(walletAddress, apiKey)
-      setStats(result)
-    } catch (err) {
-      console.error('Transaction failed:', err)
-      setTxFailed(true)
-    } finally {
-      setLoading(false)
+    let txHash
+    
+    if (walletClient) {
+      txHash = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
+    } 
+    
+    else if (typeof window !== 'undefined' && window.ethereum) {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+      if (!accounts || accounts.length === 0) throw new Error('No accounts found')
+      const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
+      txHash = await fallbackSigner.sendTransaction({ account: accounts[0], to: CONTRACT_ADDRESS, data })
+    } 
+    else {
+      throw new Error('No signer available')
     }
+
+    console.log('Transaction sent:', txHash)
+    setTxConfirmed(true) 
+
+    const apiKey = process.env.BASE_API_KEY || ''
+    if (!walletAddress) throw new Error('Wallet address is missing')
+    const result = await fetchWalletStats(walletAddress, apiKey)
+    setStats(result)
+
+  } catch (err) {
+    console.error('Transaction failed:', err)
+    setTxFailed(true)
+  } finally {
+    setLoading(false)
+  }
   }
 
   // Handle sharing wallet stats
