@@ -117,32 +117,37 @@ useEffect(() => {
     })
 
     let txHash: string | undefined
-    
+
     if (walletClient) {
       txHash = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
     } 
     else if (typeof window !== 'undefined' && window.ethereum) {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[]
+      const accounts = (await window.ethereum.request({ method: 'eth_accounts' })) as string[]
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
+
+      
+      const account = accounts[0] as `0x${string}`
+
       const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
-      txHash = await fallbackSigner.sendTransaction({ account: accounts[0], to: CONTRACT_ADDRESS, data })
+      txHash = await fallbackSigner.sendTransaction({ account, to: CONTRACT_ADDRESS, data })
     } 
     else {
       throw new Error('No signer available')
     }
 
     console.log('Transaction sent:', txHash)
-    setTxConfirmed(true) 
+    setTxConfirmed(true)
 
     
-    const waitForReady = () => new Promise<void>((resolve) => {
-      const interval = setInterval(() => {
-        if (walletAddress && isFrameReady && chainId === base.id) {
-          clearInterval(interval)
-          resolve()
-        }
-      }, 100)
-    })
+    const waitForReady = () =>
+      new Promise<void>((resolve) => {
+        const interval = setInterval(() => {
+          if (walletAddress && isFrameReady && chainId === base.id) {
+            clearInterval(interval)
+            resolve()
+          }
+        }, 100)
+      })
     await waitForReady()
 
     
