@@ -34,9 +34,7 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] =
-    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
-
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
@@ -94,9 +92,12 @@ export default function Home() {
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
+  
   const handleClick = async () => {
     setLoading(true)
     setTxFailed(false)
+    setStats(null)
+    setTxConfirmed(false)
 
     try {
       const data = encodeFunctionData({
@@ -113,7 +114,7 @@ export default function Home() {
         args: [],
       })
 
-      let tx
+      let tx: string
 
       if (walletClient) {
         tx = await walletClient.sendTransaction({
@@ -150,9 +151,19 @@ export default function Home() {
       const apiKey = process.env.BASE_API_KEY || ''
 
       
-      const result = await fetchWalletStats(walletAddress, apiKey)
+      let result = null
 
-      if (!result) throw new Error('Failed to fetch stats')
+      for (let i = 0; i < 10; i++) {
+        result = await fetchWalletStats(walletAddress, apiKey)
+
+        if (result) break
+
+        await new Promise((r) => setTimeout(r, 1500))
+      }
+
+      if (!result) {
+        throw new Error('Stats not ready yet')
+      }
 
       setStats(result)
       setTxConfirmed(true)
@@ -196,18 +207,14 @@ export default function Home() {
           )}&embeds[]=${encodeURIComponent(embedUrl)}`
         )
       }
-    } catch (err) {
-      console.error('Share failed:', err)
-    }
+    } catch {}
   }
 
   if (!fid) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
-          <p className={styles.statusMessage}>
-            Initializing Farcaster session…
-          </p>
+          <p className={styles.statusMessage}>Initializing Farcaster session…</p>
         </header>
       </div>
     )
@@ -229,9 +236,7 @@ export default function Home() {
               onClick={handleClick}
               disabled={!ready || loading}
             >
-              {loading
-                ? 'Submitting transaction...'
-                : 'Submit activity and retrieve wallet stats'}
+              {loading ? 'Submitting transaction...' : 'Submit activity'}
             </button>
 
             {txFailed && (
@@ -239,10 +244,7 @@ export default function Home() {
                 <p className={styles.statusMessage}>
                   Transaction failed. Please try again.
                 </p>
-                <button
-                  className={styles.retryButton}
-                  onClick={handleClick}
-                >
+                <button className={styles.retryButton} onClick={handleClick}>
                   Retry
                 </button>
               </>
@@ -251,26 +253,6 @@ export default function Home() {
         ) : stats ? (
           <>
             <WalletStatus stats={stats} />
-
-            <div style={{ textAlign: 'center', margin: '32px 0' }}>
-              <button className={styles.actionButton} onClick={handleShareText}>
-                📤 Share Stats as Text
-              </button>
-            </div>
-
-            {context?.user && walletClient && (
-              <MintCard
-                stats={stats.data}
-                type={stats.type}
-                user={{
-                  fid: context.user.fid,
-                  username: context.user.username,
-                  pfpUrl: context.user.pfpUrl,
-                }}
-                minted={!!mintedImageUrl}
-                setMintedImageUrl={setMintedImageUrl}
-              />
-            )}
           </>
         ) : (
           <p className={styles.statusMessage}>
