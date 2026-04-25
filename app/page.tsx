@@ -7,12 +7,7 @@ import {
   useSwitchChain,
   useWalletClient,
 } from 'wagmi'
-import {
-  encodeFunctionData,
-  createWalletClient,
-  custom,
-  waitForTransactionReceipt,
-} from 'viem'
+import { encodeFunctionData, createWalletClient, custom } from 'viem'
 import {
   useMiniKit,
   useAuthenticate,
@@ -28,9 +23,7 @@ import type { WalletStats, ContractStats } from '../src/types'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
-
-const DATA_SUFFIX =
-  '0x62635f6c61786875716f670b0080218021802180218021802180218021'
+const DATA_SUFFIX = "0x62635f6c61786875716f670b0080218021802180218021802180218021"
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
@@ -41,7 +34,8 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] =
+    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
@@ -66,22 +60,17 @@ export default function Home() {
             if (ctx?.client && !ctx.client.added) {
               try {
                 await sdk.actions.addMiniApp()
-              } catch (err) {
-                console.warn('addMiniApp rejected', err)
-              }
+              } catch {}
             }
 
             if (ctx.location?.type !== 'launcher') {
               await signIn()
             }
-          } catch (err) {
-            console.error(err)
-          }
+          } catch {}
         }
 
         if (!isFrameReady) setFrameReady()
-      } catch (err) {
-        console.error(err)
+      } catch {
         if (!isFrameReady) setFrameReady()
       }
     }
@@ -123,7 +112,7 @@ export default function Home() {
         args: [],
       })
 
-      let tx: `0x${string}`
+      let tx
 
       if (walletClient) {
         tx = await walletClient.sendTransaction({
@@ -131,43 +120,41 @@ export default function Home() {
           data,
           dataSuffix: DATA_SUFFIX,
         })
-
-        
-        await waitForTransactionReceipt(walletClient, {
-          hash: tx,
-        })
       } else if (typeof window !== 'undefined' && window.ethereum) {
         const accounts = await window.ethereum.request({
           method: 'eth_accounts',
         })
 
-        if (!accounts?.length) throw new Error('No accounts')
+        if (!accounts?.length) throw new Error('No accounts found')
 
-        const fallback = createWalletClient({
+        const fallbackSigner = createWalletClient({
           chain: base,
           transport: custom(window.ethereum),
         })
 
-        tx = await fallback.sendTransaction({
+        tx = await fallbackSigner.sendTransaction({
           account: accounts[0],
           to: CONTRACT_ADDRESS,
           data,
           dataSuffix: DATA_SUFFIX,
         })
-
-        await waitForTransactionReceipt(fallback, {
-          hash: tx,
-        })
       } else {
-        throw new Error('No wallet')
+        throw new Error('No signer available')
       }
 
-      setTxConfirmed(true)
+      console.log('Transaction sent:', tx)
 
-      const result = await fetchWalletStats(walletAddress!, '')
+      if (!walletAddress) throw new Error('Wallet address is missing')
+
+      const apiKey = process.env.BASE_API_KEY || ''
+      const result = await fetchWalletStats(walletAddress, apiKey)
+
       setStats(result)
+
+      
+      setTxConfirmed(true)
     } catch (err) {
-      console.error(err)
+      console.error('Transaction failed:', err)
       setTxFailed(true)
     } finally {
       setLoading(false)
@@ -182,68 +169,99 @@ export default function Home() {
 
     if (stats.type === 'wallet') {
       const s = stats.data as WalletStats
-      body = `Wallet Age: ${s.walletAge}
-Active Days: ${s.activeDays}
-Tx Count: ${s.txCount}
-Best Streak: ${s.bestStreak}
-Contracts: ${s.contracts}
-Tokens: ${s.tokens}
-Volume: ${s.volumeEth}`
+      body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
     } else {
       const s = stats.data as ContractStats
-      body = `Age: ${s.age}
-Post: ${s.postTokens}
-Tx: ${s.internalTxCount}
-Streak: ${s.bestStreak}
-Senders: ${s.uniqueSenders}`
+      body = `📊 BaseApp Wallet Snapshot\n${divider}\nAge: ${s.age} day\nPost: ${s.postTokens}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
     }
 
-    const text = `BaseState Stats 👇\n\n${divider}\n${body}`
+    const castText = `Just checked my ${
+      stats.type === 'wallet' ? 'wallet' : 'BaseApp wallet'
+    } stats using the BaseState Mini App 👇\n\n${body}`
 
-    const embedUrl = `${MINI_APP_URL}`
+    const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
 
     try {
-      const isMini = await sdk.isInMiniApp()
+      const isMiniApp = await sdk.isInMiniApp()
 
-      if (isMini) {
-        await composeCast({ text, embeds: [embedUrl] })
+      if (isMiniApp) {
+        await composeCast({ text: castText, embeds: [embedUrl] })
       } else {
         window.open(
-          `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`
+          `https://warpcast.com/~/compose?text=${encodeURIComponent(
+            castText
+          )}&embeds[]=${encodeURIComponent(embedUrl)}`
         )
       }
     } catch (err) {
-      console.error(err)
+      console.error('Share failed:', err)
     }
   }
 
   if (!fid) {
     return (
       <div className={styles.container}>
-        <p>Initializing...</p>
+        <header className={styles.headerCentered}>
+          <p className={styles.statusMessage}>
+            Initializing Farcaster session…
+          </p>
+        </header>
       </div>
     )
   }
 
   return (
     <div className={styles.container}>
-      <h2>{displayName}</h2>
+      <header className={styles.headerCentered}>
+        <h2 className={styles.userName}>{displayName}</h2>
+      </header>
 
-      {!txConfirmed ? (
-        <>
-          <button onClick={handleClick} disabled={!ready || loading}>
-            {loading ? 'Sending...' : 'Ping'}
-          </button>
+      <div className={styles.content}>
+        <h1 className={styles.title}>BaseState</h1>
 
-          {txFailed && <p>Transaction failed</p>}
-        </>
-      ) : (
-        stats && (
+        {!txConfirmed ? (
+          <>
+            <button
+              className={styles.actionButton}
+              onClick={handleClick}
+              disabled={!ready || loading}
+            >
+              {loading
+                ? 'Submitting transaction...'
+                : 'Submit activity and retrieve wallet stats'}
+            </button>
+
+            {!ready && !loading && (
+              <p className={styles.statusMessage}>
+                Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
+              </p>
+            )}
+
+            {txFailed && (
+              <>
+                <p className={styles.statusMessage}>
+                  Transaction failed. Please try again.
+                </p>
+                <button
+                  className={styles.retryButton}
+                  onClick={handleClick}
+                >
+                  Retry
+                </button>
+              </>
+            )}
+          </>
+        ) : stats ? (
           <>
             <WalletStatus stats={stats} />
-            <button onClick={handleShareText}>Share</button>
 
-            {context?.user && (
+            <div style={{ textAlign: 'center', margin: '32px 0' }}>
+              <button className={styles.actionButton} onClick={handleShareText}>
+                📤 Share Stats as Text
+              </button>
+            </div>
+
+            {context?.user && walletClient && (
               <MintCard
                 stats={stats.data}
                 type={stats.type}
@@ -257,8 +275,13 @@ Senders: ${s.uniqueSenders}`
               />
             )}
           </>
-        )
-      )}
+        ) : (
+          <p className={styles.statusMessage}>
+            Fetching wallet stats, please wait…{' '}
+            <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
+          </p>
+        )}
+      </div>
     </div>
   )
 }
