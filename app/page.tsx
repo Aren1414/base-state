@@ -23,6 +23,7 @@ import type { WalletStats, ContractStats } from '../src/types'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
+const DATA_SUFFIX = "0x62635f6c61786875716f670b0080218021802180218021802180218021"
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
@@ -117,12 +118,21 @@ const handleClick = async () => {
 
     let tx
     if (walletClient) {
-      tx = await walletClient.sendTransaction({ to: CONTRACT_ADDRESS, data })
+      tx = await walletClient.sendTransaction({ 
+  to: CONTRACT_ADDRESS, 
+  data,
+  dataSuffix: DATA_SUFFIX
+})
     } else if (typeof window !== 'undefined' && window.ethereum) {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' })
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
       const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
-      tx = await fallbackSigner.sendTransaction({ account: accounts[0], to: CONTRACT_ADDRESS, data })
+      tx = await fallbackSigner.sendTransaction({ 
+  account: accounts[0], 
+  to: CONTRACT_ADDRESS, 
+  data,
+  dataSuffix: DATA_SUFFIX
+})
     } else {
       throw new Error('No signer available')
     }
