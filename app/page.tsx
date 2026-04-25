@@ -23,7 +23,8 @@ import type { WalletStats, ContractStats } from '../src/types'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
-const DATA_SUFFIX = "0x62635f6c61786875716f670b0080218021802180218021802180218021"
+const DATA_SUFFIX =
+  '0x62635f6c61786875716f670b0080218021802180218021802180218021'
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
@@ -34,125 +35,141 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
+  const [stats, setStats] =
+    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
 
-
-useEffect(() => {
-  const initApp = async () => {
-    try {
-      const isFarcasterMiniApp = await sdk.isInMiniApp();
-      if (!isFarcasterMiniApp) {
-        // Not a Farcaster mini app (regular web or Base-hosted page) — still mark frame ready for MiniKit
-        if (!isFrameReady) setFrameReady();
-        return;
-      }
-
-      // We're in a Mini App environment — fetch context
-      const ctx = await sdk.context;
-
-      // Detect Base app by clientFid (Base app's clientFid = 309857 per docs)
-      const isBaseApp = String(ctx?.client?.clientFid) === '309857';
-
-      // Only run Farcaster addMiniApp flow when NOT inside Base app
-      if (!isBaseApp) {
-        try {
-          await sdk.actions.ready();
-
-          if (ctx?.client && !ctx.client.added) {
-            try {
-              await sdk.actions.addMiniApp();
-            } catch (err) {
-              console.warn('User rejected addMiniApp:', err);
-            }
-          }
-
-          if (ctx.location?.type !== 'launcher') {
-            // signin only for non-launcher launches
-            await signIn();
-          }
-        } catch (err) {
-          console.error('Farcaster MiniApp initialization failed:', err);
+  useEffect(() => {
+    const initApp = async () => {
+      try {
+        const isFarcasterMiniApp = await sdk.isInMiniApp()
+        if (!isFarcasterMiniApp) {
+          if (!isFrameReady) setFrameReady()
+          return
         }
+
+        const ctx = await sdk.context
+        const isBaseApp = String(ctx?.client?.clientFid) === '309857'
+
+        if (!isBaseApp) {
+          try {
+            await sdk.actions.ready()
+
+            if (ctx?.client && !ctx.client.added) {
+              try {
+                await sdk.actions.addMiniApp()
+              } catch (err) {
+                console.warn('User rejected addMiniApp:', err)
+              }
+            }
+
+            if (ctx.location?.type !== 'launcher') {
+              await signIn()
+            }
+          } catch (err) {
+            console.error('Farcaster MiniApp initialization failed:', err)
+          }
+        }
+
+        if (!isFrameReady) setFrameReady()
+      } catch (err) {
+        console.error('initApp error:', err)
+        if (!isFrameReady) setFrameReady()
       }
-
-      // Always set frame ready for Base MiniKit flow (if not already)
-      if (!isFrameReady) setFrameReady();
-    } catch (err) {
-      console.error('initApp error:', err);
-      if (!isFrameReady) setFrameReady();
     }
-  };
 
-  initApp();
-  // deps: keep signIn and frame flags so setFrameReady/signIn are stable
-}, [isFrameReady, setFrameReady, signIn]);
+    initApp()
+  }, [isFrameReady, setFrameReady, signIn])
 
-useEffect(() => {
-  const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
-  if (!isBaseApp && chainId !== base.id && switchChain) {
-    switchChain({ chainId: base.id })
-  }
-}, [chainId, switchChain]);
-  
+  useEffect(() => {
+    const isBaseApp =
+      typeof window !== 'undefined' &&
+      window.location.href.includes('cbbaseapp://')
+
+    if (!isBaseApp && chainId !== base.id && switchChain) {
+      switchChain({ chainId: base.id })
+    }
+  }, [chainId, switchChain])
+
   const user = context?.user
   const fid = user?.fid
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
   // Handle transaction submission
-const handleClick = async () => {
-  setLoading(true)
-  setTxFailed(false)
-  try {
-    const data = encodeFunctionData({
-      abi: [
-        { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-      ],
-      functionName: 'ping',
-      args: [],
-    })
+  const handleClick = async () => {
+    setLoading(true)
+    setTxFailed(false)
 
-    let tx
-    if (walletClient) {
-      tx = await walletClient.sendTransaction({ 
-  to: CONTRACT_ADDRESS, 
-  data,
-  dataSuffix: DATA_SUFFIX
-})
-    } else if (typeof window !== 'undefined' && window.ethereum) {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-      if (!accounts || accounts.length === 0) throw new Error('No accounts found')
-      const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
-      tx = await fallbackSigner.sendTransaction({ 
-  account: accounts[0], 
-  to: CONTRACT_ADDRESS, 
-  data,
-  dataSuffix: DATA_SUFFIX
-})
-    } else {
-      throw new Error('No signer available')
+    try {
+      const data = encodeFunctionData({
+        abi: [
+          {
+            inputs: [],
+            name: 'ping',
+            outputs: [],
+            stateMutability: 'nonpayable',
+            type: 'function',
+          },
+        ],
+        functionName: 'ping',
+        args: [],
+      })
+
+      let tx: `0x${string}`
+
+      if (walletClient) {
+        tx = await walletClient.sendTransaction({
+          to: CONTRACT_ADDRESS,
+          data,
+          dataSuffix: DATA_SUFFIX,
+        })
+      } else if (typeof window !== 'undefined' && window.ethereum) {
+        const accounts = await window.ethereum.request({
+          method: 'eth_accounts',
+        })
+        if (!accounts || accounts.length === 0)
+          throw new Error('No accounts found')
+
+        const fallbackSigner = createWalletClient({
+          chain: base,
+          transport: custom(window.ethereum),
+        })
+
+        tx = await fallbackSigner.sendTransaction({
+          account: accounts[0],
+          to: CONTRACT_ADDRESS,
+          data,
+          dataSuffix: DATA_SUFFIX,
+        })
+      } else {
+        throw new Error('No signer available')
+      }
+
+      console.log('Transaction sent:', tx)
+
+      if (walletClient) {
+        await walletClient.waitForTransactionReceipt({ hash: tx })
+      }
+
+      setTxConfirmed(true)
+
+      const apiKey = process.env.BASE_API_KEY || ''
+      if (!walletAddress) throw new Error('Wallet address is missing')
+
+      const result = await fetchWalletStats(walletAddress, apiKey)
+      setStats(result)
+    } catch (err) {
+      console.error('Transaction failed:', err)
+      setTxFailed(true)
+    } finally {
+      setLoading(false)
     }
-
-    console.log('Transaction sent:', tx)
-    setTxConfirmed(true)
-
-    const apiKey = process.env.BASE_API_KEY || ''
-    if (!walletAddress) throw new Error('Wallet address is missing')
-    const result = await fetchWalletStats(walletAddress, apiKey)
-    setStats(result)
-  } catch (err) {
-    console.error('Transaction failed:', err)
-    setTxFailed(true)
-  } finally {
-    setLoading(false)
-  }
   }
 
-  // Handle sharing wallet stats
   const handleShareText = async () => {
     if (!stats) return
 
@@ -174,29 +191,32 @@ const handleClick = async () => {
 
     const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
 
-try {
-  const isMiniApp = await sdk.isInMiniApp()
+    try {
+      const isMiniApp = await sdk.isInMiniApp()
 
-  if (isMiniApp) {
-    await composeCast({ text: castText, embeds: [embedUrl] })
-  } else {
-    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-      castText
-    )}&embeds[]=${encodeURIComponent(embedUrl)}`
-    window.open(warpcastUrl, '_blank')
-  }
-} catch (err) {
-  console.error('Share failed:', err)
-}
+      if (isMiniApp) {
+        await composeCast({ text: castText, embeds: [embedUrl] })
+      } else {
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+          castText
+        )}&embeds[]=${encodeURIComponent(embedUrl)}`
+        window.open(warpcastUrl, '_blank')
+      }
+    } catch (err) {
+      console.error('Share failed:', err)
+    }
   }
 
-  // Download wallet card
   const downloadCard = async () => {
     const card = document.getElementById('walletCard')
     if (!card) return
 
     const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+    const canvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: null,
+    })
 
     const resizedCanvas = document.createElement('canvas')
     resizedCanvas.width = 1200
@@ -216,7 +236,9 @@ try {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
-          <p className={styles.statusMessage}>Initializing Farcaster session…</p>
+          <p className={styles.statusMessage}>
+            Initializing Farcaster session…
+          </p>
         </header>
       </div>
     )
@@ -244,53 +266,67 @@ try {
             </button>
 
             {!ready && !loading && (
-                  <p className={styles.statusMessage}>
-                    Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
-                  </p>
-                )}
-
-                {txFailed && (
-                  <>
-                    <p className={styles.statusMessage}>
-                      Transaction failed. Please try again.
-                    </p>
-                    <button className={styles.retryButton} onClick={handleClick}>
-                      Retry
-                    </button>
-                  </>
-                )}
-              </>
-            ) : stats ? (
-              <>
-                <WalletStatus stats={stats} />
-
-                <div style={{ textAlign: 'center', margin: '32px 0' }}>
-                  <button className={styles.actionButton} onClick={handleShareText}>
-                    📤 Share Stats as Text
-                  </button>
-                </div>
-
-                {context?.user && walletClient && (
-                  <MintCard
-                    stats={stats.data}
-                    type={stats.type}
-                    user={{
-                      fid: context.user.fid,
-                      username: context.user.username,
-                      pfpUrl: context.user.pfpUrl,
-                    }}
-                    minted={!!mintedImageUrl}
-                    setMintedImageUrl={setMintedImageUrl}
-                  />
-                )}
-              </>
-            ) : (
               <p className={styles.statusMessage}>
-                Fetching wallet stats, please wait…{' '}
-                <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
+                Wallet not ready. Please reconnect or reload inside
+                Farcaster/Base App.
               </p>
             )}
-          </div>
-        </div>
-      )
-}
+
+            {txFailed && (
+              <>
+                <p className={styles.statusMessage}>
+                  Transaction failed. Please try again.
+                </p>
+                <button
+                  className={styles.retryButton}
+                  onClick={handleClick}
+                >
+                  Retry
+                </button>
+              </>
+            )}
+          </>
+        ) : stats ? (
+          <>
+            <WalletStatus stats={stats} />
+
+            <div style={{ textAlign: 'center', margin: '32px 0' }}>
+              <button
+                className={styles.actionButton}
+                onClick={handleShareText}
+              >
+                📤 Share Stats as Text
+              </button>
+            </div>
+
+            {context?.user && walletClient && (
+              <MintCard
+                stats={stats.data}
+                type={stats.type}
+                user={{
+                  fid: context.user.fid,
+                  username: context.user.username,
+                  pfpUrl: context.user.pfpUrl,
+                }}
+                minted={false}
+                setMintedImageUrl={setMintedImageUrl}
+              />
+            )}
+          </>
+        ) : (
+          <p className={styles.statusMessage}>
+            Fetching wallet stats, please wait…{' '}
+            <span
+              style={{
+                animation: 'spin 1s linear infinite',
+                display: 'inline-block',
+              }}
+            >
+              ⏳
+            </span>
+          </p>
+        )}
+      </div>
+    </div>
+  )
+    }
