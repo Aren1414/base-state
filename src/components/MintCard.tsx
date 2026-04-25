@@ -7,6 +7,7 @@ import { useComposeCast } from "@coinbase/onchainkit/minikit"
 import { sdk } from "@farcaster/miniapp-sdk"
 
 const CONTRACT_ADDRESS = "0x972f0F6D9f1C25eC153729113048Cdfe6828515c"
+const DATA_SUFFIX = "0x62635f6c61786875716f670b0080218021802180218021802180218021"
 
 interface MintCardProps {
   stats: any
@@ -84,13 +85,14 @@ export default function MintCard({
       const tokenURI = `${window.location.origin}/api/metadata/${fileName}`
 
       await walletClient.writeContract({
-        address: CONTRACT_ADDRESS,
-        abi,
-        functionName: "mint",
-        args: [tokenURI],
-        account: walletAddress,
-        value: parseEther("0.0001"),
-      })
+  address: CONTRACT_ADDRESS,
+  abi,
+  functionName: "mint",
+  args: [tokenURI],
+  account: walletAddress,
+  value: parseEther("0.0001"),
+  dataSuffix: DATA_SUFFIX 
+})
 
       setMintStatus("✅ Mint successful!")
       setCanShare(true)
