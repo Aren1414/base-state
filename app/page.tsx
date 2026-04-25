@@ -36,6 +36,7 @@ export default function Home() {
 
   const [stats, setStats] =
     useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
+
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
@@ -147,11 +148,13 @@ export default function Home() {
       if (!walletAddress) throw new Error('Wallet address is missing')
 
       const apiKey = process.env.BASE_API_KEY || ''
-      const result = await fetchWalletStats(walletAddress, apiKey)
-
-      setStats(result)
 
       
+      const result = await fetchWalletStats(walletAddress, apiKey)
+
+      if (!result) throw new Error('Failed to fetch stats')
+
+      setStats(result)
       setTxConfirmed(true)
     } catch (err) {
       console.error('Transaction failed:', err)
@@ -177,7 +180,7 @@ export default function Home() {
 
     const castText = `Just checked my ${
       stats.type === 'wallet' ? 'wallet' : 'BaseApp wallet'
-    } stats using the BaseState Mini App 👇\n\n${body}`
+    } stats 👇\n\n${body}`
 
     const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
 
@@ -231,12 +234,6 @@ export default function Home() {
                 : 'Submit activity and retrieve wallet stats'}
             </button>
 
-            {!ready && !loading && (
-              <p className={styles.statusMessage}>
-                Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
-              </p>
-            )}
-
             {txFailed && (
               <>
                 <p className={styles.statusMessage}>
@@ -277,7 +274,7 @@ export default function Home() {
           </>
         ) : (
           <p className={styles.statusMessage}>
-            Fetching wallet stats, please wait…{' '}
+            Fetching wallet stats…{' '}
             <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
           </p>
         )}
