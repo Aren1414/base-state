@@ -7,7 +7,12 @@ import {
   useSwitchChain,
   useWalletClient,
 } from 'wagmi'
-import { encodeFunctionData, createWalletClient, custom } from 'viem'
+import {
+  encodeFunctionData,
+  createWalletClient,
+  custom,
+  waitForTransactionReceipt,
+} from 'viem'
 import {
   useMiniKit,
   useAuthenticate,
@@ -23,6 +28,7 @@ import type { WalletStats, ContractStats } from '../src/types'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
+
 const DATA_SUFFIX =
   '0x62635f6c61786875716f670b0080218021802180218021802180218021'
 
@@ -35,8 +41,7 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] =
-    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
+  const [stats, setStats] = useState<any>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
@@ -62,7 +67,7 @@ export default function Home() {
               try {
                 await sdk.actions.addMiniApp()
               } catch (err) {
-                console.warn('User rejected addMiniApp:', err)
+                console.warn('addMiniApp rejected', err)
               }
             }
 
@@ -70,13 +75,13 @@ export default function Home() {
               await signIn()
             }
           } catch (err) {
-            console.error('Farcaster MiniApp initialization failed:', err)
+            console.error(err)
           }
         }
 
         if (!isFrameReady) setFrameReady()
       } catch (err) {
-        console.error('initApp error:', err)
+        console.error(err)
         if (!isFrameReady) setFrameReady()
       }
     }
@@ -99,7 +104,6 @@ export default function Home() {
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
-  // Handle transaction submission
   const handleClick = async () => {
     setLoading(true)
     setTxFailed(false)
@@ -127,43 +131,43 @@ export default function Home() {
           data,
           dataSuffix: DATA_SUFFIX,
         })
+
+        
+        await waitForTransactionReceipt(walletClient, {
+          hash: tx,
+        })
       } else if (typeof window !== 'undefined' && window.ethereum) {
         const accounts = await window.ethereum.request({
           method: 'eth_accounts',
         })
-        if (!accounts || accounts.length === 0)
-          throw new Error('No accounts found')
 
-        const fallbackSigner = createWalletClient({
+        if (!accounts?.length) throw new Error('No accounts')
+
+        const fallback = createWalletClient({
           chain: base,
           transport: custom(window.ethereum),
         })
 
-        tx = await fallbackSigner.sendTransaction({
+        tx = await fallback.sendTransaction({
           account: accounts[0],
           to: CONTRACT_ADDRESS,
           data,
           dataSuffix: DATA_SUFFIX,
         })
+
+        await waitForTransactionReceipt(fallback, {
+          hash: tx,
+        })
       } else {
-        throw new Error('No signer available')
-      }
-
-      console.log('Transaction sent:', tx)
-
-      if (walletClient) {
-        await walletClient.waitForTransactionReceipt({ hash: tx })
+        throw new Error('No wallet')
       }
 
       setTxConfirmed(true)
 
-      const apiKey = process.env.BASE_API_KEY || ''
-      if (!walletAddress) throw new Error('Wallet address is missing')
-
-      const result = await fetchWalletStats(walletAddress, apiKey)
+      const result = await fetchWalletStats(walletAddress!, '')
       setStats(result)
     } catch (err) {
-      console.error('Transaction failed:', err)
+      console.error(err)
       setTxFailed(true)
     } finally {
       setLoading(false)
@@ -173,133 +177,73 @@ export default function Home() {
   const handleShareText = async () => {
     if (!stats) return
 
-    const type = stats.type
     const divider = '────────────────────'
     let body = ''
 
-    if (type === 'wallet') {
+    if (stats.type === 'wallet') {
       const s = stats.data as WalletStats
-      body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
+      body = `Wallet Age: ${s.walletAge}
+Active Days: ${s.activeDays}
+Tx Count: ${s.txCount}
+Best Streak: ${s.bestStreak}
+Contracts: ${s.contracts}
+Tokens: ${s.tokens}
+Volume: ${s.volumeEth}`
     } else {
       const s = stats.data as ContractStats
-      body = `📊 BaseApp Wallet Snapshot\n${divider}\nAge: ${s.age} day\nPost: ${s.postTokens}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
+      body = `Age: ${s.age}
+Post: ${s.postTokens}
+Tx: ${s.internalTxCount}
+Streak: ${s.bestStreak}
+Senders: ${s.uniqueSenders}`
     }
 
-    const castText = `Just checked my ${
-      type === 'wallet' ? 'wallet' : 'BaseApp wallet'
-    } stats using the BaseState Mini App 👇\n\n${body}`
+    const text = `BaseState Stats 👇\n\n${divider}\n${body}`
 
-    const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
+    const embedUrl = `${MINI_APP_URL}`
 
     try {
-      const isMiniApp = await sdk.isInMiniApp()
+      const isMini = await sdk.isInMiniApp()
 
-      if (isMiniApp) {
-        await composeCast({ text: castText, embeds: [embedUrl] })
+      if (isMini) {
+        await composeCast({ text, embeds: [embedUrl] })
       } else {
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-          castText
-        )}&embeds[]=${encodeURIComponent(embedUrl)}`
-        window.open(warpcastUrl, '_blank')
+        window.open(
+          `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`
+        )
       }
     } catch (err) {
-      console.error('Share failed:', err)
+      console.error(err)
     }
-  }
-
-  const downloadCard = async () => {
-    const card = document.getElementById('walletCard')
-    if (!card) return
-
-    const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(card, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-    })
-
-    const resizedCanvas = document.createElement('canvas')
-    resizedCanvas.width = 1200
-    resizedCanvas.height = 800
-    const ctx = resizedCanvas.getContext('2d')
-    if (!ctx) return
-
-    ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height)
-
-    const link = document.createElement('a')
-    link.download = 'BaseState_Wallet_Card.png'
-    link.href = resizedCanvas.toDataURL('image/png', 0.8)
-    link.click()
   }
 
   if (!fid) {
     return (
       <div className={styles.container}>
-        <header className={styles.headerCentered}>
-          <p className={styles.statusMessage}>
-            Initializing Farcaster session…
-          </p>
-        </header>
+        <p>Initializing...</p>
       </div>
     )
   }
 
   return (
     <div className={styles.container}>
-      <header className={styles.headerCentered}>
-        <h2 className={styles.userName}>{displayName}</h2>
-      </header>
+      <h2>{displayName}</h2>
 
-      <div className={styles.content}>
-        <h1 className={styles.title}>BaseState</h1>
+      {!txConfirmed ? (
+        <>
+          <button onClick={handleClick} disabled={!ready || loading}>
+            {loading ? 'Sending...' : 'Ping'}
+          </button>
 
-        {!txConfirmed ? (
-          <>
-            <button
-              className={styles.actionButton}
-              onClick={handleClick}
-              disabled={!ready || loading}
-            >
-              {loading
-                ? 'Submitting transaction...'
-                : 'Submit activity and retrieve wallet stats'}
-            </button>
-
-            {!ready && !loading && (
-              <p className={styles.statusMessage}>
-                Wallet not ready. Please reconnect or reload inside
-                Farcaster/Base App.
-              </p>
-            )}
-
-            {txFailed && (
-              <>
-                <p className={styles.statusMessage}>
-                  Transaction failed. Please try again.
-                </p>
-                <button
-                  className={styles.retryButton}
-                  onClick={handleClick}
-                >
-                  Retry
-                </button>
-              </>
-            )}
-          </>
-        ) : stats ? (
+          {txFailed && <p>Transaction failed</p>}
+        </>
+      ) : (
+        stats && (
           <>
             <WalletStatus stats={stats} />
+            <button onClick={handleShareText}>Share</button>
 
-            <div style={{ textAlign: 'center', margin: '32px 0' }}>
-              <button
-                className={styles.actionButton}
-                onClick={handleShareText}
-              >
-                📤 Share Stats as Text
-              </button>
-            </div>
-
-            {context?.user && walletClient && (
+            {context?.user && (
               <MintCard
                 stats={stats.data}
                 type={stats.type}
@@ -308,25 +252,13 @@ export default function Home() {
                   username: context.user.username,
                   pfpUrl: context.user.pfpUrl,
                 }}
-                minted={false}
+                minted={!!mintedImageUrl}
                 setMintedImageUrl={setMintedImageUrl}
               />
             )}
           </>
-        ) : (
-          <p className={styles.statusMessage}>
-            Fetching wallet stats, please wait…{' '}
-            <span
-              style={{
-                animation: 'spin 1s linear infinite',
-                display: 'inline-block',
-              }}
-            >
-              ⏳
-            </span>
-          </p>
-        )}
-      </div>
+        )
+      )}
     </div>
   )
-    }
+}
