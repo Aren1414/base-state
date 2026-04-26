@@ -1,5 +1,21 @@
 import { NextResponse } from 'next/server'
 
+interface EtherscanTx {
+  timeStamp: string;
+  to: string;
+  gasUsed: string;
+  gasPrice: string;
+  value: string;
+  contractAddress?: string;
+  tokenName?: string;
+}
+
+interface EtherscanResponse<T> {
+  status: string;
+  message: string;
+  result: T;
+}
+
 export async function POST(req: Request) {
   try {
     const { address } = await req.json()
@@ -32,8 +48,8 @@ export async function POST(req: Request) {
       const txRes = await fetch(
         `${baseUrl}?chainid=${chainId}&module=account&action=txlist&address=${address}&sort=asc&apikey=${apiKey}`
       )
-      const txJson = await txRes.json()
-      const txList = txJson.result || []
+      const txJson: EtherscanResponse<EtherscanTx[]> = await txRes.json()
+      const txList: EtherscanTx[] = txJson.result || []
 
       const txCount = txList.length
       const firstTs = parseInt(txList[0]?.timeStamp || '0', 10)
@@ -41,16 +57,17 @@ export async function POST(req: Request) {
       const walletAge = Math.floor((today - firstTs) / 86400)
 
       const activeDates = [...new Set(
-        txList.map(tx => new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10))
+        txList.map((tx: EtherscanTx) =>
+          new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10)
+        )
       )].sort()
 
       const activeDays = activeDates.length
 
       let streak = 0, best = 0, prev = ''
       for (const date of activeDates) {
-        if (!prev) {
-          streak = 1
-        } else {
+        if (!prev) streak = 1
+        else {
           const next = new Date(new Date(prev).getTime() + 86400000).toISOString().slice(0, 10)
           if (date === next) streak++
           else {
@@ -63,22 +80,28 @@ export async function POST(req: Request) {
       best = Math.max(best, streak)
 
       const contracts = [...new Set(txList.map(tx => tx.to))].length
-      const fees = txList.reduce((sum, tx) => sum + BigInt(tx.gasUsed) * BigInt(tx.gasPrice), 0n)
+      const fees = txList.reduce(
+        (sum, tx) => sum + BigInt(tx.gasUsed) * BigInt(tx.gasPrice),
+        0n
+      )
       const feesEth = (Number(fees) / 1e18).toFixed(6)
 
-      const volume = txList.reduce((sum, tx) => sum + BigInt(tx.value), 0n)
+      const volume = txList.reduce(
+        (sum, tx) => sum + BigInt(tx.value),
+        0n
+      )
       const volumeEth = (Number(volume) / 1e18).toFixed(6)
 
       const balRes = await fetch(
         `${baseUrl}?chainid=${chainId}&module=account&action=balance&address=${address}&apikey=${apiKey}`
       )
-      const balanceJson = await balRes.json()
+      const balanceJson: EtherscanResponse<string> = await balRes.json()
       const balanceEth = (Number(balanceJson.result) / 1e18).toFixed(6)
 
       const tokenRes = await fetch(
         `${baseUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
       )
-      const tokensJson = await tokenRes.json()
+      const tokensJson: EtherscanResponse<EtherscanTx[]> = await tokenRes.json()
       const tokenCount = [...new Set(tokensJson.result.map(t => t.contractAddress).filter(Boolean))].length
 
       return NextResponse.json({
@@ -104,8 +127,8 @@ export async function POST(req: Request) {
     const intRes = await fetch(
       `${baseUrl}?chainid=${chainId}&module=account&action=txlistinternal&address=${address}&sort=asc&apikey=${apiKey}`
     )
-    const intJson = await intRes.json()
-    const intList = intJson.result || []
+    const intJson: EtherscanResponse<EtherscanTx[]> = await intRes.json()
+    const intList: EtherscanTx[] = intJson.result || []
 
     const internalTxCount = intList.length
     const firstTs = parseInt(intList[0]?.timeStamp || '0', 10)
@@ -114,7 +137,9 @@ export async function POST(req: Request) {
     const firstSeen = new Date(firstTs * 1000).toISOString().slice(0, 10)
 
     const activeDates = [...new Set(
-      intList.map(tx => new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10))
+      intList.map((tx: EtherscanTx) =>
+        new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10)
+      )
     )].sort()
 
     const activeDays = activeDates.length
@@ -142,18 +167,20 @@ export async function POST(req: Request) {
     const balRes = await fetch(
       `${baseUrl}?chainid=${chainId}&module=account&action=balance&address=${address}&apikey=${apiKey}`
     )
-    const balanceJson = await balRes.json()
+    const balanceJson: EtherscanResponse<string> = await balRes.json()
     const balanceEth = (Number(balanceJson.result) / 1e18).toFixed(6)
 
     const tokenRes = await fetch(
       `${baseUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
     )
-    const tokensJson = await tokenRes.json()
+    const tokensJson: EtherscanResponse<EtherscanTx[]> = await tokenRes.json()
     const tokenList = tokensJson.result || []
     const tokensReceived = [...new Set(tokenList.map(t => t.contractAddress).filter(Boolean))].length
 
-    const rareTokens = Object.values(tokenList.reduce((acc, t) => {
-      if (t.contractAddress) acc[t.contractAddress] = (acc[t.contractAddress] || 0) + 1
+    const rareTokens = Object.values(tokenList.reduce((acc: Record<string, number>, t) => {
+      if (t.contractAddress) {
+        acc[t.contractAddress] = (acc[t.contractAddress] || 0) + 1
+      }
       return acc
     }, {})).filter(c => c === 1).length
 
@@ -168,7 +195,7 @@ export async function POST(req: Request) {
     const aaRes = await fetch(
       `${baseUrl}?chainid=${chainId}&module=logs&action=getLogs&fromBlock=0&toBlock=latest&address=${entryPoint}&topic0=${topic0}&topic2=${padded}&apikey=${apiKey}`
     )
-    const aaJson = await aaRes.json()
+    const aaJson: EtherscanResponse<any[]> = await aaRes.json()
     const aaList = aaJson.result || []
 
     const allAaTransactions = aaList.length
@@ -201,4 +228,4 @@ export async function POST(req: Request) {
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
-  }
+    }
