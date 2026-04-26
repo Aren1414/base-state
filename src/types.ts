@@ -25,6 +25,4 @@ export type ContractStats = {
   tokensReceived: number
   rareTokens: number
   postTokens: number
-  allAaTransactions: number
-  aaPaymasterSuccess: number
 }
