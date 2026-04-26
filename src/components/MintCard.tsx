@@ -125,7 +125,7 @@ Internal Tx Count: ${stats.internalTxCount}
 Best Streak: ${stats.bestStreak} days
 Unique Senders: ${stats.uniqueSenders}
 Tokens Received: ${stats.tokensReceived}
-AA Transactions: ${stats.allAaTransactions}`
+first Seen: ${stats.firstSeen}`
     }
 
     const text = `Check out my BaseState NFT card!\n\n📊 ${
@@ -243,7 +243,7 @@ AA Transactions: ${stats.allAaTransactions}`
                   { label: "Best Streak", value: stats.bestStreak + " days" },
                   { label: "Unique Senders", value: stats.uniqueSenders },
                   { label: "Tokens Received", value: stats.tokensReceived },
-                  { label: "AA Transactions", value: stats.allAaTransactions },
+                  { label: "first Seen", value: stats.firstSin },
                   { label: "Rare Tokens", value: stats.rareTokens },
                 ]
             ).map((f, i) => (
