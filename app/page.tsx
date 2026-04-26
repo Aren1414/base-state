@@ -104,7 +104,8 @@ useEffect(() => {
   const ready = fid && walletAddress && chainId === base.id
 
 
-   // Handle transaction submission
+   
+  // Handle transaction submission
 const handleClick = async () => {
   setLoading(true)
   setTxFailed(false)
@@ -119,40 +120,29 @@ const handleClick = async () => {
     })
 
     let hash
-    let signerToWait
 
     // ---- SEND TRANSACTION ----
+    let signer = createWalletClient({
+      chain: base,
+      transport: custom(window.ethereum)
+    })
+
     if (walletClient) {
       hash = await walletClient.sendTransaction({
         to: CONTRACT_ADDRESS,
         data,
         dataSuffix: DATA_SUFFIX
       })
-
-      // wagmi walletClient → waitForTransactionReceipt ندارد
-      // پس برای wait یک signer viem می‌سازیم
-      signerToWait = createWalletClient({
-        chain: base,
-        transport: custom(window.ethereum)
-      })
-
     } else if (typeof window !== 'undefined' && window.ethereum) {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' })
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
 
-      const fallbackSigner = createWalletClient({
-        chain: base,
-        transport: custom(window.ethereum)
-      })
-
-      hash = await fallbackSigner.sendTransaction({
+      hash = await signer.sendTransaction({
         account: accounts[0],
         to: CONTRACT_ADDRESS,
         data,
         dataSuffix: DATA_SUFFIX
       })
-
-      signerToWait = fallbackSigner
     } else {
       throw new Error('No signer available')
     }
@@ -160,7 +150,7 @@ const handleClick = async () => {
     console.log("Transaction sent:", hash)
 
     // ---- WAIT FOR CONFIRMATION ----
-    await signerToWait.waitForTransactionReceipt({ hash })
+    await signer.waitForTransactionReceipt({ hash })
 
     console.log("Transaction confirmed")
     setTxConfirmed(true)
@@ -191,6 +181,7 @@ const handleClick = async () => {
     setLoading(false)
   }
 }
+      
 
 // Handle sharing wallet stats
 const handleShareText = async () => {
