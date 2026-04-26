@@ -103,10 +103,14 @@ useEffect(() => {
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
-  // Handle transaction submission
+  
+    }
+
+    // Handle transaction submission
 const handleClick = async () => {
   setLoading(true)
   setTxFailed(false)
+
   try {
     const data = encodeFunctionData({
       abi: [
@@ -116,41 +120,68 @@ const handleClick = async () => {
       args: [],
     })
 
-    let tx
+    let hash
+
+    // ---- SEND TRANSACTION ----
     if (walletClient) {
-      tx = await walletClient.sendTransaction({ 
-  to: CONTRACT_ADDRESS, 
-  data,
-  dataSuffix: DATA_SUFFIX
-})
+      hash = await walletClient.sendTransaction({
+        to: CONTRACT_ADDRESS,
+        data,
+        dataSuffix: DATA_SUFFIX
+      })
     } else if (typeof window !== 'undefined' && window.ethereum) {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' })
       if (!accounts || accounts.length === 0) throw new Error('No accounts found')
-      const fallbackSigner = createWalletClient({ chain: base, transport: custom(window.ethereum) })
-      tx = await fallbackSigner.sendTransaction({ 
-  account: accounts[0], 
-  to: CONTRACT_ADDRESS, 
-  data,
-  dataSuffix: DATA_SUFFIX
-})
+
+      const fallbackSigner = createWalletClient({
+        chain: base,
+        transport: custom(window.ethereum)
+      })
+
+      hash = await fallbackSigner.sendTransaction({
+        account: accounts[0],
+        to: CONTRACT_ADDRESS,
+        data,
+        dataSuffix: DATA_SUFFIX
+      })
     } else {
       throw new Error('No signer available')
     }
 
-    console.log('Transaction sent:', tx)
+    console.log("Transaction sent:", hash)
+
+    // ---- WAIT FOR CONFIRMATION ----
+    await walletClient.waitForTransactionReceipt({ hash })
+
+    console.log("Transaction confirmed")
     setTxConfirmed(true)
 
-    const apiKey = process.env.BASE_API_KEY || ''
+    // ---- FETCH STATS FROM SERVER API ----
     if (!walletAddress) throw new Error('Wallet address is missing')
-    const result = await fetchWalletStats(walletAddress, apiKey)
-    setStats(result)
+
+    const res = await fetch('/api/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: walletAddress })
+    })
+
+    const json = await res.json()
+
+    if (json.error) {
+      console.error("Stats fetch error:", json.error)
+      setTxFailed(true)
+      return
+    }
+
+    setStats(json)
+
   } catch (err) {
     console.error('Transaction failed:', err)
     setTxFailed(true)
   } finally {
     setLoading(false)
   }
-  }
+}
 
   // Handle sharing wallet stats
   const handleShareText = async () => {
