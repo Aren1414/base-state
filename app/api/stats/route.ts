@@ -24,16 +24,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing address' }, { status: 400 })
     }
 
-    const apiKey = process.env.BLOCKSCOUTAPIKEY
+    const apiKey = process.env.BLOCKSCOUT_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
     }
 
+    // -------------------------
+    // Blockscout PRO API
+    // -------------------------
     const baseUrl = 'https://api.blockscout.com/v2/api'
     const chainId = 8453
 
     // -------------------------
-    // CHECK IF CONTRACT
+    // 1) CHECK IF CONTRACT
     // -------------------------
     const codeRes = await fetch(
       `${baseUrl}?chain_id=${chainId}&module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`
@@ -49,7 +52,7 @@ export async function POST(req: Request) {
         `${baseUrl}?chain_id=${chainId}&module=account&action=txlist&address=${address}&sort=asc&apikey=${apiKey}`
       )
       const txJson: BlockscoutResponse<BlockscoutTx[]> = await txRes.json()
-      const txList = txJson.result || []
+      const txList: BlockscoutTx[] = txJson.result || []
 
       const txCount = txList.length
       const firstTs = parseInt(txList[0]?.timeStamp || '0', 10)
@@ -57,7 +60,7 @@ export async function POST(req: Request) {
       const walletAge = firstTs > 0 ? Math.floor((today - firstTs) / 86400) : 0
 
       const activeDates = [...new Set(
-        txList.map(tx =>
+        txList.map((tx: BlockscoutTx) =>
           new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10)
         )
       )].sort()
@@ -103,7 +106,9 @@ export async function POST(req: Request) {
       )
       const tokensJson: BlockscoutResponse<BlockscoutTx[]> = await tokenRes.json()
       const tokenCount = [...new Set(
-        (tokensJson.result || []).map(t => t.contractAddress).filter(Boolean)
+        (tokensJson.result || [])
+          .map(t => t.contractAddress)
+          .filter(Boolean)
       )].length
 
       return NextResponse.json({
@@ -130,7 +135,7 @@ export async function POST(req: Request) {
       `${baseUrl}?chain_id=${chainId}&module=account&action=txlistinternal&address=${address}&sort=asc&apikey=${apiKey}`
     )
     const intJson: BlockscoutResponse<BlockscoutTx[]> = await intRes.json()
-    const intList = intJson.result || []
+    const intList: BlockscoutTx[] = intJson.result || []
 
     const internalTxCount = intList.length
     const firstTs = parseInt(intList[0]?.timeStamp || '0', 10)
@@ -141,7 +146,7 @@ export async function POST(req: Request) {
       : ''
 
     const activeDates = [...new Set(
-      intList.map(tx =>
+      intList.map((tx: BlockscoutTx) =>
         new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10)
       )
     )].sort()
@@ -197,13 +202,20 @@ export async function POST(req: Request) {
       /http|base\.dev|mini-app|frame/i.test(t.tokenName || '')
     ).length
 
+    // ---------- AA metrics ----------
     const padded = `0x${address.toLowerCase().replace(/^0x/, '').padStart(64, '0')}`
     const topic0 =
       '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f'
     const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789'
 
     const aaRes = await fetch(
-      `${baseUrl}?chain_id=${chainId}&module=logs&action=getLogs&fromBlock=0&toBlock=latest&address=${entryPoint}&topic0=${topic0}&topic2=${padded}&apikey=${apiKey}`
+      `${baseUrl}?chain_id=${chainId}` +
+      `&module=logs&action=getLogs` +
+      `&fromBlock=0&toBlock=latest` +
+      `&address=${entryPoint}` +
+      `&topic0=${topic0}` +
+      `&topic2=${padded}` +
+      `&apikey=${apiKey}`
     )
     const aaJson: BlockscoutResponse<any[]> = await aaRes.json()
     const aaList = aaJson.result || []
@@ -240,4 +252,4 @@ export async function POST(req: Request) {
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
-        }
+}
