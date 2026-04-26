@@ -25,8 +25,6 @@ export interface ContractStats {
   tokensReceived: number;
   rareTokens: number;
   postTokens: number;
-  allAaTransactions: number;
-  aaPaymasterSuccess: number;
 }
 
 export type AddressStats =
@@ -262,8 +260,6 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
       tokensReceived,
       rareTokens,
       postTokens,
-      allAaTransactions,
-      aaPaymasterSuccess,
     },
   };
     }
