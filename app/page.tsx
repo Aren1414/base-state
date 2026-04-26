@@ -106,7 +106,7 @@ useEffect(() => {
   
     }
 
-    // Handle transaction submission
+   // Handle transaction submission
 const handleClick = async () => {
   setLoading(true)
   setTxFailed(false)
@@ -183,44 +183,44 @@ const handleClick = async () => {
   }
 }
 
-  // Handle sharing wallet stats
-  const handleShareText = async () => {
-    if (!stats) return
+// Handle sharing wallet stats
+const handleShareText = async () => {
+  if (!stats) return
 
-    const type = stats.type
-    const divider = '────────────────────'
-    let body = ''
+  const type = stats.type
+  const divider = '────────────────────'
+  let body = ''
 
-    if (type === 'wallet') {
-      const s = stats.data as WalletStats
-      body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
-    } else {
-      const s = stats.data as ContractStats
-      body = `📊 BaseApp Wallet Snapshot\n${divider}\nAge: ${s.age} day\nPost: ${s.postTokens}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
-    }
-
-    const castText = `Just checked my ${
-      type === 'wallet' ? 'wallet' : 'BaseApp wallet'
-    } stats using the BaseState Mini App 👇\n\n${body}`
-
-    const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
-
-try {
-  const isMiniApp = await sdk.isInMiniApp()
-
-  if (isMiniApp) {
-    await composeCast({ text: castText, embeds: [embedUrl] })
+  if (type === 'wallet') {
+    const s = stats.data as WalletStats
+    body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
   } else {
-    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-      castText
-    )}&embeds[]=${encodeURIComponent(embedUrl)}`
-    window.open(warpcastUrl, '_blank')
+    const s = stats.data as ContractStats
+    body = `📊 BaseApp Wallet Snapshot\n${divider}\nAge: ${s.age} day\nPost: ${s.postTokens}\nInternal Tx Count: ${s.internalTxCount}\nBest Streak: ${s.bestStreak} day\nUnique Senders: ${s.uniqueSenders}\nTokens Received: ${s.tokensReceived}\nAA Transactions: ${s.allAaTransactions}`
   }
-} catch (err) {
-  console.error('Share failed:', err)
-}
-  
 
+  const castText = `Just checked my ${
+    type === 'wallet' ? 'wallet' : 'BaseApp wallet'
+  } stats using the BaseState Mini App 👇\n\n${body}`
+
+  const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
+
+  try {
+    const isMiniApp = await sdk.isInMiniApp()
+
+    if (isMiniApp) {
+      await composeCast({ text: castText, embeds: [embedUrl] })
+    } else {
+      const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+        castText
+      )}&embeds[]=${encodeURIComponent(embedUrl)}`
+      window.open(warpcastUrl, '_blank')
+    }
+  } catch (err) {
+    console.error('Share failed:', err)
+  }
+}
+    
   // Download wallet card
   const downloadCard = async () => {
     const card = document.getElementById('walletCard')
