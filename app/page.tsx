@@ -149,7 +149,9 @@ const handleClick = async () => {
     console.log("Transaction sent:", hash)
 
     // ---- WAIT FOR CONFIRMATION ----
-    await walletClient.waitForTransactionReceipt({ hash })
+if (walletClient) {
+  await walletClient.waitForTransactionReceipt({ hash })
+}
 
     console.log("Transaction confirmed")
     setTxConfirmed(true)
