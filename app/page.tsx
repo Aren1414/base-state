@@ -219,7 +219,7 @@ try {
 } catch (err) {
   console.error('Share failed:', err)
 }
-  }
+  
 
   // Download wallet card
   const downloadCard = async () => {
