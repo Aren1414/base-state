@@ -50,18 +50,21 @@ interface EtherscanResponse<T> {
 }
 
 export async function fetchWalletStats(address: string, apiKey: string): Promise<AddressStats> {
-  const baseUrl = 'https://api.etherscan.io/v2/api';
+  // Blockscout PRO API (Etherscan-compatible)
+  const baseUrl = 'https://api.blockscout.com/v2/api';
   const chainId = 8453;
 
+  
   const codeRes = await fetch(
-    `${baseUrl}?chainid=${chainId}&module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`
+    `${baseUrl}?chain_id=${chainId}&module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`
   );
   const codeJson = await codeRes.json();
   const isContract = codeJson.result?.[0]?.ABI !== 'Contract source code not verified';
 
+  // ================== WALLET ==================
   if (!isContract) {
     const txRes = await fetch(
-      `${baseUrl}?chainid=${chainId}&module=account&action=txlist&address=${address}&sort=asc&apikey=${apiKey}`
+      `${baseUrl}?chain_id=${chainId}&module=account&action=txlist&address=${address}&sort=asc&apikey=${apiKey}`
     );
     const txJson: EtherscanResponse<EtherscanTx[]> = await txRes.json();
     const txList = txJson.result || [];
@@ -69,10 +72,12 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
     const txCount = txList.length;
     const firstTs = parseInt(txList[0]?.timeStamp || '0', 10);
     const today = Math.floor(Date.now() / 1000);
-    const walletAge = Math.floor((today - firstTs) / 86400);
+    const walletAge = firstTs > 0 ? Math.floor((today - firstTs) / 86400) : 0;
 
     const activeDates = [...new Set(
-      txList.map(tx => new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10))
+      txList.map(tx =>
+        new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10)
+      )
     )].sort();
 
     const activeDays = activeDates.length;
@@ -82,7 +87,9 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
       if (!prev) {
         streak = 1;
       } else {
-        const next = new Date(new Date(prev).getTime() + 86400000).toISOString().slice(0, 10);
+        const next = new Date(new Date(prev).getTime() + 86400000)
+          .toISOString()
+          .slice(0, 10);
         if (date === next) {
           streak++;
         } else {
@@ -95,23 +102,34 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
     best = Math.max(best, streak);
 
     const contracts = [...new Set(txList.map(tx => tx.to))].length;
-    const fees = txList.reduce((sum, tx) => sum + BigInt(tx.gasUsed) * BigInt(tx.gasPrice), 0n);
+
+    const fees = txList.reduce(
+      (sum, tx) => sum + BigInt(tx.gasUsed || '0') * BigInt(tx.gasPrice || '0'),
+      0n
+    );
     const feesEth = (Number(fees) / 1e18).toFixed(6);
 
-    const volume = txList.reduce((sum, tx) => sum + BigInt(tx.value), 0n);
+    const volume = txList.reduce(
+      (sum, tx) => sum + BigInt(tx.value || '0'),
+      0n
+    );
     const volumeEth = (Number(volume) / 1e18).toFixed(6);
 
     const balRes = await fetch(
-      `${baseUrl}?chainid=${chainId}&module=account&action=balance&address=${address}&apikey=${apiKey}`
+      `${baseUrl}?chain_id=${chainId}&module=account&action=balance&address=${address}&apikey=${apiKey}`
     );
     const balanceJson: EtherscanResponse<string> = await balRes.json();
-    const balanceEth = (Number(balanceJson.result) / 1e18).toFixed(6);
+    const balanceEth = (Number(balanceJson.result || '0') / 1e18).toFixed(6);
 
     const tokenRes = await fetch(
-      `${baseUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
+      `${baseUrl}?chain_id=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
     );
     const tokensJson: EtherscanResponse<EtherscanTx[]> = await tokenRes.json();
-    const tokenCount = [...new Set(tokensJson.result.map(t => t.contractAddress).filter(Boolean))].length;
+    const tokenCount = [...new Set(
+      (tokensJson.result || [])
+        .map(t => t.contractAddress)
+        .filter(Boolean)
+    )].length;
 
     return {
       type: 'wallet',
@@ -130,8 +148,9 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
     };
   }
 
+  // ================== CONTRACT / SMART WALLET ==================
   const intRes = await fetch(
-    `${baseUrl}?chainid=${chainId}&module=account&action=txlistinternal&address=${address}&sort=asc&apikey=${apiKey}`
+    `${baseUrl}?chain_id=${chainId}&module=account&action=txlistinternal&address=${address}&sort=asc&apikey=${apiKey}`
   );
   const intJson: EtherscanResponse<EtherscanTx[]> = await intRes.json();
   const intList = intJson.result || [];
@@ -139,11 +158,15 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
   const internalTxCount = intList.length;
   const firstTs = parseInt(intList[0]?.timeStamp || '0', 10);
   const today = Math.floor(Date.now() / 1000);
-  const age = Math.floor((today - firstTs) / 86400);
-  const firstSeen = new Date(firstTs * 1000).toISOString().slice(0, 10);
+  const age = firstTs > 0 ? Math.floor((today - firstTs) / 86400) : 0;
+  const firstSeen = firstTs > 0
+    ? new Date(firstTs * 1000).toISOString().slice(0, 10)
+    : '';
 
   const activeDates = [...new Set(
-    intList.map(tx => new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10))
+    intList.map(tx =>
+      new Date(parseInt(tx.timeStamp, 10) * 1000).toISOString().slice(0, 10)
+    )
   )].sort();
 
   const activeDays = activeDates.length;
@@ -153,7 +176,9 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
     if (!prev) {
       streak = 1;
     } else {
-      const next = new Date(new Date(prev).getTime() + 86400000).toISOString().slice(0, 10);
+      const next = new Date(new Date(prev).getTime() + 86400000)
+        .toISOString()
+        .slice(0, 10);
       if (date === next) {
         streak++;
       } else {
@@ -167,47 +192,66 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
 
   const uniqueSenders = [...new Set(intList.map(tx => tx.to))].length;
   const zeroEthTx = intList.filter(tx => tx.value === '0').length;
-  const volume = intList.reduce((sum, tx) => sum + BigInt(tx.value), 0n);
+
+  const volume = intList.reduce(
+    (sum, tx) => sum + BigInt(tx.value || '0'),
+    0n
+  );
   const volumeEth = (Number(volume) / 1e18).toFixed(6);
 
   const balRes = await fetch(
-    `${baseUrl}?chainid=${chainId}&module=account&action=balance&address=${address}&apikey=${apiKey}`
+    `${baseUrl}?chain_id=${chainId}&module=account&action=balance&address=${address}&apikey=${apiKey}`
   );
   const balanceJson: EtherscanResponse<string> = await balRes.json();
-  const balanceEth = (Number(balanceJson.result) / 1e18).toFixed(6);
+  const balanceEth = (Number(balanceJson.result || '0') / 1e18).toFixed(6);
 
   const tokenRes = await fetch(
-    `${baseUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
+    `${baseUrl}?chain_id=${chainId}&module=account&action=tokentx&address=${address}&apikey=${apiKey}`
   );
   const tokensJson: EtherscanResponse<EtherscanTx[]> = await tokenRes.json();
   const tokenList = tokensJson.result || [];
-  const tokensReceived = [...new Set(tokenList.map(t => t.contractAddress).filter(Boolean))].length;
 
-  const rareTokens = Object.values(tokenList.reduce((acc: Record<string, number>, t) => {
-    if (t.contractAddress) {
-      acc[t.contractAddress] = (acc[t.contractAddress] || 0) + 1;
-    }
-    return acc;
-  }, {})).filter(c => c === 1).length;
+  const tokensReceived = [...new Set(
+    tokenList.map(t => t.contractAddress).filter(Boolean)
+  )].length;
+
+  const rareTokens = Object.values(
+    tokenList.reduce((acc: Record<string, number>, t) => {
+      if (t.contractAddress) {
+        acc[t.contractAddress] = (acc[t.contractAddress] || 0) + 1;
+      }
+      return acc;
+    }, {})
+  ).filter(c => c === 1).length;
 
   const postTokens = tokenList.filter(t =>
     /http|base\.dev|mini-app|frame/i.test(t.tokenName || '')
   ).length;
 
+  // ---------- AA metrics (Blockscout) ----------
   const padded = `0x${address.toLowerCase().replace(/^0x/, '').padStart(64, '0')}`;
-  const topic0 = '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f';
+  const topic0 =
+    '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f';
   const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
   const aaRes = await fetch(
-    `${baseUrl}?chainid=${chainId}&module=logs&action=getLogs&fromBlock=0&toBlock=latest&address=${entryPoint}&topic0=${topic0}&topic2=${padded}&apikey=${apiKey}`
+    `${baseUrl}?chain_id=${chainId}` +
+    `&module=logs&action=getLogs` +
+    `&fromBlock=0&toBlock=latest` +
+    `&address=${entryPoint}` +
+    `&topic0=${topic0}` +
+    `&topic2=${padded}` +
+    `&apikey=${apiKey}`
   );
   const aaJson: EtherscanResponse<any[]> = await aaRes.json();
   const aaList = aaJson.result || [];
 
   const allAaTransactions = aaList.length;
   const aaPaymasterSuccess = aaList.filter(log =>
-    log.data?.slice(66, 130) === '0000000000000000000000000000000000000000000000000000000000000001' &&
-    log.topics?.[3] !== '0x0000000000000000000000000000000000000000000000000000000000000000'
+    log.data?.slice(66, 130) ===
+      '0000000000000000000000000000000000000000000000000000000000000001' &&
+    log.topics?.[3] !==
+      '0x0000000000000000000000000000000000000000000000000000000000000000'
   ).length;
 
   return {
@@ -230,4 +274,4 @@ export async function fetchWalletStats(address: string, apiKey: string): Promise
       aaPaymasterSuccess,
     },
   };
-}
+    }
