@@ -103,8 +103,6 @@ useEffect(() => {
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id
 
-  
-    }
 
    // Handle transaction submission
 const handleClick = async () => {
