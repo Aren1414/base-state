@@ -11,6 +11,10 @@ let fetchWithPayment: any = null;
 export function initX402Client(walletClient: WalletClient) {
   if (client) return { client, fetchWithPayment };
 
+  if (!walletClient || !walletClient.account) {
+    throw new Error("walletClient not ready");
+  }
+
   const signer = {
     address: walletClient.account.address,
     sendTransaction: async (tx: any) => {
@@ -19,6 +23,7 @@ export function initX402Client(walletClient: WalletClient) {
   };
 
   const c = new x402Client();
+
   c.register("eip155:8453", new ExactEvmScheme(signer));
   c.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
@@ -29,6 +34,8 @@ export function initX402Client(walletClient: WalletClient) {
 }
 
 export function getX402() {
-  if (!client || !fetchWithPayment) throw new Error("x402 not initialized");
+  if (!client || !fetchWithPayment) {
+    throw new Error("x402 not initialized");
+  }
   return { client, fetchWithPayment };
 }
