@@ -12,8 +12,16 @@ export function initX402Client(walletClient: WalletClient) {
 
   const c = new x402Client();
 
-  c.register("eip155:8453", new ExactEvmScheme(walletClient));
+  
+  const signer = {
+    address: walletClient.account.address,
+    sendTransaction: async (tx) => {
+      return walletClient.sendTransaction(tx);
+    }
+  };
 
+  
+  c.register("eip155:8453", new ExactEvmScheme(signer));
   c.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
   client = c;
