@@ -23,6 +23,11 @@ import { initX402Client, getX402 } from '../src/lib/x402Client'
 
 const MINI_APP_URL = 'https://base-state.vercel.app'
 
+type StatsResponse = {
+  type: 'wallet' | 'contract'
+  data: WalletStats | ContractStats
+}
+
 export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
@@ -32,11 +37,11 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] = useState(null)
+  const [stats, setStats] = useState<StatsResponse | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
-  const [mintedImageUrl, setMintedImageUrl] = useState(null)
+  const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
 
   useEffect(() => {
@@ -258,4 +263,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+        }
