@@ -8,7 +8,6 @@ import {
   useWalletClient,
   usePublicClient
 } from 'wagmi'
-import { encodeFunctionData, createWalletClient, custom } from 'viem'
 import {
   useMiniKit,
   useAuthenticate,
@@ -21,10 +20,10 @@ import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
 import styles from './page.module.css'
 import type { WalletStats, ContractStats } from '../src/types'
+import { initX402Client, getX402Client } from '../src/lib/x402Client'
 
 const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
-const DATA_SUFFIX = "0x62635f6c61786875716f670b0080218021802180218021802180218021"
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
@@ -41,6 +40,18 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
+  const [x402Ready, setX402Ready] = useState(false)
+
+  useEffect(() => {
+    if (walletClient && !x402Ready) {
+      try {
+        initX402Client(walletClient as any)
+        setX402Ready(true)
+      } catch (err) {
+        console.error("x402 init failed:", err)
+      }
+    }
+  }, [walletClient, x402Ready])
 
   useEffect(() => {
     const initApp = async () => {
@@ -94,59 +105,38 @@ export default function Home() {
   const user = context?.user
   const fid = user?.fid
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
-  const ready = fid && walletAddress && chainId === base.id
+  const ready = fid && walletAddress && chainId === base.id && x402Ready
 
-  // Handle transaction submission
+  
   const handleClick = async () => {
     setLoading(true)
     setTxFailed(false)
 
     try {
-      const data = encodeFunctionData({
-        abi: [
-          { inputs: [], name: 'ping', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-        ],
-        functionName: 'ping',
-        args: [],
+      if (!x402Ready) throw new Error("x402 not ready")
+      if (!walletAddress) throw new Error("Wallet address missing")
+
+      const client = getX402Client()
+
+      
+      const result = await client.pay({
+        scheme: "exact",
+        price: "$0.001",
+        network: "eip155:8453",
+        payTo: CONTRACT_ADDRESS,
+        description: "BaseState activity ping"
       })
 
-      let hash
+      const hash = result?.settlement?.txHash
+      if (!hash) throw new Error("No settlement tx hash")
 
-      if (walletClient) {
-        hash = await walletClient.sendTransaction({
-          to: CONTRACT_ADDRESS,
-          data,
-          dataSuffix: DATA_SUFFIX
-        })
-      } else if (typeof window !== 'undefined' && window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-        if (!accounts || accounts.length === 0) throw new Error('No accounts found')
+      console.log("x402 payment tx:", hash)
 
-        const fallbackSigner = createWalletClient({
-          chain: base,
-          transport: custom(window.ethereum)
-        })
-
-        hash = await fallbackSigner.sendTransaction({
-          account: accounts[0],
-          to: CONTRACT_ADDRESS,
-          data,
-          dataSuffix: DATA_SUFFIX
-        })
-      } else {
-        throw new Error('No signer available')
-      }
-
-      console.log("Transaction sent:", hash)
-
-      // ✅ FIX
       if (!publicClient) throw new Error('No public client')
       await publicClient.waitForTransactionReceipt({ hash })
 
       console.log("Transaction confirmed")
       setTxConfirmed(true)
-
-      if (!walletAddress) throw new Error('Wallet address is missing')
 
       const res = await fetch('/api/stats', {
         method: 'POST',
@@ -311,4 +301,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+        }
