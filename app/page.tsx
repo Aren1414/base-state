@@ -48,7 +48,7 @@ export default function Home() {
         initX402Client(walletClient as any)
         setX402Ready(true)
       } catch (err) {
-        console.error("x402 init failed:", err)
+        console.error('x402 init failed:', err)
       }
     }
   }, [walletClient, x402Ready])
@@ -56,104 +56,102 @@ export default function Home() {
   useEffect(() => {
     const initApp = async () => {
       try {
-        const isFarcasterMiniApp = await sdk.isInMiniApp();
+        const isFarcasterMiniApp = await sdk.isInMiniApp()
         if (!isFarcasterMiniApp) {
-          if (!isFrameReady) setFrameReady();
-          return;
+          if (!isFrameReady) setFrameReady()
+          return
         }
 
-        const ctx = await sdk.context;
-        const isBaseApp = String(ctx?.client?.clientFid) === '309857';
+        const ctx = await sdk.context
+        const isBaseApp = String(ctx?.client?.clientFid) === '309857'
 
         if (!isBaseApp) {
           try {
-            await sdk.actions.ready();
+            await sdk.actions.ready()
 
             if (ctx?.client && !ctx.client.added) {
               try {
-                await sdk.actions.addMiniApp();
+                await sdk.actions.addMiniApp()
               } catch (err) {
-                console.warn('User rejected addMiniApp:', err);
+                console.warn('User rejected addMiniApp:', err)
               }
             }
 
             if (ctx.location?.type !== 'launcher') {
-              await signIn();
+              await signIn()
             }
           } catch (err) {
-            console.error('Farcaster MiniApp initialization failed:', err);
+            console.error('Farcaster MiniApp initialization failed:', err)
           }
         }
 
-        if (!isFrameReady) setFrameReady();
+        if (!isFrameReady) setFrameReady()
       } catch (err) {
-        console.error('initApp error:', err);
-        if (!isFrameReady) setFrameReady();
+        console.error('initApp error:', err)
+        if (!isFrameReady) setFrameReady()
       }
-    };
+    }
 
-    initApp();
-  }, [isFrameReady, setFrameReady, signIn]);
+    initApp()
+  }, [isFrameReady, setFrameReady, signIn])
 
   useEffect(() => {
-    const isBaseApp = typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
+    const isBaseApp =
+      typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
     if (!isBaseApp && chainId !== base.id && switchChain) {
       switchChain({ chainId: base.id })
     }
-  }, [chainId, switchChain]);
-  
+  }, [chainId, switchChain])
+
   const user = context?.user
   const fid = user?.fid
   const displayName = user?.displayName || fid || walletAddress || 'Guest'
   const ready = fid && walletAddress && chainId === base.id && x402Ready
 
-  
   const handleClick = async () => {
     setLoading(true)
     setTxFailed(false)
 
     try {
-      if (!x402Ready) throw new Error("x402 not ready")
-      if (!walletAddress) throw new Error("Wallet address missing")
+      if (!x402Ready) throw new Error('x402 not ready')
+      if (!walletAddress) throw new Error('Wallet address missing')
 
       const client = getX402Client()
 
-      
       const result = await client.pay({
-        scheme: "exact",
-        price: "$0.001",
-        network: "eip155:8453",
+        scheme: 'exact',
+        price: '$0.001',
+        network: 'eip155:8453',
         payTo: CONTRACT_ADDRESS,
-        description: "BaseState activity ping"
+        description: 'BaseState activity ping',
       })
 
       const hash = result?.settlement?.txHash
-      if (!hash) throw new Error("No settlement tx hash")
+      if (!hash) throw new Error('No settlement tx hash')
 
-      console.log("x402 payment tx:", hash)
+      console.log('x402 payment tx:', hash)
 
       if (!publicClient) throw new Error('No public client')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      console.log("Transaction confirmed")
+      console.log('Transaction confirmed')
       setTxConfirmed(true)
 
       const res = await fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: walletAddress })
+        body: JSON.stringify({ address: walletAddress }),
       })
 
       const json = await res.json()
 
       if (json.error) {
-        console.error("Stats fetch error:", json.error)
+        console.error('Stats fetch error:', json.error)
         setTxFailed(true)
         return
       }
 
       setStats(json)
-
     } catch (err) {
       console.error('Transaction failed:', err)
       setTxFailed(true)
@@ -190,7 +188,7 @@ export default function Home() {
         await composeCast({ text: castText, embeds: [embedUrl] })
       } else {
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-          castText
+          castText,
         )}&embeds[]=${encodeURIComponent(embedUrl)}`
         window.open(warpcastUrl, '_blank')
       }
@@ -198,7 +196,7 @@ export default function Home() {
       console.error('Share failed:', err)
     }
   }
-    
+
   const downloadCard = async () => {
     const card = document.getElementById('walletCard')
     if (!card) return
@@ -301,4 +299,4 @@ export default function Home() {
       </div>
     </div>
   )
-        }
+                             }
