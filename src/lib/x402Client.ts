@@ -1,4 +1,4 @@
-import { x402Client } from "@x402/fetch";
+import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
 import { BuilderCodeClientExtension } from "@x402/extensions/builder-code";
 import type { WalletClient } from "viem";
@@ -6,29 +6,29 @@ import type { WalletClient } from "viem";
 const BUILDER_CODE = "bc_laxhuqog";
 
 let client: x402Client | null = null;
+let fetchWithPayment: any = null;
 
 export function initX402Client(walletClient: WalletClient) {
-  if (client) return client;
+  if (client) return { client, fetchWithPayment };
 
-  const c = new x402Client();
-
-  
   const signer = {
     address: walletClient.account.address,
-    sendTransaction: async (tx) => {
+    sendTransaction: async (tx: any) => {
       return walletClient.sendTransaction(tx);
-    }
+    },
   };
 
-  
+  const c = new x402Client();
   c.register("eip155:8453", new ExactEvmScheme(signer));
   c.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
   client = c;
-  return client;
+  fetchWithPayment = wrapFetchWithPayment(fetch, client);
+
+  return { client, fetchWithPayment };
 }
 
-export function getX402Client() {
-  if (!client) throw new Error("x402 client not initialized");
-  return client;
+export function getX402() {
+  if (!client || !fetchWithPayment) throw new Error("x402 not initialized");
+  return { client, fetchWithPayment };
 }
