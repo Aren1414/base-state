@@ -6,7 +6,6 @@ import {
   useChainId,
   useSwitchChain,
   useWalletClient,
-  usePublicClient
 } from 'wagmi'
 import {
   useMiniKit,
@@ -27,7 +26,6 @@ const MINI_APP_URL = 'https://base-state.vercel.app'
 export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
-  const publicClient = usePublicClient()
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const { signIn } = useAuthenticate()
   const { composeCast } = useComposeCast()
@@ -46,7 +44,7 @@ export default function Home() {
       try {
         initX402Client(walletClient)
         setX402Ready(true)
-      } catch (err) {}
+      } catch {}
     }
   }, [walletClient, x402Ready])
 
@@ -110,8 +108,6 @@ export default function Home() {
 
       const json = await res.json()
       const hash = json.hash
-
-      await publicClient.waitForTransactionReceipt({ hash })
 
       setTxConfirmed(true)
 
@@ -262,4 +258,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
+    }
