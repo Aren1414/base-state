@@ -20,9 +20,8 @@ import { fetchWalletStats } from '../src/lib/fetchWalletStats'
 import { base } from 'viem/chains'
 import styles from './page.module.css'
 import type { WalletStats, ContractStats } from '../src/types'
-import { initX402Client, getX402Client } from '../src/lib/x402Client'
+import { initX402Client, getX402 } from '../src/lib/x402Client'
 
-const CONTRACT_ADDRESS = '0xCDbb19b042DFf53F0a30Da02cCfA24fb25fcEb1d'
 const MINI_APP_URL = 'https://base-state.vercel.app'
 
 export default function Home() {
@@ -35,29 +34,27 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
+  const [stats, setStats] = useState(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
-  const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
+  const [mintedImageUrl, setMintedImageUrl] = useState(null)
   const [x402Ready, setX402Ready] = useState(false)
 
   useEffect(() => {
     if (walletClient && !x402Ready) {
       try {
-        initX402Client(walletClient as any)
+        initX402Client(walletClient)
         setX402Ready(true)
-      } catch (err) {
-        console.error('x402 init failed:', err)
-      }
+      } catch (err) {}
     }
   }, [walletClient, x402Ready])
 
   useEffect(() => {
     const initApp = async () => {
       try {
-        const isFarcasterMiniApp = await sdk.isInMiniApp()
-        if (!isFarcasterMiniApp) {
+        const isMini = await sdk.isInMiniApp()
+        if (!isMini) {
           if (!isFrameReady) setFrameReady()
           return
         }
@@ -66,28 +63,19 @@ export default function Home() {
         const isBaseApp = String(ctx?.client?.clientFid) === '309857'
 
         if (!isBaseApp) {
-          try {
-            await sdk.actions.ready()
-
-            if (ctx?.client && !ctx.client.added) {
-              try {
-                await sdk.actions.addMiniApp()
-              } catch (err) {
-                console.warn('User rejected addMiniApp:', err)
-              }
-            }
-
-            if (ctx.location?.type !== 'launcher') {
-              await signIn()
-            }
-          } catch (err) {
-            console.error('Farcaster MiniApp initialization failed:', err)
+          await sdk.actions.ready()
+          if (ctx?.client && !ctx.client.added) {
+            try {
+              await sdk.actions.addMiniApp()
+            } catch {}
+          }
+          if (ctx.location?.type !== 'launcher') {
+            await signIn()
           }
         }
 
         if (!isFrameReady) setFrameReady()
-      } catch (err) {
-        console.error('initApp error:', err)
+      } catch {
         if (!isFrameReady) setFrameReady()
       }
     }
@@ -113,47 +101,29 @@ export default function Home() {
     setTxFailed(false)
 
     try {
-      if (!x402Ready) throw new Error('x402 not ready')
-      if (!walletAddress) throw new Error('Wallet address missing')
+      const { fetchWithPayment } = getX402()
 
-      const client = getX402Client()
-
-      const result = await client.pay({
-        scheme: 'exact',
-        price: '$0.001',
-        network: 'eip155:8453',
-        payTo: CONTRACT_ADDRESS,
-        description: 'BaseState activity ping',
+      const res = await fetchWithPayment('/api/ping', {
+        method: 'POST',
+        body: JSON.stringify({ address: walletAddress }),
       })
 
-      const hash = result?.settlement?.txHash
-      if (!hash) throw new Error('No settlement tx hash')
+      const json = await res.json()
+      const hash = json.hash
 
-      console.log('x402 payment tx:', hash)
-
-      if (!publicClient) throw new Error('No public client')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      console.log('Transaction confirmed')
       setTxConfirmed(true)
 
-      const res = await fetch('/api/stats', {
+      const statsRes = await fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: walletAddress }),
       })
 
-      const json = await res.json()
-
-      if (json.error) {
-        console.error('Stats fetch error:', json.error)
-        setTxFailed(true)
-        return
-      }
-
-      setStats(json)
-    } catch (err) {
-      console.error('Transaction failed:', err)
+      const statsJson = await statsRes.json()
+      setStats(statsJson)
+    } catch {
       setTxFailed(true)
     } finally {
       setLoading(false)
@@ -182,9 +152,8 @@ export default function Home() {
     const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
 
     try {
-      const isMiniApp = await sdk.isInMiniApp()
-
-      if (isMiniApp) {
+      const isMini = await sdk.isInMiniApp()
+      if (isMini) {
         await composeCast({ text: castText, embeds: [embedUrl] })
       } else {
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
@@ -192,9 +161,7 @@ export default function Home() {
         )}&embeds[]=${encodeURIComponent(embedUrl)}`
         window.open(warpcastUrl, '_blank')
       }
-    } catch (err) {
-      console.error('Share failed:', err)
-    }
+    } catch {}
   }
 
   const downloadCard = async () => {
@@ -244,9 +211,7 @@ export default function Home() {
               onClick={handleClick}
               disabled={!ready || loading}
             >
-              {loading
-                ? 'Submitting transaction...'
-                : 'Submit activity and retrieve wallet stats'}
+              {loading ? 'Submitting transaction...' : 'Submit activity and retrieve wallet stats'}
             </button>
 
             {!ready && !loading && (
@@ -257,9 +222,7 @@ export default function Home() {
 
             {txFailed && (
               <>
-                <p className={styles.statusMessage}>
-                  Transaction failed. Please try again.
-                </p>
+                <p className={styles.statusMessage}>Transaction failed. Please try again.</p>
                 <button className={styles.retryButton} onClick={handleClick}>
                   Retry
                 </button>
@@ -299,4 +262,4 @@ export default function Home() {
       </div>
     </div>
   )
-                             }
+}
