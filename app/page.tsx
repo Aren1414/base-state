@@ -23,11 +23,6 @@ import { initX402Client, getX402 } from '../src/lib/x402Client'
 
 const MINI_APP_URL = 'https://base-state.vercel.app'
 
-type StatsResponse = {
-  type: 'wallet' | 'contract'
-  data: WalletStats | ContractStats
-}
-
 export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
@@ -37,7 +32,8 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] = useState<StatsResponse | null>(null)
+  const [stats, setStats] =
+    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
@@ -122,7 +118,8 @@ export default function Home() {
         body: JSON.stringify({ address: walletAddress }),
       })
 
-      const statsJson = await statsRes.json()
+      const statsJson =
+        (await statsRes.json()) as Awaited<ReturnType<typeof fetchWalletStats>>
       setStats(statsJson)
     } catch {
       setTxFailed(true)
