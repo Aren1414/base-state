@@ -20,6 +20,9 @@ export function initX402Client(walletClient: WalletClient) {
     sendTransaction: async (tx: any) => {
       return walletClient.sendTransaction(tx);
     },
+    signTypedData: async (params: any) => {
+      return walletClient.signTypedData(params);
+    },
   };
 
   const c = new x402Client();
