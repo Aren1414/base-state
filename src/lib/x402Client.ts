@@ -22,13 +22,9 @@ export function initX402Client(walletClient: WalletClient) {
 
   const client = new x402Client();
 
-  // Register signer for all EVM chains
   client.register("eip155:*", new ExactEvmScheme(signer));
-
-  // Add Builder Code
   client.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
-  // Wrap fetch with X402 payment logic
   fetchWithPaymentSingleton = wrapFetchWithPayment(fetch, client);
 }
 
