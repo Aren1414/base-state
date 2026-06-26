@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import express from "express";
 import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
@@ -21,15 +20,15 @@ app.use(
             scheme: "exact",
             price: "$0.02",
             network: "eip155:8453",
-            payTo: "0xb46043d161bde18ef6974217a686f381b1e91138",
-          },
+            payTo: "0xb46043d161bde18ef6974217a686f381b1e91138"
+          }
         ],
         description: "BaseState activity submission",
         mimeType: "application/json",
         extensions: {
-          [BUILDER_CODE]: declareBuilderCodeExtension("bc_laxhuqog"),
-        },
-      },
+          [BUILDER_CODE]: declareBuilderCodeExtension("bc_laxhuqog")
+        }
+      }
     },
     server
   )
@@ -39,6 +38,7 @@ app.post("/ping", (req, res) => {
   res.json({ ok: true });
 });
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  return app(req as any, res as any);
+
+export default function handler(req, res) {
+  return app(req, res);
 }
