@@ -34,11 +34,12 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] = useState(null)
+  const [stats, setStats] =
+    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
-  const [mintedImageUrl, setMintedImageUrl] = useState(null)
+  const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
   const [isBaseApp, setIsBaseApp] = useState(false)
   const [appReady, setAppReady] = useState(false)
@@ -46,7 +47,7 @@ export default function Home() {
   useEffect(() => {
     if (!walletClient || x402Ready) return
     try {
-      initX402Client(walletClient)
+      initX402Client(walletClient as any)
       setX402Ready(true)
     } catch {}
   }, [walletClient, x402Ready])
@@ -61,17 +62,25 @@ export default function Home() {
           if (!isFrameReady) setFrameReady()
           return
         }
-        const ctx = await sdk.context
-        const fid = Number(ctx?.client?.clientFid) || Number(ctx?.client?.fid) || 0
+        const rawCtx = await sdk.context
+        const ctx: any = rawCtx
+        const fid =
+          Number(ctx?.client?.clientFid) ||
+          Number(ctx?.client?.fid) ||
+          0
         const baseApp = fid === 309857
         setIsBaseApp(baseApp)
         await sdk.actions.ready()
         if (!baseApp) {
           try {
-            if (ctx?.client && !ctx.client.added) await sdk.actions.addMiniApp()
+            if (ctx?.client && !ctx.client.added) {
+              await sdk.actions.addMiniApp()
+            }
           } catch {}
           try {
-            if (ctx.location?.type !== 'launcher') await signIn()
+            if (ctx.location?.type !== 'launcher') {
+              await signIn()
+            }
           } catch {}
         }
         if (!isFrameReady) setFrameReady()
@@ -98,6 +107,7 @@ export default function Home() {
   }, [appReady, chainId, switchChain])
 
   const user = context?.user
+
   const displayName =
     user?.displayName ||
     user?.username ||
@@ -105,7 +115,10 @@ export default function Home() {
     walletAddress?.slice(0, 6) ||
     'Guest'
 
-  const ready = appReady && walletAddress && x402Ready
+  const ready =
+    appReady &&
+    !!walletAddress &&
+    x402Ready
 
   const handleClick = async () => {
     if (!ready) return
@@ -124,7 +137,8 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: walletAddress }),
       })
-      const statsJson = await statsRes.json()
+      const statsJson =
+        (await statsRes.json()) as Awaited<ReturnType<typeof fetchWalletStats>>
       setStats(statsJson)
     } catch {
       setTxFailed(true)
@@ -139,13 +153,15 @@ export default function Home() {
     const divider = '────────────────────'
     let body = ''
     if (type === 'wallet') {
-      const s = stats.data
+      const s = stats.data as WalletStats
       body = `📊 Wallet Snapshot\n${divider}\nWallet Age: ${s.walletAge} day\nActive Days: ${s.activeDays}\nTx Count: ${s.txCount}\nBest Streak: ${s.bestStreak} day\nContracts: ${s.contracts}\nTokens: ${s.tokens}\nVolume Sent (ETH): ${s.volumeEth}`
     } else {
-      const s = stats.data
+      const s = stats.data as ContractStats
       body = `📊 BaseApp Wallet Snapshot — Age: ${s.age} day • Post: ${s.postTokens} • Internal Tx Count: ${s.internalTxCount} • Best Streak: ${s.bestStreak} day • Unique Senders: ${s.uniqueSenders} • Tokens Received: ${s.tokensReceived}`
     }
-    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'BaseApp wallet'} stats using the BaseState Mini App 👇\n\n${body}`
+    const castText = `Just checked my ${
+      type === 'wallet' ? 'wallet' : 'BaseApp wallet'
+    } stats using the BaseState Mini App 👇\n\n${body}`
     const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
     try {
       const mini = await sdk.isInMiniApp()
@@ -153,7 +169,7 @@ export default function Home() {
         await composeCast({ text: castText, embeds: [embedUrl] })
       } else {
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-          castText
+          castText,
         )}&embeds[]=${encodeURIComponent(embedUrl)}`
         window.open(warpcastUrl, '_blank')
       }
@@ -206,13 +222,13 @@ export default function Home() {
             {!ready && !loading && (
               <p className={styles.statusMessage}>
                 {!walletAddress
-                  ? 'Wallet not connected.'
-                  : 'Wallet not ready.'}
+                  ? 'Wallet not connected. Please connect your wallet.'
+                  : 'Wallet not ready. Please reconnect or reload inside Farcaster/Base App.'}
               </p>
             )}
             {txFailed && (
               <>
-                <p className={styles.statusMessage}>Transaction failed.</p>
+                <p className={styles.statusMessage}>Transaction failed. Please try again.</p>
                 <button className={styles.retryButton} onClick={handleClick}>
                   Retry
                 </button>
@@ -243,10 +259,11 @@ export default function Home() {
           </>
         ) : (
           <p className={styles.statusMessage}>
-            Fetching wallet stats… <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
+            Fetching wallet stats, please wait…{' '}
+            <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
           </p>
         )}
       </div>
     </div>
   )
-    }
+            }
