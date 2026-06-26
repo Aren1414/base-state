@@ -1,32 +1,32 @@
-import type { Metadata } from "next";
-import { Inter, Source_Code_Pro } from "next/font/google";
-import { minikitConfig } from "../minikit.config";
-import { RootProvider } from "./rootProvider";
-import { SafeArea } from "@coinbase/onchainkit/minikit";
-import FrameReady from "./components/FrameReady";
-import WalletCheck from "./components/WalletCheck";
-import "./globals.css";
-import React from "react";
+import type { Metadata } from 'next'
+import { Inter, Source_Code_Pro } from 'next/font/google'
+import { minikitConfig } from '../minikit.config'
+import { RootProvider } from './rootProvider'
+import { SafeArea } from '@coinbase/onchainkit/minikit'
+import FrameReady from './components/FrameReady'
+import WalletCheck from './components/WalletCheck'
+import './globals.css'
+import React from 'react'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cfg = minikitConfig.miniapp;
+  const cfg = minikitConfig.miniapp
   const ensureHttps = (u?: string) =>
-    !u ? undefined : u.startsWith("http") ? u : `https://${u.replace(/^\/+/, "")}`;
+    !u ? undefined : u.startsWith('http') ? u : `https://${u.replace(/^\/+/, '')}`
 
-  const canonical = ensureHttps(cfg.homeUrl);
+  const canonical = ensureHttps(cfg.homeUrl)
   const imageUrl =
     ensureHttps(cfg.ogImageUrl) ||
     ensureHttps(cfg.heroImageUrl) ||
     ensureHttps(cfg.splashImageUrl) ||
-    `${canonical}/embed.png`;
+    `${canonical}/embed.png`
 
   const embed = {
     version: cfg.version,
     imageUrl,
     button: {
-      title: "Launch Mini App",
+      title: 'Launch Mini App',
       action: {
-        type: "launch_frame",
+        type: 'launch_frame',
         name: cfg.name,
         url: canonical,
         splashImageUrl: ensureHttps(cfg.splashImageUrl),
@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     app: {
       canonical,
     },
-  };
+  }
 
   return {
     title: cfg.ogTitle,
@@ -47,21 +47,23 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [imageUrl],
       url: canonical,
     },
-    
     icons: {
-      icon: "/favicon.ico?v=2",
-      shortcut: "/favicon.ico?v=2",
-      apple: "/favicon.ico?v=2",
+      icon: '/favicon.ico?v=2',
+      shortcut: '/favicon.ico?v=2',
+      apple: '/favicon.ico?v=2',
     },
     other: {
-      "fc:miniapp": JSON.stringify(embed),
-      "fc:frame": JSON.stringify(embed),
+      'fc:miniapp': JSON.stringify(embed),
+      'fc:frame': JSON.stringify(embed),
     },
-  };
+  }
 }
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
-const sourceCodePro = Source_Code_Pro({ variable: "--font-source-code-pro", subsets: ["latin"] });
+const inter = Inter({ variable: '--font-inter', subsets: ['latin'] })
+const sourceCodePro = Source_Code_Pro({
+  variable: '--font-source-code-pro',
+  subsets: ['latin'],
+})
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -76,5 +78,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </body>
       </html>
     </RootProvider>
-  );
+  )
 }
