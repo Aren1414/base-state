@@ -51,27 +51,25 @@ export default function Home() {
   const [isBaseApp, setIsBaseApp] = useState(false)
   const [appReady, setAppReady] = useState(false)
 
+  
   useEffect(() => {
-    if (!x402Ready) {
-      if (isBaseApp) {
-        setX402Ready(true)
-        return
-      }
-      if (walletClient) {
-        try {
-          initX402Client(walletClient)
-          setX402Ready(true)
-        } catch {}
-      }
+    if (!walletClient || x402Ready) return
+    try {
+      initX402Client(walletClient as any)
+      setX402Ready(true)
+    } catch {
+      
     }
-  }, [walletClient, x402Ready, isBaseApp])
+  }, [walletClient, x402Ready])
 
+  
   useEffect(() => {
     const init = async () => {
       try {
         const insideMini = await sdk.isInMiniApp()
 
         if (!insideMini) {
+          // Standard Web App (Base App)
           setIsBaseApp(true)
           setAppReady(true)
           if (!isFrameReady) setFrameReady()
@@ -107,6 +105,7 @@ export default function Home() {
         if (!isFrameReady) setFrameReady()
         setAppReady(true)
       } catch {
+        
         setIsBaseApp(true)
         if (!isFrameReady) setFrameReady()
         setAppReady(true)
@@ -116,6 +115,7 @@ export default function Home() {
     init()
   }, [isFrameReady, setFrameReady, signIn])
 
+  
   useEffect(() => {
     if (!appReady) return
 
@@ -142,32 +142,24 @@ export default function Home() {
   const ready =
     appReady &&
     !!walletAddress &&
-    chainId === base.id &&
     x402Ready
 
   const handleClick = async () => {
-    if (!walletAddress) return
+    if (!walletAddress || !ready) return
 
     setLoading(true)
     setTxFailed(false)
 
     try {
-      if (isBaseApp) {
-        const res = await fetch('/api/ping', {
-          method: 'POST',
-          body: JSON.stringify({ address: walletAddress }),
-        })
-        await res.json()
-      } else {
-        const { fetchWithPayment } = getX402()
+      const { fetchWithPayment } = getX402()
 
-        const res = await fetchWithPayment('/api/ping', {
-          method: 'POST',
-          body: JSON.stringify({ address: walletAddress }),
-        })
+      // این call باید به یک endpoint x402 واقعی اشاره کند
+      const res = await fetchWithPayment('/api/ping', {
+        method: 'POST',
+        body: JSON.stringify({ address: walletAddress }),
+      })
 
-        await res.json()
-      }
+      await res.json()
 
       setTxConfirmed(true)
 
@@ -319,4 +311,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+            }
