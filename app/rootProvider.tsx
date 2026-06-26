@@ -9,28 +9,26 @@ import {
   cookieStorage,
 } from 'wagmi'
 import { base } from 'wagmi/chains'
-import { injected, coinbaseWallet } from 'wagmi/connectors'
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
-import { baseAccount } from '@base-org/account-wagmi'
+import { injected, baseAccount } from 'wagmi/connectors'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { OnchainKitProvider } from '@coinbase/onchainkit'
 import '@coinbase/onchainkit/styles.css'
 
 const queryClient = new QueryClient()
 
-const config = createConfig({
+export const config = createConfig({
   chains: [base],
   connectors: [
     injected(),
-    coinbaseWallet({ appName: 'BaseState' }),
-    farcasterMiniApp(),
-    baseAccount({ appName: 'BaseState' }),
+    baseAccount({
+      appName: 'BaseState',
+    }),
   ],
+  storage: createStorage({ storage: cookieStorage }),
+  ssr: true,
   transports: {
     [base.id]: http(),
   },
-  storage: createStorage({ storage: cookieStorage }),
-  ssr: true,
 })
 
 export function RootProvider({ children }: { children: ReactNode }) {
