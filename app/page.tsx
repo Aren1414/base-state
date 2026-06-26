@@ -72,6 +72,7 @@ export default function Home() {
         const insideMini = await sdk.isInMiniApp()
 
         if (!insideMini) {
+          setIsBaseApp(true)
           setAppReady(true)
           if (!isFrameReady) setFrameReady()
           return
@@ -106,6 +107,7 @@ export default function Home() {
         if (!isFrameReady) setFrameReady()
         setAppReady(true)
       } catch {
+        setIsBaseApp(true)
         if (!isFrameReady) setFrameReady()
         setAppReady(true)
       }
@@ -140,6 +142,7 @@ export default function Home() {
   const ready =
     appReady &&
     !!walletAddress &&
+    chainId === base.id &&
     x402Ready
 
   const handleClick = async () => {
@@ -316,4 +319,4 @@ export default function Home() {
       </div>
     </div>
   )
-          }
+    }
