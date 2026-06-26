@@ -23,6 +23,7 @@ import type { WalletStats, ContractStats } from '../src/types'
 import { initX402Client, getX402 } from '../src/lib/x402Client'
 
 const MINI_APP_URL = 'https://base-state.vercel.app'
+const PAID_ENDPOINT = 'https://base-state.vercel.app/api/ping'
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
@@ -41,7 +42,6 @@ export default function Home() {
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
 
-  // Initialize X402 client
   useEffect(() => {
     if (!walletClient || !walletAddress || x402Ready) return
     try {
@@ -50,7 +50,6 @@ export default function Home() {
     } catch {}
   }, [walletClient, walletAddress, x402Ready])
 
-  // MiniApp init
   useEffect(() => {
     const init = async () => {
       try {
@@ -72,7 +71,6 @@ export default function Home() {
     init()
   }, [isFrameReady, setFrameReady, signIn])
 
-  // Auto-switch to Base
   useEffect(() => {
     const doSwitch = async () => {
       try {
@@ -95,7 +93,6 @@ export default function Home() {
 
   const ready = !!walletAddress && x402Ready
 
-  // 🔥 THIS IS THE IMPORTANT PART
   const handleClick = async () => {
     if (!ready) return
     setLoading(true)
@@ -104,8 +101,8 @@ export default function Home() {
     try {
       const { fetchWithPayment } = getX402()
 
-      // X402 → Express backend → payment → success
-      const res = await fetchWithPayment('/api/ping', {
+      
+      const res = await fetchWithPayment(PAID_ENDPOINT, {
         method: 'POST',
         body: JSON.stringify({}),
       })
@@ -113,7 +110,6 @@ export default function Home() {
       await res.json()
       setTxConfirmed(true)
 
-      // Fetch stats after payment
       const statsRes = await fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -246,4 +242,4 @@ export default function Home() {
       </div>
     </div>
   )
-      }
+         }
