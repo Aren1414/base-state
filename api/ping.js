@@ -20,24 +20,22 @@ app.use(
             scheme: "exact",
             price: "$0.02",
             network: "eip155:8453",
-            payTo: "0xb46043d161bde18ef6974217a686f381b1e91138",
-          },
+            payTo: "0xb46043d161bde18ef6974217a686f381b1e91138"
+          }
         ],
         description: "2 cent payment",
         mimeType: "application/json",
         extensions: {
-          [BUILDER_CODE]: declareBuilderCodeExtension("bc_laxhuqog"),
-        },
-      },
+          [BUILDER_CODE]: declareBuilderCodeExtension("bc_laxhuqog")
+        }
+      }
     },
     server
   )
 );
 
-app.post("/ping", (req: express.Request, res: express.Response) => {
+app.post("/ping", (req, res) => {
   res.json({ ok: true });
 });
 
-app.listen(3001, () => {
-  console.log("X402 server running on http://localhost:3001");
-});
+export default app;
