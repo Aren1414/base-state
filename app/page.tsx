@@ -51,7 +51,7 @@ export default function Home() {
   const [isBaseApp, setIsBaseApp] = useState(false)
   const [appReady, setAppReady] = useState(false)
 
-  
+  // x402 init
   useEffect(() => {
     if (!walletClient || x402Ready) return
     try {
@@ -69,7 +69,7 @@ export default function Home() {
         const insideMini = await sdk.isInMiniApp()
 
         if (!insideMini) {
-          // Standard Web App (Base App)
+          
           setIsBaseApp(true)
           setAppReady(true)
           if (!isFrameReady) setFrameReady()
@@ -139,13 +139,18 @@ export default function Home() {
     walletAddress?.slice(0, 6) ||
     'Guest'
 
+  
   const ready =
     appReady &&
-    !!walletAddress &&
-    x402Ready
+    x402Ready &&
+    (isBaseApp || !!walletAddress)
 
   const handleClick = async () => {
-    if (!walletAddress || !ready) return
+    
+    if (!ready) return
+
+    
+    if (!isBaseApp && !walletAddress) return
 
     setLoading(true)
     setTxFailed(false)
@@ -153,7 +158,6 @@ export default function Home() {
     try {
       const { fetchWithPayment } = getX402()
 
-      // این call باید به یک endpoint x402 واقعی اشاره کند
       const res = await fetchWithPayment('/api/ping', {
         method: 'POST',
         body: JSON.stringify({ address: walletAddress }),
@@ -265,7 +269,9 @@ export default function Home() {
 
             {!ready && !loading && (
               <p className={styles.statusMessage}>
-                Wallet not ready. Please reconnect or reload inside Farcaster/Base App.
+                {isBaseApp
+                  ? 'Wallet not ready. Make sure Base App / Base Account is active.'
+                  : 'Wallet not ready. Please reconnect or reload inside Farcaster/Base App.'}
               </p>
             )}
 
@@ -311,4 +317,4 @@ export default function Home() {
       </div>
     </div>
   )
-            }
+          }
