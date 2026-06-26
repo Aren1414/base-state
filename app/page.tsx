@@ -6,7 +6,6 @@ import {
   useChainId,
   useSwitchChain,
   useWalletClient,
-  useEnsName,
 } from 'wagmi'
 
 import {
@@ -17,6 +16,7 @@ import {
 
 import { sdk } from '@farcaster/miniapp-sdk'
 import { base } from 'viem/chains'
+import { createPublicClient, http, toCoinType } from 'viem'
 
 import WalletStatus from '../src/components/WalletStatus'
 import MintCard from '../src/components/MintCard'
@@ -27,10 +27,14 @@ import { initX402Client, getX402 } from '../src/lib/x402Client'
 
 const MINI_APP_URL = 'https://base-state.vercel.app'
 
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http(process.env.NEXT_PUBLIC_BASE_RPC_URL as string),
+})
+
 export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
-  const { data: ensName } = useEnsName({ address: walletAddress })
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const { signIn } = useAuthenticate()
   const { composeCast } = useComposeCast()
@@ -47,6 +51,7 @@ export default function Home() {
 
   const [isBaseApp, setIsBaseApp] = useState(false)
   const [appReady, setAppReady] = useState(false)
+  const [basename, setBasename] = useState<string | null>(null)
 
   useEffect(() => {
     if (walletClient && !x402Ready) {
@@ -119,19 +124,33 @@ export default function Home() {
     doSwitch()
   }, [appReady, chainId, switchChain])
 
+  useEffect(() => {
+    const resolveBasename = async () => {
+      if (!walletAddress) return
+      try {
+        const name = await publicClient.getEnsName({
+          address: walletAddress,
+          coinType: toCoinType(base.id),
+        })
+        setBasename(name ?? null)
+      } catch {}
+    }
+
+    resolveBasename()
+  }, [walletAddress])
+
   const user = context?.user
 
   const displayName =
     user?.displayName ||
     user?.username ||
-    ensName ||
+    basename ||
     walletAddress?.slice(0, 6) ||
     'Guest'
 
   const ready =
     appReady &&
     !!walletAddress &&
-    chainId === base.id &&
     x402Ready
 
   const handleClick = async () => {
@@ -298,4 +317,4 @@ export default function Home() {
       </div>
     </div>
   )
-            }
+    }
