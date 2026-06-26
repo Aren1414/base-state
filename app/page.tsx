@@ -41,6 +41,7 @@ export default function Home() {
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
 
+  // Initialize X402 client
   useEffect(() => {
     if (!walletClient || !walletAddress || x402Ready) return
     try {
@@ -49,6 +50,7 @@ export default function Home() {
     } catch {}
   }, [walletClient, walletAddress, x402Ready])
 
+  // MiniApp init
   useEffect(() => {
     const init = async () => {
       try {
@@ -70,6 +72,7 @@ export default function Home() {
     init()
   }, [isFrameReady, setFrameReady, signIn])
 
+  // Auto-switch to Base
   useEffect(() => {
     const doSwitch = async () => {
       try {
@@ -92,23 +95,31 @@ export default function Home() {
 
   const ready = !!walletAddress && x402Ready
 
+  // 🔥 THIS IS THE IMPORTANT PART
   const handleClick = async () => {
     if (!ready) return
     setLoading(true)
     setTxFailed(false)
+
     try {
       const { fetchWithPayment } = getX402()
+
+      // X402 → Express backend → payment → success
       const res = await fetchWithPayment('/api/ping', {
         method: 'POST',
-        body: JSON.stringify({ address: walletAddress }),
+        body: JSON.stringify({}),
       })
+
       await res.json()
       setTxConfirmed(true)
+
+      // Fetch stats after payment
       const statsRes = await fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: walletAddress }),
       })
+
       const statsJson = await statsRes.json()
       setStats(statsJson)
     } catch {
@@ -235,4 +246,4 @@ export default function Home() {
       </div>
     </div>
   )
-            }
+      }
