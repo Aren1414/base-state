@@ -52,13 +52,19 @@ export default function Home() {
   const [appReady, setAppReady] = useState(false)
 
   useEffect(() => {
-    if (walletClient && !x402Ready) {
-      try {
-        initX402Client(walletClient)
+    if (!x402Ready) {
+      if (isBaseApp) {
         setX402Ready(true)
-      } catch {}
+        return
+      }
+      if (walletClient) {
+        try {
+          initX402Client(walletClient)
+          setX402Ready(true)
+        } catch {}
+      }
     }
-  }, [walletClient, x402Ready])
+  }, [walletClient, x402Ready, isBaseApp])
 
   useEffect(() => {
     const init = async () => {
@@ -137,18 +143,28 @@ export default function Home() {
     x402Ready
 
   const handleClick = async () => {
+    if (!walletAddress) return
+
     setLoading(true)
     setTxFailed(false)
 
     try {
-      const { fetchWithPayment } = getX402()
+      if (isBaseApp) {
+        const res = await fetch('/api/ping', {
+          method: 'POST',
+          body: JSON.stringify({ address: walletAddress }),
+        })
+        await res.json()
+      } else {
+        const { fetchWithPayment } = getX402()
 
-      const res = await fetchWithPayment('/api/ping', {
-        method: 'POST',
-        body: JSON.stringify({ address: walletAddress }),
-      })
+        const res = await fetchWithPayment('/api/ping', {
+          method: 'POST',
+          body: JSON.stringify({ address: walletAddress }),
+        })
 
-      await res.json()
+        await res.json()
+      }
 
       setTxConfirmed(true)
 
