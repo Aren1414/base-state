@@ -1,9 +1,3 @@
 {
-  "version": 2,
-  "routes": [
-    {
-      "src": "/api/ping",
-      "dest": "/api/ping.ts"
-    }
-  ]
+  "version": 2
 }
