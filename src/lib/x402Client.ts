@@ -14,15 +14,27 @@ export function initX402Client(walletClient: WalletClient) {
     throw new Error("walletClient not ready");
   }
 
+  
+  const signer = {
+    address: walletClient.account.address,
+    sendTransaction: async (tx: any) => {
+      return walletClient.sendTransaction(tx);
+    },
+    signTypedData: async (params: any) => {
+      return walletClient.signTypedData(params);
+    },
+  };
+
+  
   const client = new x402Client();
 
-  // Register signer directly (walletClient IS the signer)
-  client.register("eip155:*", new ExactEvmScheme(walletClient));
+  
+  client.register("eip155:*", new ExactEvmScheme(signer));
 
-  // Register Builder Code
+  
   client.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
-  // Wrap fetch
+  
   fetchWithPaymentSingleton = wrapFetchWithPayment(fetch, client);
 }
 
