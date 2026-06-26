@@ -34,68 +34,43 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] =
-    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
-  const [isBaseApp, setIsBaseApp] = useState(false)
-  const [appReady, setAppReady] = useState(false)
 
   useEffect(() => {
-    if (!walletClient || x402Ready) return
+    if (!walletClient || !walletAddress || x402Ready) return
     try {
       initX402Client(walletClient as any)
       setX402Ready(true)
     } catch {}
-  }, [walletClient, x402Ready])
+  }, [walletClient, walletAddress, x402Ready])
 
   useEffect(() => {
     const init = async () => {
       try {
         const insideMini = await sdk.isInMiniApp()
-        if (!insideMini) {
-          setIsBaseApp(true)
-          setAppReady(true)
-          if (!isFrameReady) setFrameReady()
-          return
-        }
-        const rawCtx = await sdk.context
-        const ctx: any = rawCtx
-        const fid =
-          Number(ctx?.client?.clientFid) ||
-          Number(ctx?.client?.fid) ||
-          0
-        const baseApp = fid === 309857
-        setIsBaseApp(baseApp)
-        await sdk.actions.ready()
-        if (!baseApp) {
+        if (insideMini) {
+          await sdk.actions.ready()
           try {
-            if (ctx?.client && !ctx.client.added) {
-              await sdk.actions.addMiniApp()
-            }
-          } catch {}
-          try {
+            const ctx: any = await sdk.context
             if (ctx.location?.type !== 'launcher') {
               await signIn()
             }
           } catch {}
         }
         if (!isFrameReady) setFrameReady()
-        setAppReady(true)
       } catch {
-        setIsBaseApp(true)
         if (!isFrameReady) setFrameReady()
-        setAppReady(true)
       }
     }
     init()
   }, [isFrameReady, setFrameReady, signIn])
 
   useEffect(() => {
-    if (!appReady) return
     const doSwitch = async () => {
       try {
         if (chainId && chainId !== base.id && switchChain) {
@@ -104,7 +79,7 @@ export default function Home() {
       } catch {}
     }
     doSwitch()
-  }, [appReady, chainId, switchChain])
+  }, [chainId, switchChain])
 
   const user = context?.user
 
@@ -115,10 +90,7 @@ export default function Home() {
     walletAddress?.slice(0, 6) ||
     'Guest'
 
-  const ready =
-    appReady &&
-    !!walletAddress &&
-    x402Ready
+  const ready = !!walletAddress && x402Ready
 
   const handleClick = async () => {
     if (!ready) return
@@ -137,8 +109,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: walletAddress }),
       })
-      const statsJson =
-        (await statsRes.json()) as Awaited<ReturnType<typeof fetchWalletStats>>
+      const statsJson = await statsRes.json()
       setStats(statsJson)
     } catch {
       setTxFailed(true)
@@ -159,9 +130,7 @@ export default function Home() {
       const s = stats.data as ContractStats
       body = `📊 BaseApp Wallet Snapshot — Age: ${s.age} day • Post: ${s.postTokens} • Internal Tx Count: ${s.internalTxCount} • Best Streak: ${s.bestStreak} day • Unique Senders: ${s.uniqueSenders} • Tokens Received: ${s.tokensReceived}`
     }
-    const castText = `Just checked my ${
-      type === 'wallet' ? 'wallet' : 'BaseApp wallet'
-    } stats using the BaseState Mini App 👇\n\n${body}`
+    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'BaseApp wallet'} stats using the BaseState Mini App 👇\n\n${body}`
     const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
     try {
       const mini = await sdk.isInMiniApp()
@@ -169,7 +138,7 @@ export default function Home() {
         await composeCast({ text: castText, embeds: [embedUrl] })
       } else {
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-          castText,
+          castText
         )}&embeds[]=${encodeURIComponent(embedUrl)}`
         window.open(warpcastUrl, '_blank')
       }
@@ -193,7 +162,7 @@ export default function Home() {
     link.click()
   }
 
-  if (!appReady) {
+  if (!isFrameReady) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
@@ -266,4 +235,4 @@ export default function Home() {
       </div>
     </div>
   )
-            }
+      }
