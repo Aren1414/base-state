@@ -22,7 +22,8 @@ export function initX402Client(walletClient: WalletClient) {
 
   const client = new x402Client();
 
-  client.register("eip155:8453", new ExactEvmScheme(signer));
+  
+  client.register("eip155:*", new ExactEvmScheme(signer));
 
   client.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
