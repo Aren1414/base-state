@@ -46,7 +46,6 @@ export default function Home() {
   const [isBaseApp, setIsBaseApp] = useState(false)
   const [appReady, setAppReady] = useState(false)
 
-  // x402 init
   useEffect(() => {
     if (walletClient && !x402Ready) {
       try {
@@ -56,7 +55,6 @@ export default function Home() {
     }
   }, [walletClient, x402Ready])
 
-  
   useEffect(() => {
     const init = async () => {
       try {
@@ -64,11 +62,7 @@ export default function Home() {
 
         if (!insideMini) {
           setAppReady(true)
-
-          if (!isFrameReady) {
-            setFrameReady()
-          }
-
+          if (!isFrameReady) setFrameReady()
           return
         }
 
@@ -98,18 +92,10 @@ export default function Home() {
           } catch {}
         }
 
-        if (!isFrameReady) {
-          setFrameReady()
-        }
-
+        if (!isFrameReady) setFrameReady()
         setAppReady(true)
-      } catch (e) {
-        console.error(e)
-
-        if (!isFrameReady) {
-          setFrameReady()
-        }
-
+      } catch {
+        if (!isFrameReady) setFrameReady()
         setAppReady(true)
       }
     }
@@ -117,27 +103,23 @@ export default function Home() {
     init()
   }, [isFrameReady, setFrameReady, signIn])
 
-  
   useEffect(() => {
     if (!appReady) return
-
-    if (chainId && chainId !== base.id && switchChain) {
-      switchChain({
-        chainId: base.id,
-      }).catch(() => {})
-    }
+    try {
+      if (chainId && chainId !== base.id && switchChain) {
+        switchChain({ chainId: base.id })
+      }
+    } catch {}
   }, [appReady, chainId, switchChain])
 
   const user = context?.user
 
-  
   const displayName =
     user?.displayName ||
     user?.username ||
     walletAddress?.slice(0, 6) ||
     'Guest'
 
-  
   const ready =
     appReady &&
     !!walletAddress &&
@@ -156,7 +138,7 @@ export default function Home() {
         body: JSON.stringify({ address: walletAddress }),
       })
 
-      const json = await res.json()
+      await res.json()
 
       setTxConfirmed(true)
 
@@ -231,12 +213,10 @@ export default function Home() {
     link.click()
   }
 
-  // --- (۶) شرط جدید ---
   if (!appReady) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
-          {/* (۷) متن جدید */}
           <p className={styles.statusMessage}>Initializing Mini App...</p>
         </header>
       </div>
@@ -310,4 +290,4 @@ export default function Home() {
       </div>
     </div>
   )
-              }
+    }
