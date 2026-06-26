@@ -59,10 +59,15 @@ export default function Home() {
         }
 
         const ctx = await sdk.context
-        const isBaseApp = String(ctx?.client?.clientFid) === '309857'
+        const clientName = ctx?.client?.name // "warpcast"  "base"
+        const isWarpcast = clientName === 'warpcast'
+        const isBaseApp = clientName === 'base'
 
-        if (!isBaseApp) {
-          await sdk.actions.ready()
+        
+        await sdk.actions.ready()
+
+        
+        if (isWarpcast) {
           if (ctx?.client && !ctx.client.added) {
             try {
               await sdk.actions.addMiniApp()
@@ -73,6 +78,7 @@ export default function Home() {
           }
         }
 
+        // MiniKit frame splash
         if (!isFrameReady) setFrameReady()
       } catch {
         if (!isFrameReady) setFrameReady()
@@ -83,9 +89,8 @@ export default function Home() {
   }, [isFrameReady, setFrameReady, signIn])
 
   useEffect(() => {
-    const isBaseApp =
-      typeof window !== 'undefined' && window.location.href.includes('cbbaseapp://')
-    if (!isBaseApp && chainId !== base.id && switchChain) {
+    
+    if (chainId !== base.id && switchChain) {
       switchChain({ chainId: base.id })
     }
   }, [chainId, switchChain])
