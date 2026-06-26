@@ -6,6 +6,7 @@ import {
   useChainId,
   useSwitchChain,
   useWalletClient,
+  useEnsName,
 } from 'wagmi'
 
 import {
@@ -29,6 +30,7 @@ const MINI_APP_URL = 'https://base-state.vercel.app'
 export default function Home() {
   const { address: walletAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
+  const { data: ensName } = useEnsName({ address: walletAddress })
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const { signIn } = useAuthenticate()
   const { composeCast } = useComposeCast()
@@ -105,11 +107,16 @@ export default function Home() {
 
   useEffect(() => {
     if (!appReady) return
-    try {
-      if (chainId && chainId !== base.id && switchChain) {
-        switchChain({ chainId: base.id })
-      }
-    } catch {}
+
+    const doSwitch = async () => {
+      try {
+        if (chainId && chainId !== base.id && switchChain) {
+          await switchChain({ chainId: base.id })
+        }
+      } catch {}
+    }
+
+    doSwitch()
   }, [appReady, chainId, switchChain])
 
   const user = context?.user
@@ -117,6 +124,7 @@ export default function Home() {
   const displayName =
     user?.displayName ||
     user?.username ||
+    ensName ||
     walletAddress?.slice(0, 6) ||
     'Guest'
 
@@ -290,4 +298,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+            }
