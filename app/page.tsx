@@ -51,15 +51,13 @@ export default function Home() {
   const [isBaseApp, setIsBaseApp] = useState(false)
   const [appReady, setAppReady] = useState(false)
 
-  // x402 init
+  
   useEffect(() => {
     if (!walletClient || x402Ready) return
     try {
       initX402Client(walletClient as any)
       setX402Ready(true)
-    } catch {
-      
-    }
+    } catch {}
   }, [walletClient, x402Ready])
 
   
@@ -69,7 +67,6 @@ export default function Home() {
         const insideMini = await sdk.isInMiniApp()
 
         if (!insideMini) {
-          
           setIsBaseApp(true)
           setAppReady(true)
           if (!isFrameReady) setFrameReady()
@@ -105,7 +102,6 @@ export default function Home() {
         if (!isFrameReady) setFrameReady()
         setAppReady(true)
       } catch {
-        
         setIsBaseApp(true)
         if (!isFrameReady) setFrameReady()
         setAppReady(true)
@@ -142,15 +138,11 @@ export default function Home() {
   
   const ready =
     appReady &&
-    x402Ready &&
-    (isBaseApp || !!walletAddress)
+    isBaseApp &&
+    x402Ready
 
   const handleClick = async () => {
-    
     if (!ready) return
-
-    
-    if (!isBaseApp && !walletAddress) return
 
     setLoading(true)
     setTxFailed(false)
@@ -271,7 +263,7 @@ export default function Home() {
               <p className={styles.statusMessage}>
                 {isBaseApp
                   ? 'Wallet not ready. Make sure Base App / Base Account is active.'
-                  : 'Wallet not ready. Please reconnect or reload inside Farcaster/Base App.'}
+                  : 'Please open this Mini App inside Base App to submit activity.'}
               </p>
             )}
 
@@ -317,4 +309,4 @@ export default function Home() {
       </div>
     </div>
   )
-          }
+            }
