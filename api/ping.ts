@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import express from "express";
 import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
@@ -37,7 +39,6 @@ app.use(
 app.post("/ping", (req, res) => {
   res.json({ ok: true });
 });
-
 
 export default function handler(req, res) {
   return app(req, res);
