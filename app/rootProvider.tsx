@@ -9,11 +9,11 @@ import {
 import { base } from 'wagmi/chains';
 
 import {
+  injected,
   coinbaseWallet,
 } from 'wagmi/connectors';
 
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector';
-import { baseAccount } from '@coinbase/onchainkit/wagmi';
 
 import {
   QueryClient,
@@ -31,16 +31,9 @@ const config = createConfig({
     [base.id]: http(),
   },
   connectors: [
-    // Base App: Base Account (MPC)
-    baseAccount(),
-
-    // Optional: Coinbase Wallet extension (browser)
-    coinbaseWallet({
-      appName: 'BaseState',
-    }),
-
-    // Farcaster Mini App
-    farcasterMiniApp(),
+    injected(), // Base App (in-app browser)
+    coinbaseWallet({ appName: 'BaseState' }), // Coinbase Wallet
+    farcasterMiniApp(), // Farcaster Mini App
   ],
 });
 
@@ -51,14 +44,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
         <OnchainKitProvider
           apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
           chain={base}
-          config={{
-            appearance: { mode: 'auto' },
-            wallet: { display: 'modal', preference: 'all' },
-          }}
-          miniKit={{
-            enabled: true,
-            autoConnect: true,
-          }}
+          miniKit={{ enabled: true, autoConnect: true }}
         >
           {children}
         </OnchainKitProvider>
