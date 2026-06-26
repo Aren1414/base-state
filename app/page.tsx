@@ -138,7 +138,7 @@ export default function Home() {
   
   const ready =
     appReady &&
-    isBaseApp &&
+    !!walletAddress &&
     x402Ready
 
   const handleClick = async () => {
@@ -261,9 +261,9 @@ export default function Home() {
 
             {!ready && !loading && (
               <p className={styles.statusMessage}>
-                {isBaseApp
-                  ? 'Wallet not ready. Make sure Base App / Base Account is active.'
-                  : 'Please open this Mini App inside Base App to submit activity.'}
+                {!walletAddress
+                  ? 'Wallet not connected. Please connect your wallet.'
+                  : 'Wallet not ready. Please reconnect or reload inside Farcaster/Base App.'}
               </p>
             )}
 
@@ -309,4 +309,4 @@ export default function Home() {
       </div>
     </div>
   )
-            }
+      }
