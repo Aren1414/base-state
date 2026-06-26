@@ -1,57 +1,31 @@
 // @ts-nocheck
 
-import express from "express";
-import { paymentMiddleware, x402ResourceServer } from "@x402/express";
+import { x402VercelHandler } from "@x402/vercel";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { BUILDER_CODE, declareBuilderCodeExtension } from "@x402/extensions/builder-code";
 
-const app = express();
-app.use(express.json());
-
-// -------------------------
-// X402 SERVER REGISTRATION
-// -------------------------
-const server = new x402ResourceServer().register(
-  "eip155:8453",
-  new ExactEvmScheme()
-);
-
-// -------------------------
-// X402 PAYMENT MIDDLEWARE
-// -------------------------
-app.use(
-  paymentMiddleware(
-    {
-      "POST /ping": {
-        accepts: [
-          {
-            scheme: "exact",
-            price: "$0.02",
-            network: "eip155:8453",
-            payTo: "0xb46043d161bde18ef6974217a686f381b1e91138"
-          }
-        ],
-        description: "BaseState activity submission",
-        mimeType: "application/json",
-        extensions: {
-          [BUILDER_CODE]: declareBuilderCodeExtension("bc_laxhuqog")
+export default x402VercelHandler(
+  {
+    "POST /ping": {
+      accepts: [
+        {
+          scheme: "exact",
+          price: "$0.02",
+          network: "eip155:8453",
+          payTo: "0xb46043d161bde18ef6974217a686f381b1e91138"
         }
+      ],
+      description: "BaseState activity submission",
+      mimeType: "application/json",
+      extensions: {
+        [BUILDER_CODE]: declareBuilderCodeExtension("bc_laxhuqog")
       }
-    },
-    server
-  )
+    }
+  },
+  {
+    "eip155:8453": new ExactEvmScheme()
+  },
+  async (req, res) => {
+    res.json({ ok: true });
+  }
 );
-
-// -------------------------
-// PAID ENDPOINT
-// -------------------------
-app.post("/ping", (req, res) => {
-  res.json({ ok: true });
-});
-
-// -------------------------
-// VERCEL SERVERLESS HANDLER
-// -------------------------
-export default function handler(req, res) {
-  return app(req, res);
-}
