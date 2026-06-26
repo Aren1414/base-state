@@ -59,16 +59,18 @@ export default function Home() {
         }
 
         const ctx = await sdk.context
-        const clientName = ctx?.client?.name // "warpcast"  "base"
-        const isWarpcast = clientName === 'warpcast'
-        const isBaseApp = clientName === 'base'
+
+        
+        const clientFid = Number((ctx as any)?.client?.clientFid)
+
+        const isBaseApp = clientFid === 309857
+        const isWarpcast = !isBaseApp
 
         
         await sdk.actions.ready()
 
-        
         if (isWarpcast) {
-          if (ctx?.client && !ctx.client.added) {
+          if ((ctx as any)?.client && !(ctx as any).client.added) {
             try {
               await sdk.actions.addMiniApp()
             } catch {}
@@ -78,7 +80,6 @@ export default function Home() {
           }
         }
 
-        // MiniKit frame splash
         if (!isFrameReady) setFrameReady()
       } catch {
         if (!isFrameReady) setFrameReady()
@@ -89,7 +90,6 @@ export default function Home() {
   }, [isFrameReady, setFrameReady, signIn])
 
   useEffect(() => {
-    
     if (chainId !== base.id && switchChain) {
       switchChain({ chainId: base.id })
     }
@@ -113,7 +113,6 @@ export default function Home() {
       })
 
       const json = await res.json()
-      const hash = json.hash
 
       setTxConfirmed(true)
 
@@ -265,4 +264,4 @@ export default function Home() {
       </div>
     </div>
   )
-        }
+  }
