@@ -1,19 +1,14 @@
-import { NextResponse } from "next/server";
+import { x402Middleware } from '@coinbase/onchainkit/x402'
 
-export const runtime = "edge";
+export const runtime = 'edge'
 
-export async function POST(req: Request) {
-  try {
-    const { address } = await req.json();
-
-    if (!address) {
-      return NextResponse.json({ ok: false, error: "No address" }, { status: 400 });
-    }
-
-    
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "failed" }, { status: 500 });
+export const POST = x402Middleware(
+  async (req) => {
+    const body = await req.json()
+    return Response.json({ ok: true, address: body.address })
+  },
+  {
+    price: '0.00001',
+    chainId: 8453,
   }
-}
+)
