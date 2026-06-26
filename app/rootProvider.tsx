@@ -1,41 +1,37 @@
-'use client';
+'use client'
 
-import { ReactNode } from 'react';
+import { ReactNode } from 'react'
 import {
   createConfig,
   http,
   WagmiProvider,
-} from 'wagmi';
-import { base } from 'wagmi/chains';
+  createStorage,
+  cookieStorage,
+} from 'wagmi'
+import { base } from 'wagmi/chains'
+import { injected, coinbaseWallet } from 'wagmi/connectors'
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
+import { baseAccount } from '@base-org/account-wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { OnchainKitProvider } from '@coinbase/onchainkit'
+import '@coinbase/onchainkit/styles.css'
 
-import {
-  injected,
-  coinbaseWallet,
-} from 'wagmi/connectors';
-
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector';
-
-import {
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query';
-
-import { OnchainKitProvider } from '@coinbase/onchainkit';
-import '@coinbase/onchainkit/styles.css';
-
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 const config = createConfig({
   chains: [base],
+  connectors: [
+    injected(),
+    coinbaseWallet({ appName: 'BaseState' }),
+    farcasterMiniApp(),
+    baseAccount({ appName: 'BaseState' }),
+  ],
   transports: {
     [base.id]: http(),
   },
-  connectors: [
-    injected(), // Base App (in-app browser)
-    coinbaseWallet({ appName: 'BaseState' }), // Coinbase Wallet
-    farcasterMiniApp(), // Farcaster Mini App
-  ],
-});
+  storage: createStorage({ storage: cookieStorage }),
+  ssr: true,
+})
 
 export function RootProvider({ children }: { children: ReactNode }) {
   return (
@@ -50,5 +46,5 @@ export function RootProvider({ children }: { children: ReactNode }) {
         </OnchainKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
-  );
+  )
 }
