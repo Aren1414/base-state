@@ -1,43 +1,86 @@
 'use client';
+
 import { ReactNode } from 'react';
-import { WagmiConfig } from 'wagmi';
-import { base } from 'wagmi/chains';
-import { OnchainKitProvider } from '@coinbase/onchainkit';
-import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector';
-import { createConfig, http } from 'wagmi';
+import {
+  createConfig,
+  http,
+  WagmiProvider,
+} from 'wagmi';
+import {
+  base
+} from 'wagmi/chains';
+
+import {
+  injected,
+  coinbaseWallet,
+} from 'wagmi/connectors';
+
+import {
+  farcasterMiniApp
+} from '@farcaster/miniapp-wagmi-connector';
+
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+
+import {
+  OnchainKitProvider,
+} from '@coinbase/onchainkit';
+
 import '@coinbase/onchainkit/styles.css';
 
-const wagmiConfig = createConfig({
+const queryClient = new QueryClient();
+
+const config = createConfig({
   chains: [base],
+
   transports: {
     [base.id]: http(),
   },
-  connectors: [miniAppConnector()],
+
+  connectors: [
+
+    // Base App
+    injected(),
+
+    coinbaseWallet({
+      appName: 'BaseState',
+    }),
+
+    // Farcaster
+    farcasterMiniApp(),
+  ],
 });
 
-export function RootProvider({ children }: { children: ReactNode }) {
+export function RootProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <OnchainKitProvider
-        apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-        chain={base}
-        config={{
-          appearance: {
-            mode: 'auto',
-          },
-          wallet: {
-            display: 'modal',
-            preference: 'all',
-          },
-        }}
-        miniKit={{
-          enabled: true,
-          autoConnect: true,
-          notificationProxyUrl: undefined,
-        }}
-      >
-        {children}
-      </OnchainKitProvider>
-    </WagmiConfig>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          chain={base}
+          config={{
+            appearance: {
+              mode: 'auto',
+            },
+            wallet: {
+              display: 'modal',
+              preference: 'all',
+            },
+          }}
+          miniKit={{
+            enabled: true,
+            autoConnect: true,
+          }}
+        >
+          {children}
+        </OnchainKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
