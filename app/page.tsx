@@ -7,16 +7,19 @@ import {
   useSwitchChain,
   useWalletClient,
 } from 'wagmi'
+
 import {
   useMiniKit,
   useAuthenticate,
   useComposeCast,
 } from '@coinbase/onchainkit/minikit'
+
 import { sdk } from '@farcaster/miniapp-sdk'
+import { base } from 'viem/chains'
+
 import WalletStatus from '../src/components/WalletStatus'
 import MintCard from '../src/components/MintCard'
 import { fetchWalletStats } from '../src/lib/fetchWalletStats'
-import { base } from 'viem/chains'
 import styles from './page.module.css'
 import type { WalletStats, ContractStats } from '../src/types'
 import { initX402Client, getX402 } from '../src/lib/x402Client'
@@ -40,6 +43,10 @@ export default function Home() {
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
 
+  const [isBaseApp, setIsBaseApp] = useState(false)
+  const [appReady, setAppReady] = useState(false)
+
+  // x402 init
   useEffect(() => {
     if (walletClient && !x402Ready) {
       try {
@@ -49,56 +56,93 @@ export default function Home() {
     }
   }, [walletClient, x402Ready])
 
+  
   useEffect(() => {
-    const initApp = async () => {
+    const init = async () => {
       try {
-        const isMini = await sdk.isInMiniApp()
-        if (!isMini) {
-          if (!isFrameReady) setFrameReady()
+        const insideMini = await sdk.isInMiniApp()
+
+        if (!insideMini) {
+          setAppReady(true)
+
+          if (!isFrameReady) {
+            setFrameReady()
+          }
+
           return
         }
 
         const ctx = await sdk.context
 
-        
-        const clientFid = Number((ctx as any)?.client?.clientFid)
+        const fid =
+          Number((ctx as any)?.client?.clientFid) ||
+          Number((ctx as any)?.client?.fid) ||
+          0
 
-        const isBaseApp = clientFid === 309857
-        const isWarpcast = !isBaseApp
+        const baseApp = fid === 309857
+        setIsBaseApp(baseApp)
 
-        
         await sdk.actions.ready()
 
-        if (isWarpcast) {
-          if ((ctx as any)?.client && !(ctx as any).client.added) {
-            try {
+        if (!baseApp) {
+          try {
+            if ((ctx as any)?.client && !(ctx as any).client.added) {
               await sdk.actions.addMiniApp()
-            } catch {}
-          }
-          if (ctx.location?.type !== 'launcher') {
-            await signIn()
-          }
+            }
+          } catch {}
+
+          try {
+            if (ctx.location?.type !== 'launcher') {
+              await signIn()
+            }
+          } catch {}
         }
 
-        if (!isFrameReady) setFrameReady()
-      } catch {
-        if (!isFrameReady) setFrameReady()
+        if (!isFrameReady) {
+          setFrameReady()
+        }
+
+        setAppReady(true)
+      } catch (e) {
+        console.error(e)
+
+        if (!isFrameReady) {
+          setFrameReady()
+        }
+
+        setAppReady(true)
       }
     }
 
-    initApp()
+    init()
   }, [isFrameReady, setFrameReady, signIn])
 
+  
   useEffect(() => {
-    if (chainId !== base.id && switchChain) {
-      switchChain({ chainId: base.id })
+    if (!appReady) return
+
+    if (chainId && chainId !== base.id && switchChain) {
+      switchChain({
+        chainId: base.id,
+      }).catch(() => {})
     }
-  }, [chainId, switchChain])
+  }, [appReady, chainId, switchChain])
 
   const user = context?.user
-  const fid = user?.fid
-  const displayName = user?.displayName || fid || walletAddress || 'Guest'
-  const ready = fid && walletAddress && chainId === base.id && x402Ready
+
+  
+  const displayName =
+    user?.displayName ||
+    user?.username ||
+    walletAddress?.slice(0, 6) ||
+    'Guest'
+
+  
+  const ready =
+    appReady &&
+    !!walletAddress &&
+    chainId === base.id &&
+    x402Ready
 
   const handleClick = async () => {
     setLoading(true)
@@ -154,8 +198,8 @@ export default function Home() {
     const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
 
     try {
-      const isMini = await sdk.isInMiniApp()
-      if (isMini) {
+      const mini = await sdk.isInMiniApp()
+      if (mini) {
         await composeCast({ text: castText, embeds: [embedUrl] })
       } else {
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
@@ -187,11 +231,13 @@ export default function Home() {
     link.click()
   }
 
-  if (!fid) {
+  // --- (۶) شرط جدید ---
+  if (!appReady) {
     return (
       <div className={styles.container}>
         <header className={styles.headerCentered}>
-          <p className={styles.statusMessage}>Initializing Farcaster session…</p>
+          {/* (۷) متن جدید */}
+          <p className={styles.statusMessage}>Initializing Mini App...</p>
         </header>
       </div>
     )
@@ -241,14 +287,14 @@ export default function Home() {
               </button>
             </div>
 
-            {context?.user && walletClient && (
+            {walletClient && (
               <MintCard
                 stats={stats.data}
                 type={stats.type}
                 user={{
-                  fid: context.user.fid,
-                  username: context.user.username,
-                  pfpUrl: context.user.pfpUrl,
+                  fid: context?.user?.fid ?? 0,
+                  username: context?.user?.username,
+                  pfpUrl: context?.user?.pfpUrl,
                 }}
                 minted={!!mintedImageUrl}
                 setMintedImageUrl={setMintedImageUrl}
@@ -264,4 +310,4 @@ export default function Home() {
       </div>
     </div>
   )
-  }
+              }
