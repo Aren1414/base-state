@@ -8,11 +8,17 @@ import { BUILDER_CODE, declareBuilderCodeExtension } from "@x402/extensions/buil
 const app = express();
 app.use(express.json());
 
+// -------------------------
+// X402 SERVER REGISTRATION
+// -------------------------
 const server = new x402ResourceServer().register(
   "eip155:8453",
   new ExactEvmScheme()
 );
 
+// -------------------------
+// X402 PAYMENT MIDDLEWARE
+// -------------------------
 app.use(
   paymentMiddleware(
     {
@@ -36,10 +42,16 @@ app.use(
   )
 );
 
+// -------------------------
+// PAID ENDPOINT
+// -------------------------
 app.post("/ping", (req, res) => {
   res.json({ ok: true });
 });
 
+// -------------------------
+// VERCEL SERVERLESS HANDLER
+// -------------------------
 export default function handler(req, res) {
   return app(req, res);
 }
