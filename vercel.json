@@ -1,26 +1,9 @@
 {
   "version": 2,
-  "functions": {
-    "api/ping.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "routes": [
     {
-      "src": "/icon.png",
-      "headers": { "Cache-Control": "no-store" }
-    },
-    {
-      "src": "/splash.png",
-      "headers": { "Cache-Control": "no-store" }
-    },
-    {
-      "src": "/hero.png",
-      "headers": { "Cache-Control": "no-store" }
-    },
-    {
       "src": "/api/ping",
-      "dest": "/api/ping.js"
+      "dest": "/api/ping.ts"
     }
   ]
 }
