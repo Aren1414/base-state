@@ -23,7 +23,7 @@ import type { WalletStats, ContractStats } from '../src/types'
 import { initX402Client, getX402 } from '../src/lib/x402Client'
 
 const MINI_APP_URL = 'https://base-state.vercel.app'
-const PAID_ENDPOINT = '/api/ping'   // ← فقط همین اصلاح لازم بود
+const PAID_ENDPOINT = '/api/ping'   
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
@@ -259,4 +259,4 @@ export default function Home() {
       </div>
     </div>
   )
-                         }
+}
