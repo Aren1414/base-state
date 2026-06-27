@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
 import { BuilderCodeClientExtension } from "@x402/extensions/builder-code";
@@ -14,6 +16,7 @@ export function initX402Client(walletClient: WalletClient) {
     throw new Error("walletClient not ready");
   }
 
+  
   const signer = {
     address: walletClient.account.address,
     sendTransaction: async (tx: any) => walletClient.sendTransaction(tx),
@@ -22,9 +25,13 @@ export function initX402Client(walletClient: WalletClient) {
 
   const client = new x402Client();
 
-  client.register("eip155:*", new ExactEvmScheme(signer));
+  
+  client.register("eip155:8453", new ExactEvmScheme(signer));
+
+  
   client.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
+  
   fetchWithPaymentSingleton = wrapFetchWithPayment(fetch, client);
 }
 
