@@ -27,7 +27,7 @@ const PAID_ENDPOINT = '/api/ping'
 
 export default function Home() {
   const { address: walletAddress } = useAccount()
-  const { data: walletClient } = useWalletClient()
+  const { data: walletClient } = useWalletClient({ chainId: base.id })
   const { data: ensName } = useEnsName({ address: walletAddress, chainId: base.id })
   const { context, isFrameReady, setFrameReady } = useMiniKit()
   const { signIn } = useAuthenticate()
@@ -49,7 +49,9 @@ export default function Home() {
     try {
       initX402Client(walletClient as any)
       setX402Ready(true)
-    } catch {}
+    } catch (e) {
+      console.error('initX402Client error:', e)
+    }
   }, [walletClient, walletAddress, x402Ready])
 
   // MiniKit init
@@ -60,7 +62,7 @@ export default function Home() {
         if (insideMini) {
           await sdk.actions.ready()
           try {
-            await signIn()   // ← اصلاح مهم
+            await signIn()
           } catch {}
         }
         if (!isFrameReady) setFrameReady()
@@ -92,7 +94,7 @@ export default function Home() {
     walletAddress?.slice(0, 6) ||
     'Guest'
 
-  const ready = !!walletAddress && x402Ready
+  const ready = !!walletAddress && !!walletClient && x402Ready
 
   const handleClick = async () => {
     if (!ready) return
