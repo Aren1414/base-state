@@ -35,7 +35,8 @@ export default function Home() {
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
 
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
+  const [stats, setStats] =
+    useState<Awaited<ReturnType<typeof fetchWalletStats>> | null>(null)
   const [txConfirmed, setTxConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [txFailed, setTxFailed] = useState(false)
@@ -101,7 +102,6 @@ export default function Home() {
     try {
       const { fetchWithPayment } = getX402()
 
-      
       const res = await fetchWithPayment(PAID_ENDPOINT, {
         method: 'POST',
         body: JSON.stringify({}),
@@ -137,7 +137,9 @@ export default function Home() {
       const s = stats.data as ContractStats
       body = `📊 BaseApp Wallet Snapshot — Age: ${s.age} day • Post: ${s.postTokens} • Internal Tx Count: ${s.internalTxCount} • Best Streak: ${s.bestStreak} day • Unique Senders: ${s.uniqueSenders} • Tokens Received: ${s.tokensReceived}`
     }
-    const castText = `Just checked my ${type === 'wallet' ? 'wallet' : 'BaseApp wallet'} stats using the BaseState Mini App 👇\n\n${body}`
+    const castText = `Just checked my ${
+      type === 'wallet' ? 'wallet' : 'BaseApp wallet'
+    } stats using the BaseState Mini App 👇\n\n${body}`
     const embedUrl = `${MINI_APP_URL}?v=${Date.now()}`
     try {
       const mini = await sdk.isInMiniApp()
@@ -145,7 +147,7 @@ export default function Home() {
         await composeCast({ text: castText, embeds: [embedUrl] })
       } else {
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-          castText
+          castText,
         )}&embeds[]=${encodeURIComponent(embedUrl)}`
         window.open(warpcastUrl, '_blank')
       }
@@ -156,7 +158,11 @@ export default function Home() {
     const card = document.getElementById('walletCard')
     if (!card) return
     const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null })
+    const canvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: null,
+    })
     const resizedCanvas = document.createElement('canvas')
     resizedCanvas.width = 1200
     resizedCanvas.height = 800
@@ -193,7 +199,9 @@ export default function Home() {
               onClick={handleClick}
               disabled={!ready || loading}
             >
-              {loading ? 'Submitting transaction...' : 'Submit activity and retrieve wallet stats'}
+              {loading
+                ? 'Submitting transaction...'
+                : 'Submit activity and retrieve wallet stats'}
             </button>
             {!ready && !loading && (
               <p className={styles.statusMessage}>
@@ -204,7 +212,9 @@ export default function Home() {
             )}
             {txFailed && (
               <>
-                <p className={styles.statusMessage}>Transaction failed. Please try again.</p>
+                <p className={styles.statusMessage}>
+                  Transaction failed. Please try again.
+                </p>
                 <button className={styles.retryButton} onClick={handleClick}>
                   Retry
                 </button>
@@ -236,10 +246,17 @@ export default function Home() {
         ) : (
           <p className={styles.statusMessage}>
             Fetching wallet stats, please wait…{' '}
-            <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
+            <span
+              style={{
+                animation: 'spin 1s linear infinite',
+                display: 'inline-block',
+              }}
+            >
+              ⏳
+            </span>
           </p>
         )}
       </div>
     </div>
   )
-         }
+    }
