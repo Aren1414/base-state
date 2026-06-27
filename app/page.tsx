@@ -43,6 +43,7 @@ export default function Home() {
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
 
+  // X402 init
   useEffect(() => {
     if (!walletClient || !walletAddress || x402Ready) return
     try {
@@ -51,6 +52,7 @@ export default function Home() {
     } catch {}
   }, [walletClient, walletAddress, x402Ready])
 
+  // MiniKit init
   useEffect(() => {
     const init = async () => {
       try {
@@ -58,10 +60,7 @@ export default function Home() {
         if (insideMini) {
           await sdk.actions.ready()
           try {
-            const ctx: any = await sdk.context
-            if (ctx.location?.type !== 'launcher') {
-              await signIn()
-            }
+            await signIn()   // ← اصلاح مهم
           } catch {}
         }
         if (!isFrameReady) setFrameReady()
@@ -72,6 +71,7 @@ export default function Home() {
     init()
   }, [isFrameReady, setFrameReady, signIn])
 
+  // Auto switch to Base
   useEffect(() => {
     const doSwitch = async () => {
       try {
@@ -259,4 +259,4 @@ export default function Home() {
       </div>
     </div>
   )
-            }
+        }
