@@ -2,6 +2,7 @@
 
 import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
+import { HTTPFacilitatorClient } from "@x402/core/client";
 import { BuilderCodeClientExtension } from "@x402/extensions/builder-code";
 import type { WalletClient } from "viem";
 
@@ -22,15 +23,21 @@ export function initX402Client(walletClient: WalletClient) {
     signTypedData: async (params: any) => walletClient.signTypedData(params),
   };
 
-  const client = new x402Client();
+  
+  const facilitatorClient = new HTTPFacilitatorClient({
+    url: "https://x402.org/facilitator",
+  });
 
-  // Base chain
+  
+  const client = new x402Client(facilitatorClient);
+
+  
   client.register("eip155:8453", new ExactEvmScheme(signer));
 
-  // Builder Code
+  
   client.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
-  // Wrap fetch
+  
   fetchWithPaymentSingleton = wrapFetchWithPayment(fetch, client);
 }
 
