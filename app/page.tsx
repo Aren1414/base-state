@@ -43,17 +43,6 @@ export default function Home() {
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
 
-  // X402 init
-  useEffect(() => {
-    if (!walletClient || !walletAddress || x402Ready) return
-    try {
-      initX402Client(walletClient as any)
-      setX402Ready(true)
-    } catch (e) {
-      console.error('initX402Client error:', e)
-    }
-  }, [walletClient, walletAddress, x402Ready])
-
   // MiniKit init
   useEffect(() => {
     const init = async () => {
@@ -94,7 +83,8 @@ export default function Home() {
     walletAddress?.slice(0, 6) ||
     'Guest'
 
-  const ready = !!walletAddress && !!walletClient && x402Ready
+  
+  const ready = !!walletAddress
 
   const handleClick = async () => {
     if (!ready) return
@@ -102,6 +92,15 @@ export default function Home() {
     setTxFailed(false)
 
     try {
+      
+      if (!x402Ready) {
+        if (!walletClient) {
+          throw new Error('walletClient not ready')
+        }
+        initX402Client(walletClient as any)
+        setX402Ready(true)
+      }
+
       const { fetchWithPayment } = getX402()
 
       const res = await fetchWithPayment(PAID_ENDPOINT, {
@@ -261,4 +260,4 @@ export default function Home() {
       </div>
     </div>
   )
-        }
+    }
