@@ -10,7 +10,7 @@ export default x402VercelHandler(
       accepts: [
         {
           scheme: "exact",
-          price: "$0.02",
+          price: "$0.001",
           network: "eip155:8453",
           payTo: "0xb46043d161bde18ef6974217a686f381b1e91138"
         }
