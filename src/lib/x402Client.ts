@@ -16,7 +16,6 @@ export function initX402Client(walletClient: WalletClient) {
     throw new Error("walletClient not ready");
   }
 
-  
   const signer = {
     address: walletClient.account.address,
     sendTransaction: async (tx: any) => walletClient.sendTransaction(tx),
@@ -25,13 +24,13 @@ export function initX402Client(walletClient: WalletClient) {
 
   const client = new x402Client();
 
-  
+  // Base chain
   client.register("eip155:8453", new ExactEvmScheme(signer));
 
-  
+  // Builder Code
   client.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
 
-  
+  // Wrap fetch
   fetchWithPaymentSingleton = wrapFetchWithPayment(fetch, client);
 }
 
