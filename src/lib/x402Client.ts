@@ -1,9 +1,7 @@
 // @ts-nocheck
 
 import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { HTTPFacilitatorClient } from "@x402/core/client";
-import { facilitator } from "@coinbase/x402";
+import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { BuilderCodeClientExtension } from "@x402/extensions/builder-code";
 import type { WalletClient } from "viem";
 
@@ -19,20 +17,13 @@ export function initX402Client(walletClient: WalletClient) {
   }
 
   
-  const signer = {
-    address: walletClient.account.address,
-    sendTransaction: async (tx: any) => walletClient.sendTransaction(tx),
-    signTypedData: async (params: any) => walletClient.signTypedData(params),
-  };
+  const signer = walletClient.account;
 
   
-  const facilitatorClient = new HTTPFacilitatorClient(facilitator);
+  const client = new x402Client();
 
   
-  const client = new x402Client(facilitatorClient);
-
-  
-  client.register("eip155:8453", new ExactEvmScheme(signer));
+  registerExactEvmScheme(client, { signer });
 
   
   client.registerExtension(new BuilderCodeClientExtension(BUILDER_CODE));
@@ -46,4 +37,4 @@ export function getX402() {
     throw new Error("x402 not initialized");
   }
   return { fetchWithPayment: fetchWithPaymentSingleton };
-}
+                                                   }
