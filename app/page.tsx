@@ -83,7 +83,6 @@ export default function Home() {
     walletAddress?.slice(0, 6) ||
     'Guest'
 
-  
   const ready = !!walletAddress
 
   const handleClick = async () => {
@@ -103,14 +102,17 @@ export default function Home() {
 
       const { fetchWithPayment } = getX402()
 
+      
       const res = await fetchWithPayment(PAID_ENDPOINT, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       })
 
       await res.json()
       setTxConfirmed(true)
 
+      
       const statsRes = await fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -260,4 +262,4 @@ export default function Home() {
       </div>
     </div>
   )
-    }
+      }
