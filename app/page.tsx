@@ -43,7 +43,7 @@ export default function Home() {
   const [mintedImageUrl, setMintedImageUrl] = useState<string | null>(null)
   const [x402Ready, setX402Ready] = useState(false)
 
-  // MiniKit init
+  
   useEffect(() => {
     const init = async () => {
       try {
@@ -62,7 +62,7 @@ export default function Home() {
     init()
   }, [isFrameReady, setFrameReady, signIn])
 
-  // Auto switch to Base
+  
   useEffect(() => {
     const doSwitch = async () => {
       try {
@@ -83,7 +83,7 @@ export default function Home() {
     walletAddress?.slice(0, 6) ||
     'Guest'
 
-  const ready = !!walletAddress
+  const ready = !!walletAddress && !!walletClient
 
   const handleClick = async () => {
     if (!ready) return
@@ -109,6 +109,10 @@ export default function Home() {
         body: JSON.stringify({}),
       })
 
+      if (!res.ok) {
+        throw new Error('payment request failed')
+      }
+
       await res.json()
       setTxConfirmed(true)
 
@@ -121,7 +125,8 @@ export default function Home() {
 
       const statsJson = await statsRes.json()
       setStats(statsJson)
-    } catch {
+    } catch (err) {
+      console.error('x402/payment error:', err)
       setTxFailed(true)
     } finally {
       setLoading(false)
@@ -262,4 +267,4 @@ export default function Home() {
       </div>
     </div>
   )
-      }
+            }
