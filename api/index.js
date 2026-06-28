@@ -8,12 +8,13 @@ import { BUILDER_CODE, declareBuilderCodeExtension } from "@x402/extensions/buil
 const app = express();
 app.use(express.json());
 
+
 const payTo = "0xb46043d161bde18ef6974217a686f381b1e91138";
 
-// MAINNET facilitator (CDP)
+
 const facilitatorClient = new HTTPFacilitatorClient(facilitator);
 
-// Base MAINNET (8453)
+
 const server = new x402ResourceServer(facilitatorClient)
   .register("eip155:8453", new ExactEvmScheme());
 
